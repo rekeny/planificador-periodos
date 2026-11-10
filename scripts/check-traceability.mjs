@@ -43,14 +43,19 @@ function definedIds(specText) {
   return ids;
 }
 
-// Only the names of executable tests count: a comment such as "// RF-001" proves nothing.
+// Only the names of executable tests count: comments and empty `describe` blocks prove nothing.
 const TEST_NAME_PATTERN =
-  /\b(?:it|test|describe)(?:\.\w+)*(?:\((?:[^()]|\([^()]*\))*\))?\s*\(\s*(["'`])((?:\\.|(?!\1)[^\\])*)\1/g;
+  /\b(?:it|test)(?:\.\w+)*(?:\((?:[^()]|\([^()]*\))*\))?\s*\(\s*(["'`])((?:\\.|(?!\1)[^\\])*)\1/g;
+
+// Block comments and whole-line comments. A trailing "//" is left alone: it may sit inside a string.
+function stripComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+}
 
 function testNamesIn(path) {
   const source = readFileSync(path, "utf8");
   if (/\.ya?ml$/.test(path)) return source.replace(/^\s*#.*$/gm, "");
-  return [...source.matchAll(TEST_NAME_PATTERN)]
+  return [...stripComments(source).matchAll(TEST_NAME_PATTERN)]
     .map((match) => match[2])
     .join("\n");
 }

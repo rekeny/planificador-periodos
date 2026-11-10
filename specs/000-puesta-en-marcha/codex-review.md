@@ -1,38 +1,33 @@
 # Revisión de Codex
 
-- Fecha: 2026-11-10 13:59
+- Fecha: 2026-11-10 14:06
 - Rama: 000-puesta-en-marcha contra main
-- Commit: 224a834
+- Commit: becffa9
 
-**Veredicto: no cerrar todavía.** Revisión de `git diff main...HEAD`, hasta `224a834`.
+Revisión de `git diff main...HEAD`, hasta `becffa9`: **3 hallazgos IMPORTANTES y 1 MENOR. Sin BLOQUEANTES detectados.**
 
-1. **Requisitos y alcance — BLOQUEANTE.**  
-   [review.md:5](/Users/rekeny/code/planificador-periodos/specs/000-puesta-en-marcha/review.md:5) omite el análisis previo por tratarse de la fase 0, pero no existe `spec.md` ni una excepción documentada que autorice esa omisión. Sin RF y E no se puede acreditar cobertura ni ausencia de alcance añadido. **Corrección:** incorporar la especificación aprobada y enlazar requisitos, ejemplos, tareas y pruebas.
+1. **Requisitos y alcance: sin hallazgos.** El plan aprobado exceptúa expresamente esta fase de tener `spec.md`, RF y E. La implementación coincide con la puesta en marcha descrita.
 
-2. **Arquitectura y convenciones — IMPORTANTE.**
+2. **Constitución, capas y convenciones: sin hallazgos adicionales.** Los casos comprobados confirman que ESLint rechaza imports entre capas no permitidos y textos literales en JSX.
 
-   - [eslint.config.js:31](/Users/rekeny/code/planificador-periodos/eslint.config.js:31) permite paquetes externos en todas las capas y después restringe solo algunos. He comprobado que `src/data/` y `src/i18n/` pueden importar `react-native` sin errores, contradiciendo la tabla de capas. **Corrección:** definir permisos de paquetes por capa y comprobar también sus subrutas.
-   - [eslint.config.js:142](/Users/rekeny/code/planificador-periodos/eslint.config.js:142) usa `jsx-text-only`: acepta `<Text>{"Texto fijo"}</Text>` y `accessibilityLabel="Texto fijo"`. **Corrección:** ampliar la regla para cubrir expresiones y atributos visibles, exceptuando explícitamente los valores técnicos.
+3. **Pruebas y controles:**
 
-3. **Pruebas y trazabilidad — IMPORTANTE.**
+   - **IMPORTANTE — La trazabilidad acepta pruebas comentadas y suites vacías.** En [check-traceability.mjs:48](/Users/rekeny/code/planificador-periodos/scripts/check-traceability.mjs:48), la expresión regular sigue leyendo comentarios y considera `describe` una prueba. Reproducido en memoria: tanto `// it("RF-001 E-01: …", …)` como `describe("RF-001 E-01: …", () => {})` producen `Traceability OK` sin probar ese comportamiento. **Corrección:** analizar llamadas ejecutables mediante un parser, excluir comentarios y exigir pruebas `it`/`test`; añadir casos negativos para ambos ejemplos.
 
-   - [check-traceability.mjs:46](/Users/rekeny/code/planificador-periodos/scripts/check-traceability.mjs:46) busca IDs en todo el contenido de las pruebas. Un comentario `// RF-001 E-01` basta para obtener «Traceability OK», aunque la prueba sea ajena al requisito. Lo he reproducido en memoria. **Corrección:** extraer los IDs de nombres de pruebas ejecutables y añadir casos negativos del comprobador.
-   - [verify.sh:43](/Users/rekeny/code/planificador-periodos/scripts/verify.sh:43) no detecta `it.skip.each(...)` ni `it.only.each(...)`. **Corrección:** sustituir la expresión regular por una comprobación sintáctica que cubra las variantes parametrizadas y las pruebas pendientes.
+   - **IMPORTANTE — Una especificación puede acreditar la cobertura de otra.** En [check-traceability.mjs:58](/Users/rekeny/code/planificador-periodos/scripts/check-traceability.mjs:58), todos los identificadores se agregan a un único conjunto global. Cuando dos especificaciones reutilicen `E-01` o `RF-001`, una prueba de la primera satisfará también la segunda. **Corrección:** asociar las pruebas a su especificación y comprobar pares «especificación, ID», con un caso que repita identificadores entre dos especificaciones.
 
-   No se han eliminado ni debilitado pruebas existentes: `main` no contenía pruebas. La nueva aserción comprueba efectivamente el título accesible.
+   - **IMPORTANTE — La detección de cambios puede omitir las mutaciones.** En [verify.sh:23](/Users/rekeny/code/planificador-periodos/scripts/verify.sh:23), si falta `origin/main`, el error se transforma en una base vacía y los cambios ya confirmados no se comprueban. En el workflow de `push` a `main`, `origin/main` también puede coincidir con `HEAD`, dejando el diff vacío. **Corrección:** proporcionar explícitamente la base según el evento y usar una alternativa conservadora que ejecute mutaciones cuando no pueda determinarla.
 
-4. **Seguridad.**
+   No se han eliminado ni debilitado pruebas existentes: `main` no contenía pruebas. La nueva aserción comprueba el título accesible.
 
-   - **IMPORTANTE —** [eslint.config.js:109](/Users/rekeny/code/planificador-periodos/eslint.config.js:109) prohíbe `fetch(...)`, pero admite `globalThis.fetch(...)`; comprobado con ESLint. **Corrección:** activar `checkGlobalObject` y comprobar las variantes de acceso de las cuatro API prohibidas.
-   - **IMPORTANTE —** [verify.yml:38](/Users/rekeny/code/planificador-periodos/.github/workflows/verify.yml:38) descarga herramientas ejecutables sin verificar su integridad. Ya figura como S-01 abierto. **Corrección:** verificar SHA-256 contra valores fijados y revisados antes de instalar.
-   - **MENOR —** [package.json:23](/Users/rekeny/code/planificador-periodos/package.json:23) instala Jest y jest-expo como dependencias de producción; `@types/jest` también está allí. El plan las clasifica como desarrollo. **Corrección:** mover las tres a `devDependencies` y actualizar el lockfile.
+4. **Seguridad:**
 
-   Sin hallazgos en el código actual de `src/` sobre llamadas de red, registros de jugadores o SQL. `android.allowBackup` está desactivado.
+   - **MENOR — Acciones fijadas por etiquetas mutables.** [verify.yml:27](/Users/rekeny/code/planificador-periodos/.github/workflows/verify.yml:27) y la línea 31 usan `actions/checkout@v7` y `actions/setup-node@v7`. **Corrección:** fijar ambas por SHA de commit y conservar la versión como comentario.
 
-5. **Explicaciones — sin contradicciones adicionales detectadas.**  
-   Falta `resumen.md`, pero T011 lo declara pendiente; no lo considero una entrega falsamente completada. Hasta incorporarlo no puede verificarse la explicación final exigida.
+   Sin hallazgos adicionales en `src/` sobre llamadas de red, registros de jugadores o SQL. `android.allowBackup` está desactivado.
 
-6. **Simplicidad y eficiencia — sin hallazgos.**  
-   El código de la pantalla y de internacionalización es pequeño y directo.
+5. **Explicaciones: sin contradicciones adicionales detectadas.** Falta `resumen.md`, pero T011 sigue pendiente. La salida de verificación corresponde a `b2c3db9`, anterior a los últimos arreglos; queda pendiente verificar y documentar el estado final.
 
-**Validación:** tipos y lint pasan. Jest no pudo arrancar porque intenta escribir caché y la sesión solo permite lectura. Formato falla únicamente por `codex-review.md`, que está sin versionar. No he modificado archivos ni certificado la verificación completa.
+6. **Simplicidad, claridad y eficiencia: sin hallazgos.**
+
+**Validación:** tipos, lint, formato de los scripts y documentos comprobados, y trazabilidad pasan. Jest no pudo arrancar por una escritura de caché denegada en esta sesión de solo lectura. No certifico la verificación completa ni he modificado archivos.

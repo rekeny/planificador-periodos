@@ -22,5 +22,5 @@ Leyenda: `[ ]` pendiente · `[x]` hecha. Cada tarea es un commit `T00N: descripc
   - Hecho cuando: la PR tiene la verificación en verde y `main` está protegida.
 - [x] **T010** · Arranque en iPhone, iPad y Android
   - Hecho cuando: Fernando confirma que ve el título en los tres dispositivos, también en horizontal.
-- [ ] **T011** · Revisión, informe y cierre
+- [x] **T011** · Revisión, informe y cierre
   - Hecho cuando: no queda ningún hallazgo bloqueante, `resumen.md` está escrito y la PR está lista para fusionar.

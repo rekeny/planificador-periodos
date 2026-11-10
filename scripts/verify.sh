@@ -21,7 +21,10 @@ domain_has_code() {
 domain_changed() {
   local base changes=""
   base="$(git merge-base HEAD origin/main 2>/dev/null || true)"
-  if [ -n "$base" ]; then changes="$(git diff --name-only "$base" -- src/domain)"; fi
+  # Without a base, or when HEAD is the base (push to main), we cannot tell what changed:
+  # run mutation testing to be safe.
+  if [ -z "$base" ] || [ "$base" = "$(git rev-parse HEAD)" ]; then return 0; fi
+  changes="$(git diff --name-only "$base" -- src/domain)"
   changes="${changes}$(git status --porcelain -- src/domain)"
   [ -n "$changes" ]
 }

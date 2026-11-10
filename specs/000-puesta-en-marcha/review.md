@@ -6,7 +6,7 @@ No aplica: la fase 0 no tiene `spec.md` ni RF/E por diseño (lo documenta `plan.
 
 ## Verificación (fase 7)
 
-- Fecha y commit: 2026-11-10, b2c3db9
+- Fecha y commit: 2026-11-10, sobre `becffa9` más los arreglos de la segunda revisión de Codex (C-09 y C-11), todavía sin commit en ese momento. Verificación previa, sobre `b2c3db9` y `becffa9`: también en verde.
 - Resultado: verde (`npm run verify`, salida 0, «All checks passed»). Sin flujos de Maestro todavía.
 
 ```text
@@ -35,7 +35,7 @@ Lines        : 80% ( 4/5 )
 Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 total
 Snapshots:   0 total
-Time:        0.587 s, estimated 1 s
+Time:        0.751 s, estimated 1 s
 Ran all test suites.
 
 ▶ Traceability
@@ -48,10 +48,10 @@ Running 20 checks on your project...
 ▶ Mutation testing (skipped: no domain changes)
 
 ▶ Dependencies
-# npm audit report (omitido: 24 vulnerabilidades, 1 baja y 23 moderadas, todas indirectas y de desarrollo; el detalle completo se reproduce con `npm audit`)
+(npm audit --omit=dev --audit-level=high: sin hallazgos altos; el listado completo se reproduce con `npm audit`)
 Starting filesystem walk for root: /
 Scanned /Users/rekeny/code/planificador-periodos/package-lock.json file and found 1190 packages
-End status: 0 dirs visited, 1 inodes visited, 1 Extract calls, 301.824333ms elapsed, 301.827ms wall time
+End status: 0 dirs visited, 1 inodes visited, 1 Extract calls, 351.41525ms elapsed, 351.419ms wall time
 Loaded filter from: /Users/rekeny/code/planificador-periodos/osv-scanner.toml
 GHSA-gcqx-w48m-w2h4 and 1 alias have been filtered out because: deepmerge 4.3.1, indirecta de jest-config (solo desarrollo); sin versión corregida. Aprobada por Fernando el 2026-11-10.
 GHSA-3g3m-2fjr-6pw4 and 1 alias have been filtered out because: glob 10.5.0 y 13.0.7, indirectas de Expo CLI y Jest; la corrección exige glob 14, una versión mayor ajena. Aprobada por Fernando el 2026-11-10.
@@ -67,9 +67,9 @@ Filtered 9 vulnerabilities from output
 No issues found
 
 ▶ Secrets
-1:55PM INF 11 commits scanned.
-1:55PM INF scanned ~1227638 bytes (1.23 MB) in 97.2ms
-1:55PM INF no leaks found
+2:10PM INF 14 commits scanned.
+2:10PM INF scanned ~1270233 bytes (1.27 MB) in 117ms
+2:10PM INF no leaks found
 
 ▶ Static analysis
 
@@ -80,16 +80,20 @@ No issues found
 
 Fichero completo: [codex-review.md](codex-review.md)
 
-| #    | Hallazgo                                                                                                                                                                              | Fichero                             | Gravedad   | Estado                                                                                                     |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| C-01 | Falta `spec.md`: sin requisitos RF ni ejemplos E no se puede acreditar cobertura ni ausencia de alcance añadido, y `review.md` omite el análisis previo sin excepción documentada.    | `specs/000-puesta-en-marcha/`       | bloqueante | Resuelto: `plan.md` documenta que la fase 0 no tiene especificación y por qué la trazabilidad no se aplica |
-| C-02 | `eslint.config.js` permite paquetes externos en todas las capas y después restringe solo algunos: `src/data/` y `src/i18n/` pueden importar `react-native`, contra la tabla de capas. | `eslint.config.js:31`               | importante | Abierto                                                                                                    |
-| C-03 | `i18next/no-literal-string` en modo `jsx-text-only` acepta `<Text>{"Texto fijo"}</Text>` y `accessibilityLabel="Texto fijo"`.                                                         | `eslint.config.js:142`              | importante | Abierto                                                                                                    |
-| C-04 | El comprobador de trazabilidad busca los ID en todo el contenido de las pruebas: un comentario `// RF-001 E-01` basta para dar «Traceability OK».                                     | `scripts/check-traceability.mjs:46` | importante | Abierto                                                                                                    |
-| C-05 | `verify.sh` no detecta `it.skip.each(...)` ni `it.only.each(...)`.                                                                                                                    | `scripts/verify.sh:43`              | importante | Abierto                                                                                                    |
-| C-06 | ESLint prohíbe `fetch(...)` pero admite `globalThis.fetch(...)` (y variantes de las otras tres API).                                                                                  | `eslint.config.js:109`              | importante | Abierto                                                                                                    |
-| C-07 | El workflow descarga gitleaks y osv-scanner sin verificar su integridad (igual que S-01).                                                                                             | `.github/workflows/verify.yml:38`   | importante | Abierto                                                                                                    |
-| C-08 | `jest`, `jest-expo` y `@types/jest` están en `dependencies` y el plan los declara de desarrollo (igual que S-03).                                                                     | `package.json:23`                   | menor      | Abierto                                                                                                    |
+| #    | Hallazgo                                                                                                                                                                              | Fichero                             | Gravedad   | Estado                                                                                                                                       |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| C-01 | Falta `spec.md`: sin requisitos RF ni ejemplos E no se puede acreditar cobertura ni ausencia de alcance añadido, y `review.md` omite el análisis previo sin excepción documentada.    | `specs/000-puesta-en-marcha/`       | bloqueante | Resuelto: `plan.md` documenta que la fase 0 no tiene especificación y por qué la trazabilidad no se aplica                                   |
+| C-02 | `eslint.config.js` permite paquetes externos en todas las capas y después restringe solo algunos: `src/data/` y `src/i18n/` pueden importar `react-native`, contra la tabla de capas. | `eslint.config.js:31`               | importante | Arreglado: ESLint limita los paquetes por capa (y sus subrutas); comprobado con ficheros temporales                                          |
+| C-03 | `i18next/no-literal-string` en modo `jsx-text-only` acepta `<Text>{"Texto fijo"}</Text>` y `accessibilityLabel="Texto fijo"`.                                                         | `eslint.config.js:142`              | importante | Arreglado: `no-literal-string` en modo `jsx-only` con atributos visibles; comprobado con ficheros temporales                                 |
+| C-04 | El comprobador de trazabilidad busca los ID en todo el contenido de las pruebas: un comentario `// RF-001 E-01` basta para dar «Traceability OK».                                     | `scripts/check-traceability.mjs:46` | importante | Arreglado: la trazabilidad lee solo los nombres de `it`/`test`/`describe`; comprobado con un comentario engañoso                             |
+| C-05 | `verify.sh` no detecta `it.skip.each(...)` ni `it.only.each(...)`.                                                                                                                    | `scripts/verify.sh:43`              | importante | Arreglado: `verify.sh` detecta `it.skip.each`, `it.only.each`, `xit` y `fit`; comprobado con ficheros temporales                             |
+| C-06 | ESLint prohíbe `fetch(...)` pero admite `globalThis.fetch(...)` (y variantes de las otras tres API).                                                                                  | `eslint.config.js:109`              | importante | Arreglado: `checkGlobalObject` activado; comprobado con `globalThis.fetch` y `window.WebSocket`                                              |
+| C-07 | El workflow descarga gitleaks y osv-scanner sin verificar su integridad (igual que S-01).                                                                                             | `.github/workflows/verify.yml:38`   | importante | Arreglado: SHA-256 fijados en `verify.yml` y comprobados antes de instalar                                                                   |
+| C-08 | `jest`, `jest-expo` y `@types/jest` están en `dependencies` y el plan los declara de desarrollo (igual que S-03).                                                                     | `package.json:23`                   | menor      | Arreglado: movidas a `devDependencies`                                                                                                       |
+| C-09 | Segunda revisión: la trazabilidad acepta pruebas comentadas y `describe` vacíos.                                                                                                      | `scripts/check-traceability.mjs:48` | importante | Arreglado: se quitan comentarios y solo cuentan `it`/`test`; comprobado con un ensayo negativo                                               |
+| C-10 | Segunda revisión: los ID de las pruebas son globales, así que una prueba de una especificación puede acreditar a otra que reutilice `RF-001` o `E-01`.                                | `scripts/check-traceability.mjs:58` | importante | Pendiente (decidido por Fernando, 2026-11-10): hoy solo existe la fase 0; la convención de ID por especificación se decide al empezar la 001 |
+| C-11 | Segunda revisión: si falta `origin/main` o coincide con `HEAD`, `verify.sh` se salta la mutación.                                                                                     | `scripts/verify.sh:23`              | importante | Arreglado: sin base determinable se ejecuta la mutación; comprobado con tres casos                                                           |
+| C-12 | Segunda revisión: acciones fijadas por etiqueta mutable (igual que S-02).                                                                                                             | `.github/workflows/verify.yml:27`   | menor      | Abierto                                                                                                                                      |
 
 ## Seguridad (fase 8)
 
@@ -106,5 +110,5 @@ Sin hallazgos bloqueantes. Comprobado y correcto: `permissions: contents: read` 
 
 ## Veredicto
 
-- [ ] Ningún hallazgo bloqueante abierto
-- [ ] Hallazgos importantes arreglados o aceptados como pendientes por el desarrollador
+- [x] Ningún hallazgo bloqueante abierto
+- [x] Hallazgos importantes arreglados o aceptados como pendientes por el desarrollador (C-10 aceptado como pendiente el 2026-11-10)
