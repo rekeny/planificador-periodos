@@ -148,6 +148,11 @@ module.exports = defineConfig([
     rules: { "import/no-named-as-default-member": "off" },
   },
   {
+    // CommonJS config file: Node provides __dirname.
+    files: ["jest.config.js"],
+    languageOptions: { globals: { __dirname: "readonly" } },
+  },
+  {
     files: TEST_FILES,
     rules: {
       "max-lines-per-function": "off",

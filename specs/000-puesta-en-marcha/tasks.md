@@ -14,7 +14,7 @@ Leyenda: `[ ]` pendiente · `[x]` hecha. Cada tarea es un commit `T00N: descripc
   - Hecho cuando: el título solo está en `es.json` y `tsc` está en verde.
 - [x] **T006** · Calidad del código: TypeScript, ESLint y Prettier
   - Hecho cuando: `typecheck`, `lint` y `format:check` están en verde, y los ficheros de prueba han fallado con la regla esperada.
-- [ ] **T007** · Pruebas: Jest, Testing Library, fast-check y Stryker
+- [x] **T007** · Pruebas: Jest, Testing Library, fast-check y Stryker
   - Hecho cuando: `npm test` está en verde y el ensayo de cobertura y mutación ha funcionado.
 - [ ] **T008** · Scripts de verificación, trazabilidad y revisión
   - Hecho cuando: `npm run verify` está en verde y el ensayo de trazabilidad ha fallado como se esperaba.
