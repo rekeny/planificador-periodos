@@ -8,7 +8,7 @@ Leyenda: `[ ]` pendiente · `[x]` hecha. Cada tarea es un commit `T00N: descripc
   - Hecho cuando: existen `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/` y este plan con la fecha de aprobación.
 - [x] **T003** · Roles, plantillas y subagentes
   - Hecho cuando: existen los 8 roles, las 7 plantillas, los 8 subagentes y la plantilla de PR.
-- [ ] **T004** · Configuración de la app y estructura de carpetas
+- [x] **T004** · Configuración de la app y estructura de carpetas
   - Hecho cuando: `app.json` tiene los datos del proyecto y `expo-doctor` y `tsc` están en verde.
 - [ ] **T005** · Textos en castellano y pantalla inicial
   - Hecho cuando: el título solo está en `es.json` y `tsc` está en verde.
