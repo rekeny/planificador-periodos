@@ -30,6 +30,7 @@
    - el mantenimiento y la licencia.
 
    Después la marca para que la revise Seguridad.
+
 4. Divide el trabajo en tareas de tres horas como mucho. Cada tarea lleva:
    - su ID (`T0NN`);
    - los RF y E que cubre;

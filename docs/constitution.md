@@ -29,6 +29,6 @@ Principios que no se negocian. Toda especificación, plan o cambio de código lo
 
 ## Registro de cambios
 
-| Fecha | ADR | Cambio |
-| --- | --- | --- |
+| Fecha      | ADR              | Cambio          |
+| ---------- | ---------------- | --------------- |
 | 2026-11-10 | ADR-001, ADR-002 | Versión inicial |

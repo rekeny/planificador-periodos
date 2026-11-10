@@ -39,9 +39,9 @@ Criterios de aceptación:
 
 <!-- El ID va en la primera columna: lo lee scripts/check-traceability.mjs. -->
 
-| ID | Situación | Resultado esperado | Requisitos |
-| --- | --- | --- | --- |
-| E-01 | … | … | RF-001 |
+| ID   | Situación | Resultado esperado | Requisitos |
+| ---- | --------- | ------------------ | ---------- |
+| E-01 | …         | …                  | RF-001     |
 
 ## Dudas
 
@@ -50,9 +50,9 @@ Criterios de aceptación:
 ## Aclaraciones
 
 | Fecha | Pregunta | Respuesta del desarrollador |
-| --- | --- | --- |
+| ----- | -------- | --------------------------- |
 
 ## Historial de cambios
 
 | Fecha | Cambio | Nivel |
-| --- | --- | --- |
+| ----- | ------ | ----- |

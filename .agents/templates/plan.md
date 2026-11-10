@@ -16,9 +16,9 @@
 
 ## Comprobación de la constitución
 
-| Principio | ¿Se cumple? | Cómo |
-| --- | --- | --- |
-| 1. Informa, nunca bloquea | | |
+| Principio                 | ¿Se cumple? | Cómo |
+| ------------------------- | ----------- | ---- |
+| 1. Informa, nunca bloquea |             |      |
 
 ## Diseño
 
@@ -33,12 +33,12 @@
 ## Dependencias nuevas
 
 | Paquete | Versión | Motivo | Alternativa sin dependencia | Revisión de Seguridad |
-| --- | --- | --- | --- | --- |
+| ------- | ------- | ------ | --------------------------- | --------------------- |
 
 ## Riesgos
 
 | Riesgo | Probabilidad | Mitigación |
-| --- | --- | --- |
+| ------ | ------------ | ---------- |
 
 ## Estrategia de pruebas
 
@@ -47,4 +47,4 @@
 ## Desviaciones
 
 | Fecha | Qué cambia respecto al plan | Motivo | Aprobado por |
-| --- | --- | --- | --- |
+| ----- | --------------------------- | ------ | ------------ |

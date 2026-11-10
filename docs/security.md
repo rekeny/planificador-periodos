@@ -4,16 +4,16 @@ La referencia es el estándar OWASP MASVS para apps móviles. Como la app funcio
 
 ## Controles
 
-| Qué puede salir mal | Control | Cómo se comprueba |
-| --- | --- | --- |
-| Una dependencia maliciosa o vulnerable | Pocas dependencias, versiones fijadas en `package-lock.json` y revisión antes de añadir una | `npm audit` y OSV-Scanner en `verify.sh` |
-| Que los datos salgan del dispositivo | Sin analítica ni SDK de terceros; el permiso de Internet se bloquea en la versión publicada de Android | ESLint prohíbe las llamadas de red; MobSF revisa el manifiesto |
-| Inyección en la base de datos | Solo consultas de Drizzle con parámetros | Semgrep y revisión de Codex |
-| Un enlace externo que abre una pantalla | Ningún enlace puede lanzar una acción destructiva, y los parámetros se validan | Pruebas y auditoría |
-| Secretos en el repositorio | No hay claves, pero se escanea igualmente | gitleaks en `verify.sh` |
-| Datos en registros o en copias del sistema | Copia automática de Android desactivada; sin `console` en `src/` | ESLint, auditoría y MobSF |
-| Permisos innecesarios | Solo los imprescindibles | MobSF sobre el APK y el IPA antes de publicar |
-| Un workflow de CI comprometido | Permisos mínimos del token y versiones de las acciones y herramientas fijadas | Auditoría de cada cambio en `.github/` |
+| Qué puede salir mal                        | Control                                                                                                | Cómo se comprueba                                              |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Una dependencia maliciosa o vulnerable     | Pocas dependencias, versiones fijadas en `package-lock.json` y revisión antes de añadir una            | `npm audit` y OSV-Scanner en `verify.sh`                       |
+| Que los datos salgan del dispositivo       | Sin analítica ni SDK de terceros; el permiso de Internet se bloquea en la versión publicada de Android | ESLint prohíbe las llamadas de red; MobSF revisa el manifiesto |
+| Inyección en la base de datos              | Solo consultas de Drizzle con parámetros                                                               | Semgrep y revisión de Codex                                    |
+| Un enlace externo que abre una pantalla    | Ningún enlace puede lanzar una acción destructiva, y los parámetros se validan                         | Pruebas y auditoría                                            |
+| Secretos en el repositorio                 | No hay claves, pero se escanea igualmente                                                              | gitleaks en `verify.sh`                                        |
+| Datos en registros o en copias del sistema | Copia automática de Android desactivada; sin `console` en `src/`                                       | ESLint, auditoría y MobSF                                      |
+| Permisos innecesarios                      | Solo los imprescindibles                                                                               | MobSF sobre el APK y el IPA antes de publicar                  |
+| Un workflow de CI comprometido             | Permisos mínimos del token y versiones de las acciones y herramientas fijadas                          | Auditoría de cada cambio en `.github/`                         |
 
 **Datos de menores.** La app guarda nombres de niños. Nunca salen del dispositivo, y en las tiendas se declara que la app no recoge datos.
 

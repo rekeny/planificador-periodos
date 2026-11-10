@@ -2,8 +2,8 @@
 
 ## Análisis previo (fase 4)
 
-| # | Hallazgo | Gravedad | Estado |
-| --- | --- | --- | --- |
+| #   | Hallazgo | Gravedad | Estado |
+| --- | -------- | -------- | ------ |
 
 ## Verificación (fase 7)
 
@@ -18,13 +18,13 @@
 
 Fichero completo: [codex-review.md](codex-review.md)
 
-| # | Hallazgo | Fichero | Gravedad | Estado |
-| --- | --- | --- | --- | --- |
+| #   | Hallazgo | Fichero | Gravedad | Estado |
+| --- | -------- | ------- | -------- | ------ |
 
 ## Seguridad (fase 8)
 
-| # | Hallazgo | Gravedad | Estado |
-| --- | --- | --- | --- |
+| #   | Hallazgo | Gravedad | Estado |
+| --- | -------- | -------- | ------ |
 
 ## Veredicto
 

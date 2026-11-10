@@ -31,28 +31,28 @@ App para iOS y Android, en móvil y tablet, que ayuda a entrenadores de balonces
 
 Antes de tocar nada, declara el nivel. En caso de duda, sube un nivel. Ningún nivel toca código sin la aprobación del desarrollador.
 
-| Nivel | Ejemplos | Fases obligatorias |
-| --- | --- | --- |
+| Nivel   | Ejemplos                                                                          | Fases obligatorias                                                                                                 |
+| ------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Pequeño | Corregir un texto, un color o un fallo sin cambiar el comportamiento especificado | Ficha breve aprobada (`.agents/templates/small-change.md`) → Pruebas → Implementar → Verificar → Revisión de Codex |
-| Medio | Cambiar algo que ya existe | Actualizar la especificación y seguir el flujo desde la fase 3 |
-| Grande | Funcionalidad nueva | Flujo completo, con una carpeta nueva en `specs/` |
+| Medio   | Cambiar algo que ya existe                                                        | Actualizar la especificación y seguir el flujo desde la fase 3                                                     |
+| Grande  | Funcionalidad nueva                                                               | Flujo completo, con una carpeta nueva en `specs/`                                                                  |
 
 - Todo lo que toque `src/domain/` es, como mínimo, de nivel medio.
 - El revisor puede reclasificar el nivel.
 
 ## Flujo de trabajo
 
-| # | Fase | Rol | Entrega | Control para avanzar |
-| --- | --- | --- | --- | --- |
-| 1 | Especificar | Especificador | `spec.md` con historias, requisitos RF y ejemplos E; cada hueco marcado `[DUDA]` | — |
-| 2 | Aclarar | Aclarador | `spec.md` sin `[DUDA]`, con las respuestas anotadas y fechadas | El desarrollador ha respondido todas las dudas |
-| 3 | Planificar | Planificador | `plan.md`, que empieza con la explicación «antes», y `tasks.md` | — |
-| 4 | Analizar y aprobar | Revisor y desarrollador | Análisis de consistencia en `review.md`; aprobación anotada en `spec.md` y `plan.md` | **El desarrollador aprueba la especificación y el plan. Hasta aquí no se toca el código.** |
-| 5 | Diseñar pruebas | Diseñador de pruebas | Escenarios de cada tarea en `tasks.md` | Cada criterio de aceptación tiene escenarios |
-| 6 | Implementar | Diseñador de pruebas e Implementador, tarea a tarea | Por cada tarea: pruebas en rojo, código, verificación en verde y commit | `scripts/verify.sh` en verde |
-| 7 | Verificar | Verificador | Salida de la verificación en `review.md` | Todo en verde |
-| 8 | Revisar | Revisor (Codex) y Seguridad | Hallazgos en `review.md` | Ningún hallazgo bloqueante |
-| 9 | Cerrar | Desarrollador | Prueba en el dispositivo, `resumen.md` y PR fusionada | El desarrollador acepta el resultado |
+| #   | Fase               | Rol                                                 | Entrega                                                                              | Control para avanzar                                                                       |
+| --- | ------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| 1   | Especificar        | Especificador                                       | `spec.md` con historias, requisitos RF y ejemplos E; cada hueco marcado `[DUDA]`     | —                                                                                          |
+| 2   | Aclarar            | Aclarador                                           | `spec.md` sin `[DUDA]`, con las respuestas anotadas y fechadas                       | El desarrollador ha respondido todas las dudas                                             |
+| 3   | Planificar         | Planificador                                        | `plan.md`, que empieza con la explicación «antes», y `tasks.md`                      | —                                                                                          |
+| 4   | Analizar y aprobar | Revisor y desarrollador                             | Análisis de consistencia en `review.md`; aprobación anotada en `spec.md` y `plan.md` | **El desarrollador aprueba la especificación y el plan. Hasta aquí no se toca el código.** |
+| 5   | Diseñar pruebas    | Diseñador de pruebas                                | Escenarios de cada tarea en `tasks.md`                                               | Cada criterio de aceptación tiene escenarios                                               |
+| 6   | Implementar        | Diseñador de pruebas e Implementador, tarea a tarea | Por cada tarea: pruebas en rojo, código, verificación en verde y commit              | `scripts/verify.sh` en verde                                                               |
+| 7   | Verificar          | Verificador                                         | Salida de la verificación en `review.md`                                             | Todo en verde                                                                              |
+| 8   | Revisar            | Revisor (Codex) y Seguridad                         | Hallazgos en `review.md`                                                             | Ningún hallazgo bloqueante                                                                 |
+| 9   | Cerrar             | Desarrollador                                       | Prueba en el dispositivo, `resumen.md` y PR fusionada                                | El desarrollador acepta el resultado                                                       |
 
 **Vueltas atrás.** Si el desarrollador no aprueba en la fase 4, se corrige el plan (fase 3). Si la verificación falla o hay un hallazgo bloqueante en la fase 8, se vuelve a implementar (fase 6). Un cambio pequeño entra en la fase 5 con su ficha aprobada; uno medio entra en la 3.
 
@@ -66,16 +66,16 @@ Así las pruebas siempre van antes que el código y la rama nunca acumula prueba
 
 ## Roles
 
-| Rol | Fichero | Fases |
-| --- | --- | --- |
-| Especificador | `.agents/roles/specifier.md` | 1 |
-| Aclarador | `.agents/roles/clarifier.md` | 2 |
-| Planificador | `.agents/roles/planner.md` | 3 |
-| Diseñador de pruebas | `.agents/roles/test-designer.md` | 5 y 6 |
-| Implementador | `.agents/roles/implementer.md` | 6 |
-| Verificador | `.agents/roles/verifier.md` | 7 |
-| Revisor | `.agents/roles/reviewer.md` | 4 y 8 |
-| Seguridad | `.agents/roles/security.md` | 8 y antes de publicar |
+| Rol                  | Fichero                          | Fases                 |
+| -------------------- | -------------------------------- | --------------------- |
+| Especificador        | `.agents/roles/specifier.md`     | 1                     |
+| Aclarador            | `.agents/roles/clarifier.md`     | 2                     |
+| Planificador         | `.agents/roles/planner.md`       | 3                     |
+| Diseñador de pruebas | `.agents/roles/test-designer.md` | 5 y 6                 |
+| Implementador        | `.agents/roles/implementer.md`   | 6                     |
+| Verificador          | `.agents/roles/verifier.md`      | 7                     |
+| Revisor              | `.agents/roles/reviewer.md`      | 4 y 8                 |
+| Seguridad            | `.agents/roles/security.md`      | 8 y antes de publicar |
 
 - La sesión principal hace de **orquestador**: lanza cada rol en su fase, le pasa solo lo que necesita y no avanza si el control de la fase no está superado.
 - Los roles no hablan con el desarrollador: devuelven sus preguntas al orquestador, que es quien pregunta.
@@ -114,15 +114,15 @@ Así las pruebas siempre van antes que el código y la rama nunca acumula prueba
 
 El desarrollador usa este proyecto para aprender. Cada implementación se explica dos veces, en lenguaje claro.
 
-| | Antes de ejecutar | Después de ejecutar |
-| --- | --- | --- |
-| Dónde | Al principio de `plan.md` y en el chat, junto a la petición de aprobación | En el chat y en `resumen.md` |
-| Qué | Qué se va a hacer, en dos o tres frases | Qué se ha hecho y qué cambia para el usuario |
-| Cómo | Pasos y ficheros que se van a tocar | Ficheros tocados y piezas nuevas |
-| Por qué | Por qué de esta forma y qué alternativas se descartan | Decisiones tomadas por el camino y su motivo |
-| Para aprender | Conceptos de TypeScript, React o Expo que van a aparecer | Esos conceptos explicados con el código real |
-| Para comprobarlo | Qué tendrá que probar el desarrollador | Pasos o comandos para verlo funcionando |
-| Pendiente | Dudas que necesitan respuesta | Riesgos o tareas que quedan |
+|                  | Antes de ejecutar                                                         | Después de ejecutar                          |
+| ---------------- | ------------------------------------------------------------------------- | -------------------------------------------- |
+| Dónde            | Al principio de `plan.md` y en el chat, junto a la petición de aprobación | En el chat y en `resumen.md`                 |
+| Qué              | Qué se va a hacer, en dos o tres frases                                   | Qué se ha hecho y qué cambia para el usuario |
+| Cómo             | Pasos y ficheros que se van a tocar                                       | Ficheros tocados y piezas nuevas             |
+| Por qué          | Por qué de esta forma y qué alternativas se descartan                     | Decisiones tomadas por el camino y su motivo |
+| Para aprender    | Conceptos de TypeScript, React o Expo que van a aparecer                  | Esos conceptos explicados con el código real |
+| Para comprobarlo | Qué tendrá que probar el desarrollador                                    | Pasos o comandos para verlo funcionando      |
+| Pendiente        | Dudas que necesitan respuesta                                             | Riesgos o tareas que quedan                  |
 
 Codex comprueba en la revisión que las explicaciones coinciden con lo que de verdad se ha hecho.
 
@@ -145,20 +145,21 @@ Codex comprueba en la revisión que las explicaciones coinciden con lo que de ve
   - dependencias, secretos y análisis estático.
 
   Lo ejecuta el agente al terminar cada tarea y GitHub Actions en cada PR. Con `FORCE_MUTATION=1`, las pruebas de mutación se ejecutan aunque no cambie el dominio.
+
 - **`scripts/review.sh specs/NNN-nombre`** lanza la revisión de Codex de la rama contra `main` y guarda la salida en `specs/NNN-nombre/codex-review.md`. Tarda varios minutos: lánzalo con un tiempo de espera largo o en segundo plano.
 - **El desarrollador** también puede usar el plugin de Codex en Claude Code: `/codex:review --base main` y `/codex:adversarial-review --base main <enfoque>`.
 
 ## Comandos
 
-| Comando | Para qué |
-| --- | --- |
-| `npm run ios` / `npm run android` | Compilar e instalar la app en el simulador o el emulador, y arrancar el servidor de desarrollo |
-| `npm start` | Solo el servidor de desarrollo, con la app ya instalada |
-| `npm test` | Pruebas |
-| `npm run test:coverage` | Pruebas con cobertura |
-| `npm run test:mutation` | Pruebas de mutación de `src/domain/` |
-| `npm run verify` | Verificación completa |
-| `npm run typecheck` / `npm run lint` / `npm run format` | Comprobaciones sueltas y formato |
+| Comando                                                 | Para qué                                                                                       |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run ios` / `npm run android`                       | Compilar e instalar la app en el simulador o el emulador, y arrancar el servidor de desarrollo |
+| `npm start`                                             | Solo el servidor de desarrollo, con la app ya instalada                                        |
+| `npm test`                                              | Pruebas                                                                                        |
+| `npm run test:coverage`                                 | Pruebas con cobertura                                                                          |
+| `npm run test:mutation`                                 | Pruebas de mutación de `src/domain/`                                                           |
+| `npm run verify`                                        | Verificación completa                                                                          |
+| `npm run typecheck` / `npm run lint` / `npm run format` | Comprobaciones sueltas y formato                                                               |
 
 ## Expo
 
