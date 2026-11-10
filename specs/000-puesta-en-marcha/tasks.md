@@ -20,7 +20,7 @@ Leyenda: `[ ]` pendiente · `[x]` hecha. Cada tarea es un commit `T00N: descripc
   - Hecho cuando: `npm run verify` está en verde y el ensayo de trazabilidad ha fallado como se esperaba.
 - [x] **T009** · Integración continua y protección de `main`
   - Hecho cuando: la PR tiene la verificación en verde y `main` está protegida.
-- [ ] **T010** · Arranque en iPhone, iPad y Android
+- [x] **T010** · Arranque en iPhone, iPad y Android
   - Hecho cuando: Fernando confirma que ve el título en los tres dispositivos, también en horizontal.
 - [ ] **T011** · Revisión, informe y cierre
   - Hecho cuando: no queda ningún hallazgo bloqueante, `resumen.md` está escrito y la PR está lista para fusionar.
