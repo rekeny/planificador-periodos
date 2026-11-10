@@ -1,56 +1,46 @@
-# Welcome to your Expo app 👋
+# Planificador de periodos
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App para iOS y Android que ayuda a entrenadores de baloncesto de formación a planificar en qué periodos juega cada jugador. Avisa cuando la planificación incumple la normativa de la variante (4, 6 u 8 periodos), sin bloquear nunca. Funciona sin conexión y todos los datos se quedan en el dispositivo.
 
-## Get started
+**Estado:** en desarrollo. La fase 0 deja preparado el proyecto; la primera funcionalidad llega con la especificación 001.
 
-1. Install dependencies
+## Cómo está hecho
 
-   ```bash
-   npm install
-   ```
+- **Tecnología:** Expo (React Native) con TypeScript estricto y Expo Router. El stack y las capas están en [`docs/architecture.md`](docs/architecture.md).
+- **Proceso:** desarrollo guiado por especificaciones con agentes de IA. Las reglas están en [`AGENTS.md`](AGENTS.md), los principios en [`docs/constitution.md`](docs/constitution.md) y cada funcionalidad en [`specs/`](specs/).
+- **Revisión:** la del código la hace Codex; la verificación automática, [`scripts/verify.sh`](scripts/verify.sh).
 
-2. Start the app
+## Puesta en marcha en local
 
-   ```bash
-   npx expo start
-   ```
+Requisitos:
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+- macOS con Xcode y un simulador de iOS;
+- Android Studio con un emulador;
+- Node, en la versión de `.nvmrc`;
+- CocoaPods;
+- gitleaks, osv-scanner y semgrep (`brew install cocoapods gitleaks osv-scanner semgrep`).
 
 ```bash
-npm run reset-project
+npm install
+npm run ios       # simulador de iOS
+npm run android   # emulador de Android
+npm run verify    # verificación completa
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+## Estructura
 
-### Other setup steps
+```text
+src/app/      pantallas y navegación
+src/ui/       componentes que pintan
+src/state/    sesión del partido y deshacer
+src/data/     base de datos y repositorios
+src/domain/   reglas de la normativa, puras
+src/i18n/     textos en castellano
+specs/        una carpeta por especificación
+docs/         constitución, arquitectura, seguridad y decisiones
+.agents/      roles y plantillas de los agentes
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Licencia
 
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Sin licencia: el código es público para consulta, pero todos los derechos están reservados.
