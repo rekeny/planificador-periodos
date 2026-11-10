@@ -6,7 +6,7 @@ Leyenda: `[ ]` pendiente · `[x]` hecha. Cada tarea es un commit `T00N: descripc
   - Hecho cuando: el repositorio existe en GitHub con `main` y en local estamos en `000-puesta-en-marcha`.
 - [x] **T002** · Reglas y documentos del proceso
   - Hecho cuando: existen `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/` y este plan con la fecha de aprobación.
-- [ ] **T003** · Roles, plantillas y subagentes
+- [x] **T003** · Roles, plantillas y subagentes
   - Hecho cuando: existen los 8 roles, las 7 plantillas, los 8 subagentes y la plantilla de PR.
 - [ ] **T004** · Configuración de la app y estructura de carpetas
   - Hecho cuando: `app.json` tiene los datos del proyecto y `expo-doctor` y `tsc` están en verde.
