@@ -36,5 +36,7 @@ Write the review in Spanish. If a category has no findings, say so."
 {
   printf '# Revisión de Codex\n\n- Fecha: %s\n- Rama: %s contra %s\n- Commit: %s\n\n' \
     "$(date '+%Y-%m-%d %H:%M')" "$(git branch --show-current)" "$base" "$(git rev-parse --short HEAD)"
-  codex review --base "$base" "$instructions"
+  # `codex review --base` does not accept custom instructions, so `codex exec` runs the review read-only.
+  codex exec --sandbox read-only "$instructions
+Use \`git diff $base...HEAD\` to see the changes of the branch." 
 } | tee "$output"
