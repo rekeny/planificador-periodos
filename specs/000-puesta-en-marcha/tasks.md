@@ -16,7 +16,7 @@ Leyenda: `[ ]` pendiente · `[x]` hecha. Cada tarea es un commit `T00N: descripc
   - Hecho cuando: `typecheck`, `lint` y `format:check` están en verde, y los ficheros de prueba han fallado con la regla esperada.
 - [x] **T007** · Pruebas: Jest, Testing Library, fast-check y Stryker
   - Hecho cuando: `npm test` está en verde y el ensayo de cobertura y mutación ha funcionado.
-- [ ] **T008** · Scripts de verificación, trazabilidad y revisión
+- [x] **T008** · Scripts de verificación, trazabilidad y revisión
   - Hecho cuando: `npm run verify` está en verde y el ensayo de trazabilidad ha fallado como se esperaba.
 - [ ] **T009** · Integración continua y protección de `main`
   - Hecho cuando: la PR tiene la verificación en verde y `main` está protegida.
