@@ -65,3 +65,4 @@
 | Fecha | Qué cambia respecto al plan | Motivo | Aprobado por |
 | --- | --- | --- | --- |
 | 2026-11-10 | T001: la plantilla de Expo ya traía un repositorio Git en `master` y un fichero `LICENSE` (MIT de Expo). Se renombra `master` a `main` y se borra `LICENSE`, porque el repositorio es público y sin licencia. El commit `T001` va encima del commit inicial de Expo. | El prompt daba por hecho que `create-expo-app` no iniciaba Git y que no había licencia | Fernando, 2026-11-10 |
+| 2026-11-10 | T004: la plantilla `default@sdk-58` trae dependencias que el plan no lista (`react-native-gesture-handler`, `react-native-reanimated`, `react-native-worklets`, `@expo/ui`, `expo-glass-effect`, entre otras). Se dejan tal cual. | Las instala Expo con la plantilla y quitarlas puede romper el arranque; gesture handler entraba de todos modos en la 001 | Pendiente de Fernando |
