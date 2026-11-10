@@ -10,6 +10,11 @@ const TEST_FILES = ["**/*.test.ts", "**/*.test.tsx", "tests/**"];
 const LAYERS = ["app", "ui", "state", "data", "domain", "i18n"];
 const ANY_PACKAGE = { module: { origin: ["external", "core"] } };
 
+const withSubpaths = (names) => names.flatMap((name) => [name, `${name}/**`]);
+const onlyPackages = (names) => ({
+  module: { origin: "external", source: withSubpaths(names) },
+});
+
 // One layer may import another only as the table "Capas" of docs/architecture.md says.
 // `types` means type-only imports (`import type`).
 const layerPolicy = (from, values, types = []) => ({
@@ -27,22 +32,28 @@ const boundaryRules = [
   layerPolicy("ui", ["state", "i18n"], ["domain"]),
   layerPolicy("state", ["domain", "data"]),
   layerPolicy("data", [], ["domain"]),
-  // Packages: everything is allowed first, then each layer loses what it must not import.
-  { from: { element: { type: LAYERS } }, allow: { to: ANY_PACKAGE } },
-  { from: { element: { type: "domain" } }, disallow: { to: ANY_PACKAGE } },
+  // Packages, per layer (docs/architecture.md, "Capas"). A package also covers its subpaths.
+  // domain imports no package; data and i18n only their own; app, ui and state anything except the
+  // packages reserved to other layers.
   {
-    from: { element: { type: ["app", "ui", "i18n"] } },
-    disallow: {
-      to: {
-        module: { origin: "external", source: ["expo-sqlite", "drizzle-orm"] },
-      },
-    },
+    from: { element: { type: ["app", "ui", "state"] } },
+    allow: { to: ANY_PACKAGE },
+  },
+  {
+    from: { element: { type: "data" } },
+    allow: { to: onlyPackages(["expo-sqlite", "drizzle-orm"]) },
+  },
+  {
+    from: { element: { type: "i18n" } },
+    allow: { to: onlyPackages(["i18next", "react-i18next"]) },
+  },
+  {
+    from: { element: { type: ["app", "ui"] } },
+    disallow: { to: onlyPackages(["expo-sqlite", "drizzle-orm"]) },
   },
   {
     from: { element: { type: "state" } },
-    disallow: {
-      to: { module: { origin: "external", source: "react-native" } },
-    },
+    disallow: { to: onlyPackages(["react-native"]) },
   },
   // Tests may import anything they test.
   {
@@ -108,13 +119,18 @@ module.exports = defineConfig([
       "no-console": "error",
       "no-restricted-globals": [
         "error",
-        ...["fetch", "XMLHttpRequest", "WebSocket", "EventSource"].map(
-          (name) => ({
-            name,
-            message:
-              "The app makes no network calls (docs/constitution.md, principle 3).",
-          }),
-        ),
+        {
+          globals: ["fetch", "XMLHttpRequest", "WebSocket", "EventSource"].map(
+            (name) => ({
+              name,
+              message:
+                "The app makes no network calls (docs/constitution.md, principle 3).",
+            }),
+          ),
+          // Also catches globalThis.fetch, window.fetch, self.fetch and global.fetch.
+          checkGlobalObject: true,
+          globalObjects: ["globalThis", "window", "self", "global"],
+        },
       ],
       complexity: ["error", 10],
       "max-lines": [
@@ -139,7 +155,24 @@ module.exports = defineConfig([
     files: ["src/app/**/*.tsx", "src/ui/**/*.tsx"],
     plugins: { i18next },
     rules: {
-      "i18next/no-literal-string": ["error", { mode: "jsx-text-only" }],
+      // jsx-only checks JSX text, text inside {...} and the visible attributes listed here.
+      "i18next/no-literal-string": [
+        "error",
+        {
+          mode: "jsx-only",
+          "jsx-attributes": {
+            include: [
+              "accessibilityLabel",
+              "accessibilityHint",
+              "aria-label",
+              "placeholder",
+              "title",
+              "label",
+              "alt",
+            ],
+          },
+        },
+      ],
     },
   },
   {

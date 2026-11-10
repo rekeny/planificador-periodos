@@ -41,8 +41,8 @@ npx prettier --check .
 
 step "Focused or skipped tests"
 if grep -rEn --include='*.test.ts' --include='*.test.tsx' \
-  '\b(it|test|describe)\.(only|skip)\(|\bx(it|test|describe)\(' src tests 2>/dev/null; then
-  echo "Remove .only, .skip and x-prefixed tests before finishing." >&2
+  '\b(it|test|describe)(\.[A-Za-z]+)*\.(only|skip)\b|\b(xit|xtest|xdescribe|fit|ftest|fdescribe)\b' src tests 2>/dev/null; then
+  echo "Remove .only, .skip, x-prefixed and f-prefixed tests before finishing." >&2
   exit 1
 fi
 

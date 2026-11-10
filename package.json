@@ -4,7 +4,6 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/ui": "~58.0.27",
-    "@types/jest": "30.0.0",
     "expo": "~58.0.23",
     "expo-constants": "~58.0.15",
     "expo-dev-client": "~58.0.18",
@@ -20,8 +19,6 @@
     "expo-system-ui": "~58.0.7",
     "expo-web-browser": "~58.0.7",
     "i18next": "^27.1.1",
-    "jest": "~30.5.2",
-    "jest-expo": "~58.0.14",
     "react": "19.3.0",
     "react-i18next": "^18.0.1",
     "react-native": "0.88.1",
@@ -36,6 +33,7 @@
     "@stryker-mutator/jest-runner": "^10.1.1",
     "@stryker-mutator/typescript-checker": "^10.1.1",
     "@testing-library/react-native": "^14.1.0",
+    "@types/jest": "30.0.0",
     "@types/react": "~19.3.0",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~58.0.4",
@@ -43,6 +41,8 @@
     "eslint-plugin-boundaries": "^7.4.2",
     "eslint-plugin-i18next": "^6.1.5",
     "fast-check": "^4.10.2",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.14",
     "prettier": "^3.9.10",
     "typescript": "~6.0.3"
   },
