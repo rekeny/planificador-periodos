@@ -299,7 +299,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a tap or menu choice never changes any cell other than the tapped one, or the two of a replacement (RF-054).
   - Pending: nothing.
 
-- [ ] **T022** · Brute-force oracle for "rule impossible to meet" on realistic grids of the three formats (RF-003, RF-004, RF-067)
+- [x] **T022** · Brute-force oracle for "rule impossible to meet" on realistic grids of the three formats (RF-003, RF-004, RF-067)
   - Layer and files: domain tests · `src/domain/rule-feasibility.oracle.test.ts`.
   - Done when: `isRuleImpossible` agrees with brute force on the mixed and the possible-by-construction generators of `plan.md` (formats 4, 6 and 8; call-ups from the format minimum to 13; at most 4 X missing in the window); a fixed-seed test shows at least 20 % of each outcome in the mixed generator.
   - Scenarios:
