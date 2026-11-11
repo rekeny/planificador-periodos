@@ -137,7 +137,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US4 · See the rule warnings (domain)
 
-- [ ] **T010** · Rule window: possible rests, light red cells, player in red (RF-002, RF-003, RF-004, RF-007, RF-008, RF-009, RF-062, RF-063, RF-064, RF-072, E-001, E-002, E-003, E-004, E-005, E-008, E-009, E-010)
+- [x] **T010** · Rule window: possible rests, light red cells, player in red (RF-002, RF-003, RF-004, RF-007, RF-008, RF-009, RF-062, RF-063, RF-064, RF-072, E-001, E-002, E-003, E-004, E-005, E-008, E-009, E-010)
   - Layer and files: domain · `src/domain/rule-window.ts`, test.
   - Done when: E-001–E-005 and E-008–E-010 give exactly the light red cells and players in red of the spec, in the three formats.
   - Scenarios:
