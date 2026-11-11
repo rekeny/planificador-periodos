@@ -78,10 +78,10 @@ describe("removeLastOvertime", () => {
     const marked: MatchGrid = {
       ...added,
       marks: {
-        [cellKey({ entryId: 1, column: period(2) })]: "starter",
-        [cellKey({ entryId: 1, column: overtime(1) })]: "starter",
-        [cellKey({ entryId: 2, column: overtime(1) })]: "sub",
-        [cellKey({ entryId: 3, column: overtime(2) })]: "starter",
+        [cellKey({ entryId: 1, column: period(2) })]: "starter" as const,
+        [cellKey({ entryId: 1, column: overtime(1) })]: "starter" as const,
+        [cellKey({ entryId: 2, column: overtime(1) })]: "sub" as const,
+        [cellKey({ entryId: 3, column: overtime(2) })]: "starter" as const,
       },
     };
 
@@ -89,9 +89,9 @@ describe("removeLastOvertime", () => {
 
     expect(grid.overtimeCount).toBe(1);
     expect(grid.marks).toEqual({
-      [cellKey({ entryId: 1, column: period(2) })]: "starter",
-      [cellKey({ entryId: 1, column: overtime(1) })]: "starter",
-      [cellKey({ entryId: 2, column: overtime(1) })]: "sub",
+      [cellKey({ entryId: 1, column: period(2) })]: "starter" as const,
+      [cellKey({ entryId: 1, column: overtime(1) })]: "starter" as const,
+      [cellKey({ entryId: 2, column: overtime(1) })]: "sub" as const,
     });
   });
 
@@ -99,7 +99,9 @@ describe("removeLastOvertime", () => {
     const added = addOvertime(addOvertime(gridWith()));
     const marked: MatchGrid = {
       ...added,
-      marks: { [cellKey({ entryId: 2, column: overtime(2) })]: "starter" },
+      marks: {
+        [cellKey({ entryId: 2, column: overtime(2) })]: "starter" as const,
+      },
     };
 
     const grid = removeLastOvertime(marked);
