@@ -10,7 +10,7 @@ Lo que sí existe ahora:
 
 - el proyecto Expo SDK 58 con TypeScript estricto y Expo Router;
 - las reglas y los documentos del proceso (`AGENTS.md`, constitución, arquitectura, seguridad y dos ADR);
-- ocho roles de agentes, siete plantillas y ocho subagentes;
+- ocho roles de agentes, siete plantillas y nueve subagentes (el Revisor tiene uno para la fase 4 y otro, con Haiku, para la fase 8);
 - calidad (ESLint con límites entre capas y Prettier), pruebas (Jest, Testing Library, fast-check y Stryker) y seguridad (npm audit, OSV-Scanner, gitleaks y Semgrep);
 - un único comando, `npm run verify`, que ejecuta todo en local y en GitHub Actions, y `main` protegida: solo se fusiona por PR con el check `verify` en verde.
 
@@ -20,7 +20,7 @@ Lo que sí existe ahora:
 | ------------------------ | --------------------------------------------------------------------------------------------------------- |
 | Proyecto y configuración | `app.json`, `package.json`, `tsconfig.json`, `.nvmrc`, `.gitignore`                                       |
 | Reglas y documentos      | `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/`, `specs/000-puesta-en-marcha/`                             |
-| Agentes                  | `.agents/roles/` (8), `.agents/templates/` (7), `.claude/agents/` (8), `.github/pull_request_template.md` |
+| Agentes                  | `.agents/roles/` (8), `.agents/templates/` (7), `.claude/agents/` (9), `.github/pull_request_template.md` |
 | Capas                    | `src/{app,ui,state,data,domain,i18n}`, con un `README.md` por capa vacía                                  |
 | Textos y pantalla        | `src/i18n/{es.json,index.ts,i18next.d.ts}`, `src/app/{_layout,index}.tsx`                                 |
 | Calidad                  | `eslint.config.js`                                                                                        |
@@ -39,6 +39,8 @@ Once tareas, un commit por tarea (`T001` a `T011`), en la rama `000-puesta-en-ma
 - **Excepciones de OSV-Scanner con caducidad** (T008): 9 vulnerabilidades medias en dependencias indirectas de Expo, Jest y Stryker, sin corrección sin subir versiones mayores ajenas. Caducan el 2027-02-08.
 - **`codex exec` en vez de `codex review --base`** (T011): con Codex 0.167.0 `--base` no admite instrucciones personalizadas. Además, el modelo `gpt-5.2` fijado en `~/.codex/config.toml` no lo admite una cuenta de ChatGPT; se quitó esa línea.
 - **Arreglos tras la revisión** (T011): paquetes por capa en ESLint, `jsx-only` con atributos visibles, `checkGlobalObject`, trazabilidad que solo lee nombres de pruebas, `verify.sh` que detecta `it.skip.each` y SHA-256 fijados en el workflow.
+
+- **Dos subagentes para el Revisor** (T011): `reviewer` hace el análisis de la fase 4 con el modelo de la sesión, y `codex-reviewer` la fase 8 con Haiku, porque ahí solo lanza `scripts/review.sh` y copia los hallazgos de Codex. Un subagente solo puede fijar un modelo, y así no depende de que el orquestador se acuerde de cambiarlo.
 
 Todas las desviaciones están en la tabla «Desviaciones» de `plan.md`, con su aprobación.
 
