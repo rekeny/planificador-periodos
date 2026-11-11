@@ -1,9 +1,9 @@
 # Spec 001 · Period planner v1
 
-- **Status:** Clarified <!-- Draft | Clarified | Approved | In progress | Closed -->
+- **Status:** Approved <!-- Draft | Clarified | Approved | In progress | Closed -->
 - **Level:** Large
 - **Date:** 2026-11-11
-- **Approved by:** — <!-- name and date -->
+- **Approved by:** Fernando, 2026-11-11 (includes the «Cancelar» button of RF-052 and the five "P-23 proposal" texts)
 - **Source:** `specs/001-planificador-v1/source-en.md` (Fernando, 2026-11-09, translated from the original Spanish specification).
 
 ## Purpose and principles

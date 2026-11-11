@@ -2,8 +2,8 @@
 
 - **Spec:** [spec.md](spec.md) (RF-001–RF-088, E-001–E-032)
 - **Level:** Large
-- **Status:** Draft <!-- Draft | Approved -->
-- **Approved by:** — <!-- name and date -->
+- **Status:** Approved <!-- Draft | Approved -->
+- **Approved by:** Fernando, 2026-11-11
 - **ADR:** [ADR-004](../../docs/decisions/ADR-004-global-ids-and-deliveries.md) (Proposed)
 
 ## Explanation before running

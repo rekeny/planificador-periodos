@@ -1,8 +1,8 @@
 # ADR-004 · Global requirement IDs and delivery of a spec in parts
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-11
-- **Decided by:** — (pending Fernando's approval in phase 4)
+- **Decided by:** Fernando, 2026-11-11
 
 ## Context
 
