@@ -24,7 +24,7 @@ See `docs/architecture.md`, section "Tests". Each scenario states the RF and E I
    - fast-check for the properties;
    - React Native Testing Library for components and screens, querying by role and visible text;
    - Maestro in `e2e/` for full flows.
-2. Put in each test name the IDs it covers: `it('RF-018 E-01: highlights P4 and P5 when …')`.
+2. Put in each test name the IDs it covers: `it('RF-018 E-001: highlights P4 and P5 when …')`.
 3. Run only those tests and check that they fail **for the right reason**: the assertion, not a broken import or a syntax error.
 4. Hand the orchestrator the list of tests and the red output.
 

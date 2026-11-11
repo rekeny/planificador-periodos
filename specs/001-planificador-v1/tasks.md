@@ -25,7 +25,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: an ID only in a comment or a `describe` does not count; fixture file contents never count, because the fixtures live in a temporary folder and the test names carry no IDs.
   - Pending: nothing.
 
-- [ ] **T002** · Documents, templates and roles quote three-digit IDs; numbering rule for the Specifier
+- [x] **T002** · Documents, templates and roles quote three-digit IDs; numbering rule for the Specifier
   - Layer and files: docs · `docs/architecture.md` (Tests "Name", Traceability table), `.agents/templates/spec.md`, `.agents/templates/tasks.md`, `.agents/roles/specifier.md` (three-digit examples, and the rule "look up the highest `RF` and `E` used in `specs/` before numbering; IDs are global and never reused"), `.agents/roles/test-designer.md`.
   - Done when: every `E-01`-style example in those files reads `E-001`; the specifier role has the numbering rule; a search for a two-digit example ID (`E-\d{2}\b`) in `docs/architecture.md`, `.agents/` and `AGENTS.md` finds nothing (the ADRs keep the old IDs where they describe the old format); `verify.sh` is green.
   - Scenarios:

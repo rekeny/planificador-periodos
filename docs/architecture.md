@@ -122,7 +122,7 @@ A new concept is added here before it is used in the code.
 ## Tests
 
 - **Where:** next to the file they test, such as `rule-window.test.ts`. Tests of the screens in `src/app/` go in `tests/app/`, because Expo Router would treat any file in `src/app/` as a route.
-- **Name:** starts with the IDs it covers, such as `it('RF-018 E-01: highlights P4 and P5 when the player has 3 X in the window', …)`. That is how traceability works.
+- **Name:** starts with the IDs it covers, such as `it('RF-018 E-001: highlights P4 and P5 when the player has 3 X in the window', …)`. That is how traceability works.
 - **Thresholds:** 90 % coverage in `src/domain/` and at least 80 % of mutants killed by Stryker.
 
 | Level                  | Tool                         | What for                                                                   |
@@ -146,14 +146,14 @@ A new concept is added here before it is used in the code.
 
 Each requirement is followed from the spec to the commit with the same identifier. `scripts/check-traceability.mjs` fails if a requirement or an example has no test.
 
-| Where               | How it appears                                                                   |
-| ------------------- | -------------------------------------------------------------------------------- |
-| `spec.md`           | `- **RF-018** · Cell that should not be marked shows light red`                  |
-| `spec.md`, examples | `\| E-01 \| Juan with X in P1, P2 and P3 \| P4 and P5 in light red \| RF-018 \|` |
-| `tasks.md`          | `- [ ] **T012** · Evaluate red cells (RF-018, E-01, E-02)`                       |
-| Test                | `it('RF-018 E-01: highlights P4 and P5 …')`                                      |
-| Commit              | `T012 RF-018: highlight periods in light red`                                    |
-| `review.md`         | Findings and verification output of T012                                         |
+| Where               | How it appears                                                                    |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `spec.md`           | `- **RF-018** · Cell that should not be marked shows light red`                   |
+| `spec.md`, examples | `\| E-001 \| Juan with X in P1, P2 and P3 \| P4 and P5 in light red \| RF-018 \|` |
+| `tasks.md`          | `- [ ] **T012** · Evaluate red cells (RF-018, E-001, E-002)`                      |
+| Test                | `it('RF-018 E-001: highlights P4 and P5 …')`                                      |
+| Commit              | `T012 RF-018: highlight periods in light red`                                     |
+| `review.md`         | Findings and verification output of T012                                          |
 
 The script checks the IDs of the tasks ticked as done and, when the spec status is "Closed", all of its IDs.
 
