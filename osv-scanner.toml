@@ -1,0 +1,38 @@
+# OSV-Scanner exceptions (docs/security.md, "Exceptions").
+# Each one has a reason, an expiry of 90 days at most and Fernando's approval (2026-11-10).
+# All are medium severity and come from development and build tools (Expo CLI, Jest, ESLint, Stryker).
+
+[[IgnoredVulns]]
+id = "GHSA-gcqx-w48m-w2h4"
+ignoreUntil = 2027-02-08T00:00:00Z
+reason = "deepmerge 4.3.1, indirect from jest-config (development only); no fixed version. Approved by Fernando on 2026-11-10."
+
+[[IgnoredVulns]]
+id = "GHSA-3g3m-2fjr-6pw4"
+ignoreUntil = 2027-02-08T00:00:00Z
+reason = "glob 10.5.0 and 13.0.7, indirect from Expo CLI and Jest; the fix needs glob 14, a major version we do not control. Approved by Fernando on 2026-11-10."
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2027-02-08T00:00:00Z
+reason = "minimatch 9.0.9 and 10.2.6, indirect from ESLint, Expo and Stryker; the fix needs minimatch 11, a major version we do not control. Approved by Fernando on 2026-11-10."
+
+[[IgnoredVulns]]
+id = "GHSA-4mjr-xmp4-gh2g"
+ignoreUntil = 2027-02-08T00:00:00Z
+reason = "qs 6.15.1, indirect from Stryker (development only). Approved by Fernando on 2026-11-10."
+
+[[IgnoredVulns]]
+id = "GHSA-6pq8-jhm2-2vcw"
+ignoreUntil = 2027-02-08T00:00:00Z
+reason = "qs 6.15.1, indirect from Stryker (development only). Approved by Fernando on 2026-11-10."
+
+[[IgnoredVulns]]
+id = "GHSA-q8mj-m7cp-5q26"
+ignoreUntil = 2027-02-08T00:00:00Z
+reason = "qs 6.15.1, indirect from Stryker (development only). Approved by Fernando on 2026-11-10."
+
+[[IgnoredVulns]]
+id = "GHSA-x5fp-wj9c-mxmx"
+ignoreUntil = 2027-02-08T00:00:00Z
+reason = "qs 6.15.1, indirect from Stryker (development only). Approved by Fernando on 2026-11-10."

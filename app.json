@@ -1,14 +1,16 @@
 {
   "expo": {
-    "name": "planificador-periodos",
+    "name": "Planificador de periodos",
     "slug": "planificador-periodos",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "planificadorperiodos",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.fernando.planificadorperiodos",
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -17,11 +19,9 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "server",
-      "favicon": "./assets/images/favicon.png"
+      "predictiveBackGestureEnabled": false,
+      "package": "com.fernando.planificadorperiodos",
+      "allowBackup": false
     },
     "plugins": [
       "expo-router",

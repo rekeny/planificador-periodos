@@ -41,3 +41,8 @@ example
 # generated native folders
 /ios
 /android
+
+# Test and analysis output
+coverage/
+reports/
+.stryker-tmp/

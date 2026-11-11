@@ -1,56 +1,46 @@
-# Welcome to your Expo app 👋
+# Planificador de periodos
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An iOS and Android app that helps youth basketball coaches plan which periods each player plays. It warns when the plan breaks the rules of the format (4, 6 or 8 periods), without ever blocking. It works offline and all data stays on the device. The app is in Spanish.
 
-## Get started
+**Status:** in development. Phase 0 sets up the project; the first feature arrives with spec 001.
 
-1. Install dependencies
+## How it is built
 
-   ```bash
-   npm install
-   ```
+- **Technology:** Expo (React Native) with strict TypeScript and Expo Router. The stack and the layers are in [`docs/architecture.md`](docs/architecture.md).
+- **Process:** spec-driven development with AI agents. The rules are in [`AGENTS.md`](AGENTS.md), the principles in [`docs/constitution.md`](docs/constitution.md) and each feature in [`specs/`](specs/).
+- **Review:** the code review is done by Codex; the automatic verification, by [`scripts/verify.sh`](scripts/verify.sh).
 
-2. Start the app
+## Local setup
 
-   ```bash
-   npx expo start
-   ```
+Requirements:
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+- macOS with Xcode and an iOS simulator;
+- Android Studio with an emulator;
+- Node, in the version of `.nvmrc`;
+- CocoaPods;
+- gitleaks, osv-scanner and semgrep (`brew install cocoapods gitleaks osv-scanner semgrep`).
 
 ```bash
-npm run reset-project
+npm install
+npm run ios       # iOS simulator
+npm run android   # Android emulator
+npm run verify    # full verification
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+## Structure
 
-### Other setup steps
+```text
+src/app/      screens and navigation
+src/ui/       components that render
+src/state/    match session and undo
+src/data/     database and repositories
+src/domain/   rules of the regulations, pure
+src/i18n/     Spanish texts
+specs/        one folder per spec
+docs/         constitution, architecture, security and decisions
+.agents/      agent roles and templates
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Licence
 
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+No licence: the code is public to read, but all rights are reserved.
