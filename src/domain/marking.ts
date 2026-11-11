@@ -1,5 +1,10 @@
 // Marking the grid: what a tap on a cell does (RF-044 to RF-051, RF-055).
-import { isRuleWindowColumn } from "@/domain/column";
+import {
+  columnKey,
+  gridColumns,
+  isRuleWindowColumn,
+  type Column,
+} from "@/domain/column";
 import { MAX_STARTERS_PER_PERIOD } from "@/domain/format";
 import {
   cellExists,
@@ -8,6 +13,7 @@ import {
   hasSub,
   starterCount,
   type Cell,
+  type CallUpEntryId,
   type Mark,
   type MatchGrid,
 } from "@/domain/grid";
@@ -48,4 +54,45 @@ export function tapCell(grid: MatchGrid, cell: Cell): MarkingResult {
     case "sub":
       return { kind: "changed", grid: withoutMark(grid, cell) };
   }
+}
+
+// Answer "sub" (RF-046): a circled X; the period keeps its X.
+export function markSub(grid: MatchGrid, cell: Cell): MatchGrid {
+  if (!cellExists(grid, cell)) return grid;
+  return withMark(grid, cell, "sub");
+}
+
+// The entries with an X in the column, in call-up order (RF-047).
+export function replaceableStarters(
+  grid: MatchGrid,
+  column: Column,
+): readonly CallUpEntryId[] {
+  const key = columnKey(column);
+  const inGrid = gridColumns(grid.format, grid.overtimeCount).some(
+    (gridColumn) => columnKey(gridColumn) === key,
+  );
+  if (!inGrid) return [];
+  return grid.callUp
+    .filter(
+      (entry) => cellState(grid, { entryId: entry.id, column }) === "starter",
+    )
+    .map((entry) => entry.id);
+}
+
+// Answer "starter" (RF-047): the tapped cell takes an X and the chosen X is emptied.
+export function replaceStarter(
+  grid: MatchGrid,
+  cell: Cell,
+  replaced: CallUpEntryId,
+): MatchGrid {
+  if (!cellExists(grid, cell)) return grid;
+  const replacedCell: Cell = { entryId: replaced, column: cell.column };
+  if (cellState(grid, replacedCell) !== "starter") return grid;
+  return withMark(withoutMark(grid, replacedCell), cell, "starter");
+}
+
+// "Remove anyway" (RF-054): empties the cell; circled Xs stay as they are.
+export function removeMark(grid: MatchGrid, cell: Cell): MatchGrid {
+  if (!cellExists(grid, cell)) return grid;
+  return withoutMark(grid, cell);
 }
