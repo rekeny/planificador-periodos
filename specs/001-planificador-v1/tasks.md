@@ -245,7 +245,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US3 · Undo (domain)
 
-- [ ] **T018** · Undo history: cell changes, pruning and revert with skipped cells (RF-055, RF-057, RF-086, E-026, E-031)
+- [x] **T018** · Undo history: cell changes, pruning and revert with skipped cells (RF-055, RF-057, RF-086, E-026, E-031)
   - Layer and files: domain · `src/domain/undo.ts`, test.
   - Done when: `cellChanges` and `undoEntryFor` list exactly the cells whose state differs; `pruneHistory` drops missing cells and empty entries; `undoLast` reverts the last entry with a surviving cell, discards the entries with none on the same press, and never produces 6 X.
   - Scenarios:
