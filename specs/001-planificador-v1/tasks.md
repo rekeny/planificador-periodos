@@ -12,7 +12,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## Setup
 
-- [ ] **T001** · Traceability script: three-digit global IDs, duplicate IDs across specs detected, spec "In progress"
+- [x] **T001** · Traceability script: three-digit global IDs, duplicate IDs across specs detected, spec "In progress"
   - Layer and files: tooling · `scripts/check-traceability.mjs`, `tests/scripts/check-traceability.test.ts`, `specs/001-planificador-v1/spec.md` (status "In progress").
   - Done when: the script reads `RF-\d{3}` and `E-\d{3}`, fails with a clear message when one ID is defined in two `spec.md` files, still ignores "retired" lines for coverage but counts them for duplicates; the spec status is "In progress"; the test runs the script against fixtures created at run time and `verify.sh` is green.
   - Scenarios:

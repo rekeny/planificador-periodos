@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Traceability check. Every requirement (RF-NNN) and example (E-NN) of a completed task must appear
+// Traceability check. Every requirement (RF-NNN) and example (E-NNN) of a completed task must appear
 // in at least one test name. When a spec is closed, every requirement and example it defines must.
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const ID_PATTERN = /\b(?:RF-\d{3}|E-\d{2})\b/g;
+const ID_PATTERN = /\b(?:RF-\d{3}|E-\d{3})\b/g;
 const TEST_FILE_PATTERN = /\.test\.tsx?$|\.ya?ml$/;
 const TEST_ROOTS = ["src", "tests", "e2e"];
 const SPECS_DIR = "specs";
@@ -31,16 +31,16 @@ function completedTaskIds(tasksText) {
   return idsIn(lines.join("\n"));
 }
 
+// Every ID a spec defines, with whether its line is marked as retired.
 function definedIds(specText) {
-  const ids = new Set();
+  const defined = new Map();
   for (const line of specText.split("\n")) {
-    if (/retired/i.test(line)) continue;
     const id =
       line.match(/^\s*-\s*\*\*(RF-\d{3})\*\*/)?.[1] ??
-      line.match(/^\|\s*(E-\d{2})\s*\|/)?.[1];
-    if (id) ids.add(id);
+      line.match(/^\|\s*(E-\d{3})\s*\|/)?.[1];
+    if (id) defined.set(id, /retired/i.test(line) && defined.get(id) !== false);
   }
-  return ids;
+  return defined;
 }
 
 // Only the names of executable tests count: comments and empty `describe` blocks prove nothing.
@@ -74,14 +74,26 @@ const specDirs = existsSync(SPECS_DIR)
   : [];
 
 const problems = [];
+const foldersById = new Map();
 for (const dir of specDirs) {
   const spec = readIfExists(join(dir, "spec.md"));
+  const defined = definedIds(spec);
+  for (const id of defined.keys()) {
+    foldersById.set(id, [...(foldersById.get(id) ?? []), dir]);
+  }
   const isClosed = /\*\*Status:\*\*\s*Closed/i.test(spec);
   const required = isClosed
-    ? definedIds(spec)
+    ? new Set([...defined].filter(([, retired]) => !retired).map(([id]) => id))
     : completedTaskIds(readIfExists(join(dir, "tasks.md")));
   const untested = [...required].filter((id) => !testedIds.has(id)).sort();
   if (untested.length > 0) problems.push(`${dir}: ${untested.join(", ")}`);
+}
+for (const [id, folders] of [...foldersById].sort()) {
+  if (folders.length > 1) {
+    problems.push(
+      `${id} is defined in more than one spec: ${folders.join(", ")}`,
+    );
+  }
 }
 
 if (problems.length > 0) {
