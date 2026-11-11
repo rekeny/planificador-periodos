@@ -61,6 +61,11 @@ const boundaryRules = [
     allow: { to: { element: { type: LAYERS } } },
   },
   { from: { file: { categories: "test" } }, allow: { to: ANY_PACKAGE } },
+  // ... and the helpers under tests/ (generators, such as tests/support/grid-arbitraries.ts).
+  {
+    from: { file: { categories: "test" } },
+    allow: { to: { file: { categories: "test" } } },
+  },
 ];
 
 module.exports = defineConfig([

@@ -273,7 +273,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: E-013 remove anyway; E-007's row has no subs and P5 and P6 empty, exactly as the spec states, so "only «!» on P5" does not depend on how the test fills the grid.
   - Pending: nothing.
 
-- [ ] **T020** · Properties on random grids: warnings deterministic and justified, counter identity (RF-060, RF-061, RF-070, RF-071, RF-072)
+- [x] **T020** · Properties on random grids: warnings deterministic and justified, counter identity (RF-060, RF-061, RF-070, RF-071, RF-072)
   - Layer and files: domain tests · `src/domain/grid.properties.test.ts`, `tests/support/grid-arbitraries.ts` (random grids of the three formats, 0 to 15 players and 0 to 3 overtimes; it lives in `tests/` because files in `src/domain/` that are not tests may not import fast-check).
   - Done when: the grid properties of `plan.md` hold for 1,000 random cases each in normal runs: `evaluateWarnings` is deterministic and every warning it reports is justified, and played + rested + circled X equals the number of columns for every player; the separate example of a complete 8-period window with 12 players and no sub reports nothing.
   - Scenarios:
