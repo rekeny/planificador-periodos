@@ -217,7 +217,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: removing Ana with marks (E-017) → `entryHasMarks` true; after removal no cell of Ana remains.
   - Pending: nothing.
 
-- [ ] **T016** · Format change (RF-038, RF-040, RF-041, RF-055, E-016)
+- [x] **T016** · Format change (RF-038, RF-040, RF-041, RF-055, E-016)
   - Layer and files: domain · `src/domain/format-change.ts`, test.
   - Done when: `changeFormat` keeps marks of the periods that still exist, drops the rest, keeps overtimes with their marks after the new last period, in any direction; the same format returns the same grid.
   - Scenarios:
