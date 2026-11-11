@@ -22,6 +22,7 @@ export type MarkingResult =
   | { readonly kind: "changed"; readonly grid: MatchGrid }
   | { readonly kind: "unchanged" }
   | { readonly kind: "askSubOrStarter" } //       RF-045
+  | { readonly kind: "chooseReplacedStarter" } // RF-047 after "starter", RF-053
   | { readonly kind: "confirmRemoveStarter" }; // RF-050 reminder
 
 function withMark(grid: MatchGrid, cell: Cell, mark: Mark): MatchGrid {
@@ -60,6 +61,12 @@ export function tapCell(grid: MatchGrid, cell: Cell): MarkingResult {
 export function markSub(grid: MatchGrid, cell: Cell): MatchGrid {
   if (!cellExists(grid, cell)) return grid;
   return withMark(grid, cell, "sub");
+}
+
+// Long-press choice "starter" (RF-052): the cell takes an X.
+export function markStarter(grid: MatchGrid, cell: Cell): MatchGrid {
+  if (!cellExists(grid, cell)) return grid;
+  return withMark(grid, cell, "starter");
 }
 
 // The entries with an X in the column, in call-up order (RF-047).

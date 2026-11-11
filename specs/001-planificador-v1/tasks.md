@@ -122,7 +122,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: the replaced cell becomes empty, never a circled X.
   - Pending: nothing.
 
-- [ ] **T009** · Long-press menu (RF-052, RF-053, RF-054)
+- [x] **T009** · Long-press menu (RF-052, RF-053, RF-054)
   - Layer and files: domain · `src/domain/cell-menu.ts`, test.
   - Done when: `canOpenCellMenu` is false on empty cells; each choice gives the result of RF-052 and RF-053; choosing the current state returns `unchanged`.
   - Scenarios:
