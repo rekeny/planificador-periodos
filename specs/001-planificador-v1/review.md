@@ -205,6 +205,26 @@ Full file: [codex-review.md](codex-review.md)
 | #   | Finding | File | Severity | Status |
 | --- | ------- | ---- | -------- | ------ |
 
+## D1 · Codex review
+
+Run: `scripts/review.sh specs/001-planificador-v1` at commit `9f243e3` (branch `claude/delivery-d1-planificador-108011` against `main`), 2026-11-12 00:09. Full output: [codex-review.md](codex-review.md).
+
+| #     | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | File                                                                                                                 | Severity (Codex) | Classification                                                         | Status |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------- | ------ |
+| D1-01 | The planned `addToCallUp(grid, entry)` (new empty row, order kept, RF-042) is not implemented in `src/domain/`. The test builds the re-added row by hand (`[newEntry, ...removed.callUp]`), so it passes without the operation and cannot detect a wrong insertion order (RF-032, RF-042). Fix: implement the function, keeping marks and inserting in `comparePlayers` order; cover insertion between rows, equal shirt numbers, re-addition and a thirteenth player through the sequence and property tests. | `src/domain/call-up.remove.sequences.test.ts:76`; missing function expected at `src/domain/call-up.ts` (plan.md:376) | Important        | Open. Classification to be decided by the orchestrator (see questions) | Open   |
+
+Codex found no BLOCKING or MINOR findings. Its category results: RF/E implementation and scope (only D1-01; D2/D3 deferred), constitution, layers, conventions and glossary (no findings), test integrity (none deleted, skipped or weakened), security (no findings), explanation accuracy (no contradictions), simplicity (no findings).
+
+Codex's checks: TypeScript, ESLint, formatting, traceability and diff whitespace passed; 943 domain cases passed through an in-memory runner. Standard Jest was blocked by cache writes in the read-only sandbox, so coverage, mutation testing and full verification were not confirmed by Codex.
+
+### D1 · Out of delivery
+
+None. Codex reported no finding about D2 or D3 requirements (screens, database, i18n texts, device-only IDs).
+
+### D1 · Notes for the orchestrator
+
+- `summary.md` does not exist yet and the Verification section above is still a placeholder. Codex mentions both, and they belong to T023, not to a code finding.
+
 ## Security (phase 8)
 
 | #   | Finding | Severity | Status |
