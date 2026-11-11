@@ -105,17 +105,43 @@ The interface never computes rules.
 
 The app is in Spanish, so the first column shows the words the user sees.
 
-| In the app (Spanish)                        | Meaning                                     | In the code                    |
-| ------------------------------------------- | ------------------------------------------- | ------------------------------ |
-| Equipo                                      | Team                                        | `Team`                         |
-| Jugador, dorsal, activo                     | Player, shirt number, active                | `Player`, `number`, `isActive` |
-| Partido, convocatoria                       | Match, call-up (players picked for a match) | `Match`, `CallUp`              |
-| Variante (4, 6 u 8 periodos)                | Format (4, 6 or 8 periods)                  | `Format`                       |
-| Periodo, prórroga                           | Period, overtime                            | `Period`, `Overtime`           |
-| Tramo con regla                             | Window of periods with a rule               | `RuleWindow`                   |
-| Marca: titular (X) o cambio (X con círculo) | Mark: starter (X) or substitute (circled X) | `Mark`: `starter` or `sub`     |
-| Jugado, descansado                          | Played, rested                              | `played`, `rested`             |
-| Aviso                                       | Warning                                     | `Warning`                      |
+| In the app (Spanish)                        | Meaning                                                         | In the code                                                       |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Equipo                                      | Team                                                            | `Team`                                                            |
+| Jugador, dorsal, activo                     | Player, shirt number, active                                    | `Player`, `number`, `isActive`                                    |
+| Partido, convocatoria                       | Match, call-up (players picked for a match)                     | `Match`, `CallUp`                                                 |
+| Variante (4, 6 u 8 periodos)                | Format (4, 6 or 8 periods)                                      | `Format`                                                          |
+| Periodo, prórroga                           | Period, overtime                                                | `Period`, `Overtime`                                              |
+| Tramo con regla                             | Window of periods with a rule                                   | `RuleWindow`                                                      |
+| Marca: titular (X) o cambio (X con círculo) | Mark: starter (X) or substitute (circled X)                     | `Mark`: `starter` or `sub`                                        |
+| Jugado, descansado                          | Played, rested                                                  | `played`, `rested`                                                |
+| Aviso                                       | Warning                                                         | `Warning`                                                         |
+| —                                           | The data of a format: periods, rule window, call-up range       | `FormatRules`, `FORMAT_RULES`                                     |
+| Periodo libre                               | A period after the rule window, or an overtime                  | `isRuleWindowColumn(...) === false`                               |
+| Cuadrícula                                  | Players in rows, periods and overtimes in columns               | `MatchGrid`                                                       |
+| —                                           | A period or overtime column of the grid, and its key            | `Column`, `ColumnKey`                                             |
+| Casilla, casillas vacías                    | One player in one column; a cell with no mark                   | `Cell`, `CellKey`, `CellState` `"empty"`                          |
+| —                                           | A player's line in a match's call-up, with name and number kept | `CallUpEntry`, `CallUpEntryId`                                    |
+| Casilla en rojo claro                       | Cell that should not be marked                                  | `lightRedCells`                                                   |
+| Jugador en rojo                             | Player breaking a minimum of the rule window                    | `playersInRed`                                                    |
+| Contador                                    | Played and rested over the whole match                          | `PlayerCounter`                                                   |
+| Categoría                                   | Free-text category of a team                                    | `category`                                                        |
+| Variante por defecto                        | Format of a team's new matches                                  | `defaultFormat`                                                   |
+| Local, visitante                            | Names of the two sides                                          | `homeName`, `awayName`                                            |
+| Resultado final                             | Optional points of each side                                    | `homeScore`, `awayScore`                                          |
+| Notas                                       | Free text of a match                                            | `notes`                                                           |
+| Desactivado                                 | Player not offered in new call-ups                              | `isActive: false`                                                 |
+| Periodo incompleto                          | Rule-window period with fewer than 5 X                          | `PeriodWarning` `"incomplete"`                                    |
+| Periodo incoherente                         | Period with a sub and fewer than 5 X                            | `PeriodWarning` `"inconsistent"`                                  |
+| Regla imposible de cumplir                  | No filling of the rule window meets everyone's minimums         | `isRuleImpossible`, `ruleImpossible`                              |
+| Rango de convocatoria                       | Allowed number of players in the call-up                        | `callUpMin`, `callUpMax`, `CallUpRangeWarning`                    |
+| Dorsal repetido                             | Two active players of a team with the same number               | `duplicateNumbers`                                                |
+| Descansos posibles                          | A player's empty cells in the rule window                       | `possibleRests`                                                   |
+| —                                           | Every warning of a grid at once                                 | `Warnings`                                                        |
+| Leyenda                                     | List under the general warning explaining the visible marks     | `LegendItem`, `legendItems`                                       |
+| Titular en lugar de otro                    | Starter replacing someone else's X                              | `replaceStarter`                                                  |
+| Deshacer                                    | Revert the last mark change                                     | `undoLast`, `UndoEntry`, `CellChange`                             |
+| —                                           | What state publishes for a screen to draw                       | `MatchView`, `RowView`, `ColumnView`, `CellView`, `MatchListItem` |
 
 A new concept is added here before it is used in the code.
 

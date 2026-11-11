@@ -40,7 +40,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## Formats (US4 base)
 
-- [ ] **T003** · Glossary terms, formats as data, columns and rule window (RF-001, RF-002, RF-003, RF-004, RF-005, RF-006)
+- [x] **T003** · Glossary terms, formats as data, columns and rule window (RF-001, RF-002, RF-003, RF-004, RF-005, RF-006, RF-042, RF-055)
   - Layer and files: domain and docs · `docs/architecture.md` (glossary, the table "Glossary additions" of `plan.md`), `src/domain/format.ts`, `src/domain/column.ts`, tests next to them.
   - Done when: the glossary has every new term; `FORMAT_RULES` holds the table of RF-002–RF-005 as data, `FORMATS` is exactly `[4, 6, 8]`, `gridColumns` gives periods then overtimes, `isRuleWindowColumn` is true only for P1–P3, P1–P5 and P1–P6 respectively; tests green.
   - Scenarios:
