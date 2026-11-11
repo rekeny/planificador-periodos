@@ -230,7 +230,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: overtime marks never lost on a format change.
   - Pending: nothing.
 
-- [ ] **T017** · Duplicate-number warning (RF-017, RF-069)
+- [x] **T017** · Duplicate-number warning (RF-017, RF-069)
   - Layer and files: domain · `src/domain/duplicate-numbers.ts`, test.
   - Done when: `duplicateNumbers` returns each number shared by two or more active players, once, and never rejects a player.
   - Scenarios:
