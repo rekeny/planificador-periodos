@@ -61,7 +61,7 @@ if [ -f drizzle.config.ts ]; then
 fi
 
 step "Expo Doctor"
-npx expo-doctor
+npx expo-doctor@1.21.6
 
 if domain_has_code && { [ "${FORCE_MUTATION:-0}" = "1" ] || domain_changed; }; then
   step "Mutation testing"

@@ -37,6 +37,6 @@ Write the review in English. If a category has no findings, say so."
   printf '# Codex review\n\n- Date: %s\n- Branch: %s against %s\n- Commit: %s\n\n' \
     "$(date '+%Y-%m-%d %H:%M')" "$(git branch --show-current)" "$base" "$(git rev-parse --short HEAD)"
   # `codex review --base` does not accept custom instructions, so `codex exec` runs the review read-only.
-  codex exec --sandbox read-only "$instructions
-Use \`git diff $base...HEAD\` to see the changes of the branch." 
+  codex exec --sandbox read-only -c model="gpt-6.1-sol" -c model_reasoning_effort="high" "$instructions
+Use \`git diff $base...HEAD\` to see the changes of the branch."
 } | tee "$output"
