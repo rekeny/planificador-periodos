@@ -1,1 +1,1 @@
-Capa de interfaz: componentes que pintan. No calcula reglas ni accede a datos. Ver docs/architecture.md, «Capas».
+Interface layer: components that render. It computes no rules and does not access data. See docs/architecture.md, "Layers".

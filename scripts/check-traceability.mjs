@@ -34,7 +34,7 @@ function completedTaskIds(tasksText) {
 function definedIds(specText) {
   const ids = new Set();
   for (const line of specText.split("\n")) {
-    if (/retirado/i.test(line)) continue;
+    if (/retired/i.test(line)) continue;
     const id =
       line.match(/^\s*-\s*\*\*(RF-\d{3})\*\*/)?.[1] ??
       line.match(/^\|\s*(E-\d{2})\s*\|/)?.[1];
@@ -76,7 +76,7 @@ const specDirs = existsSync(SPECS_DIR)
 const problems = [];
 for (const dir of specDirs) {
   const spec = readIfExists(join(dir, "spec.md"));
-  const isClosed = /\*\*Estado:\*\*\s*Cerrada/i.test(spec);
+  const isClosed = /\*\*Status:\*\*\s*Closed/i.test(spec);
   const required = isClosed
     ? definedIds(spec)
     : completedTaskIds(readIfExists(join(dir, "tasks.md")));

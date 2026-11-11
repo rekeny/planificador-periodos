@@ -1,1 +1,1 @@
-Capa de estado: sesión del partido y deshacer. Usa el dominio y los repositorios. Ver docs/architecture.md, «Capas».
+State layer: match session and undo. Uses the domain and the repositories. See docs/architecture.md, "Layers".

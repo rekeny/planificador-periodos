@@ -28,13 +28,13 @@ Review the changes of this branch against $base and check that:
 2. The constitution, the layer rules, the conventions and the glossary are respected.
 3. No test was deleted, skipped or weakened, and the tests would fail if the behaviour were wrong.
 4. Security holds: no network calls, no player data in logs, parameterised queries only, justified dependencies and permissions.
-5. The explanations in resumen.md and in the task reports match what the diff really does.
+5. The explanations in summary.md and in the task reports match what the diff really does.
 6. The code is simple, clear and efficient, without speculative generality.
-Classify each finding as BLOQUEANTE, IMPORTANTE or MENOR, with file, line and a concrete fix.
-Write the review in Spanish. If a category has no findings, say so."
+Classify each finding as BLOCKING, IMPORTANT or MINOR, with file, line and a concrete fix.
+Write the review in English. If a category has no findings, say so."
 
 {
-  printf '# Revisión de Codex\n\n- Fecha: %s\n- Rama: %s contra %s\n- Commit: %s\n\n' \
+  printf '# Codex review\n\n- Date: %s\n- Branch: %s against %s\n- Commit: %s\n\n' \
     "$(date '+%Y-%m-%d %H:%M')" "$(git branch --show-current)" "$base" "$(git rev-parse --short HEAD)"
   # `codex review --base` does not accept custom instructions, so `codex exec` runs the review read-only.
   codex exec --sandbox read-only "$instructions

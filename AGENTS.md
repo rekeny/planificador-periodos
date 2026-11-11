@@ -1,166 +1,165 @@
 # AGENTS.md · Planificador de periodos
 
-Reglas para cualquier agente o persona que trabaje en este repositorio, con cualquier herramienta o modelo. Si una herramienta necesita su propio fichero de instrucciones, como `CLAUDE.md`, ese fichero solo importa este: aquí no hay reglas exclusivas de ninguna herramienta.
+Rules for any agent or person working in this repository, with any tool or model. If a tool needs its own instructions file, such as `CLAUDE.md`, that file only imports this one: there are no rules here that belong to a single tool.
 
-## El proyecto
+## The project
 
-App para iOS y Android, en móvil y tablet, que ayuda a entrenadores de baloncesto de formación a planificar en qué periodos juega cada jugador. Avisa de los incumplimientos de la normativa de cada variante (4, 6 u 8 periodos). Funciona sin conexión, guarda todo en el dispositivo, está en castellano y nunca bloquea al entrenador, salvo el límite de 5 X por periodo.
+An iOS and Android app, for phones and tablets, that helps youth basketball coaches plan which periods each player plays. It warns about breaches of the rules of each format (4, 6 or 8 periods). It works offline, stores everything on the device, is in Spanish and never blocks the coach, except for the limit of 5 X per period.
 
-## Antes de nada, lee
+## Before anything else, read
 
-1. Este fichero.
-2. `docs/constitution.md`: los principios que no se negocian.
-3. `docs/architecture.md`: el stack, las capas, las convenciones y el glosario.
-4. La especificación afectada, en `specs/NNN-nombre/`.
-5. Tu rol en `.agents/roles/`, si actúas como uno.
+1. This file.
+2. `docs/constitution.md`: the non-negotiable principles.
+3. `docs/architecture.md`: the stack, the layers, the conventions and the glossary.
+4. The affected spec, in `specs/NNN-name/`.
+5. Your role in `.agents/roles/`, if you act as one.
 
-## Idiomas
+## Languages
 
-- **Código en inglés:** identificadores, comentarios, nombres de pruebas, mensajes de los scripts y nombres de ficheros de código.
-- **Commits en inglés:** el título y el cuerpo del mensaje, para que el historial lo entienda cualquiera (ADR-003).
-- **Castellano en todo lo demás:** documentación, especificaciones, PR y explicaciones al desarrollador.
-- **Textos de la interfaz:** solo en `src/i18n/es.json`, nunca escritos en el código.
-- Los nombres del dominio salen siempre del glosario de `docs/architecture.md`.
+- **English in the repository:** code, identifiers, comments, test names, script messages, file names, commits, documentation, specs, ADRs, reports and PRs (ADR-003).
+- **Spanish in the app:** the user interface texts live only in `src/i18n/es.json`, never written in the code.
+- **Spanish in the chat:** explanations and questions to the developer are given in the conversation in Spanish; what is saved in the repository is written in English.
+- Domain names always come from the glossary in `docs/architecture.md`.
 
-## Cómo pedir trabajo
+## How to ask for work
 
-- **Grande:** «Nueva especificación: <petición>». El orquestador lanza el Especificador.
-- **Medio:** «Cambio en specs/NNN: <petición>». El orquestador actualiza la especificación con el Especificador y sigue desde la fase 3.
-- **Pequeño:** «Cambio pequeño: <petición>». El orquestador rellena la ficha breve y espera la aprobación.
+- **Large:** "New spec: <request>". The orchestrator launches the Specifier.
+- **Medium:** "Change in specs/NNN: <request>". The orchestrator updates the spec with the Specifier and continues from phase 3.
+- **Small:** "Small change: <request>". The orchestrator fills in the short form and waits for approval.
 
-## Niveles de cambio
+## Change levels
 
-Antes de tocar nada, declara el nivel. En caso de duda, sube un nivel. Ningún nivel toca código sin la aprobación del desarrollador.
+Before touching anything, declare the level. When in doubt, go one level up. No level touches code without the developer's approval.
 
-| Nivel   | Ejemplos                                                                          | Fases obligatorias                                                                                                 |
-| ------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Pequeño | Corregir un texto, un color o un fallo sin cambiar el comportamiento especificado | Ficha breve aprobada (`.agents/templates/small-change.md`) → Pruebas → Implementar → Verificar → Revisión de Codex |
-| Medio   | Cambiar algo que ya existe                                                        | Actualizar la especificación y seguir el flujo desde la fase 3                                                     |
-| Grande  | Funcionalidad nueva                                                               | Flujo completo, con una carpeta nueva en `specs/`                                                                  |
+| Level  | Examples                                                               | Mandatory phases                                                                                      |
+| ------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Small  | Fix a text, a colour or a bug without changing the specified behaviour | Approved short form (`.agents/templates/small-change.md`) → Tests → Implement → Verify → Codex review |
+| Medium | Change something that already exists                                   | Update the spec and follow the flow from phase 3                                                      |
+| Large  | New feature                                                            | Full flow, with a new folder in `specs/`                                                              |
 
-- Todo lo que toque `src/domain/` es, como mínimo, de nivel medio.
-- El revisor puede reclasificar el nivel.
+- Anything that touches `src/domain/` is at least medium.
+- The reviewer may reclassify the level.
 
-## Flujo de trabajo
+## Workflow
 
-| #   | Fase               | Rol                                                 | Entrega                                                                              | Control para avanzar                                                                       |
-| --- | ------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| 1   | Especificar        | Especificador                                       | `spec.md` con historias, requisitos RF y ejemplos E; cada hueco marcado `[DUDA]`     | —                                                                                          |
-| 2   | Aclarar            | Aclarador                                           | `spec.md` sin `[DUDA]`, con las respuestas anotadas y fechadas                       | El desarrollador ha respondido todas las dudas                                             |
-| 3   | Planificar         | Planificador                                        | `plan.md`, que empieza con la explicación «antes», y `tasks.md`                      | —                                                                                          |
-| 4   | Analizar y aprobar | Revisor y desarrollador                             | Análisis de consistencia en `review.md`; aprobación anotada en `spec.md` y `plan.md` | **El desarrollador aprueba la especificación y el plan. Hasta aquí no se toca el código.** |
-| 5   | Diseñar pruebas    | Diseñador de pruebas                                | Escenarios de cada tarea en `tasks.md`                                               | Cada criterio de aceptación tiene escenarios                                               |
-| 6   | Implementar        | Diseñador de pruebas e Implementador, tarea a tarea | Por cada tarea: pruebas en rojo, código, verificación en verde y commit              | `scripts/verify.sh` en verde                                                               |
-| 7   | Verificar          | Verificador                                         | Salida de la verificación en `review.md`                                             | Todo en verde                                                                              |
-| 8   | Revisar            | Revisor (Codex) y Seguridad                         | Hallazgos en `review.md`                                                             | Ningún hallazgo bloqueante                                                                 |
-| 9   | Cerrar             | Desarrollador                                       | Prueba en el dispositivo, `resumen.md` y PR fusionada                                | El desarrollador acepta el resultado                                                       |
+| #   | Phase               | Role                                        | Deliverable                                                                        | Gate to move on                                                                         |
+| --- | ------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 1   | Specify             | Specifier                                   | `spec.md` with stories, RF requirements and E examples; every gap marked `[DOUBT]` | —                                                                                       |
+| 2   | Clarify             | Clarifier                                   | `spec.md` without `[DOUBT]`, with the answers recorded and dated                   | The developer has answered every doubt                                                  |
+| 3   | Plan                | Planner                                     | `plan.md`, starting with the "before" explanation, and `tasks.md`                  | —                                                                                       |
+| 4   | Analyse and approve | Reviewer and developer                      | Consistency analysis in `review.md`; approval recorded in `spec.md` and `plan.md`  | **The developer approves the spec and the plan. No code is touched before this point.** |
+| 5   | Design tests        | Test designer                               | Scenarios for each task in `tasks.md`                                              | Every acceptance criterion has scenarios                                                |
+| 6   | Implement           | Test designer and Implementer, task by task | For each task: red tests, code, green verification and commit                      | `scripts/verify.sh` green                                                               |
+| 7   | Verify              | Verifier                                    | Verification output in `review.md`                                                 | All green                                                                               |
+| 8   | Review              | Reviewer (Codex) and Security               | Findings in `review.md`                                                            | No blocking finding                                                                     |
+| 9   | Close               | Developer                                   | Device test, `summary.md` and merged PR                                            | The developer accepts the result                                                        |
 
-**Vueltas atrás.** Si el desarrollador no aprueba en la fase 4, se corrige el plan (fase 3). Si la verificación falla o hay un hallazgo bloqueante en la fase 8, se vuelve a implementar (fase 6). Un cambio pequeño entra en la fase 5 con su ficha aprobada; uno medio entra en la 3.
+**Going back.** If the developer does not approve in phase 4, the plan is fixed (phase 3). If verification fails or there is a blocking finding in phase 8, implementation starts again (phase 6). A small change enters phase 5 with its approved form; a medium one enters phase 3.
 
-**Ciclo de cada tarea en la fase 6.**
+**Cycle of each task in phase 6.**
 
-1. El Diseñador de pruebas escribe las pruebas de la tarea a partir de sus escenarios y comprueba que fallan por el motivo correcto.
-2. El Implementador escribe el código mínimo para que pasen y ejecuta `scripts/verify.sh`.
-3. Un solo commit recoge las pruebas y el código.
+1. The Test designer writes the task's tests from its scenarios and checks that they fail for the right reason.
+2. The Implementer writes the minimum code to make them pass and runs `scripts/verify.sh`.
+3. A single commit holds the tests and the code.
 
-Así las pruebas siempre van antes que el código y la rama nunca acumula pruebas en rojo.
+This way tests always come before code and the branch never piles up red tests.
 
 ## Roles
 
-| Rol                  | Fichero                          | Fases                 |
-| -------------------- | -------------------------------- | --------------------- |
-| Especificador        | `.agents/roles/specifier.md`     | 1                     |
-| Aclarador            | `.agents/roles/clarifier.md`     | 2                     |
-| Planificador         | `.agents/roles/planner.md`       | 3                     |
-| Diseñador de pruebas | `.agents/roles/test-designer.md` | 5 y 6                 |
-| Implementador        | `.agents/roles/implementer.md`   | 6                     |
-| Verificador          | `.agents/roles/verifier.md`      | 7                     |
-| Revisor              | `.agents/roles/reviewer.md`      | 4 y 8                 |
-| Seguridad            | `.agents/roles/security.md`      | 8 y antes de publicar |
+| Role          | File                             | Phases                  |
+| ------------- | -------------------------------- | ----------------------- |
+| Specifier     | `.agents/roles/specifier.md`     | 1                       |
+| Clarifier     | `.agents/roles/clarifier.md`     | 2                       |
+| Planner       | `.agents/roles/planner.md`       | 3                       |
+| Test designer | `.agents/roles/test-designer.md` | 5 and 6                 |
+| Implementer   | `.agents/roles/implementer.md`   | 6                       |
+| Verifier      | `.agents/roles/verifier.md`      | 7                       |
+| Reviewer      | `.agents/roles/reviewer.md`      | 4 and 8                 |
+| Security      | `.agents/roles/security.md`      | 8 and before publishing |
 
-- La sesión principal hace de **orquestador**: lanza cada rol en su fase, le pasa solo lo que necesita y no avanza si el control de la fase no está superado.
-- Los roles no hablan con el desarrollador: devuelven sus preguntas al orquestador, que es quien pregunta.
-- En Claude Code, cada rol es un subagente de `.claude/agents/`. En otras herramientas, se pega el fichero del rol como prompt.
-- Quien escribe algo no lo revisa.
+- The main session acts as the **orchestrator**: it launches each role in its phase, passes it only what it needs and does not move on if the phase gate is not met.
+- Roles do not talk to the developer: they return their questions to the orchestrator, who asks them.
+- In Claude Code, each role is a subagent in `.claude/agents/`. In other tools, the role file is pasted as the prompt.
+- Whoever writes something does not review it.
 
-## Las 17 reglas de cada prompt
+## The 17 rules of every prompt
 
-**Al empezar**
+**When starting**
 
-1. Leer `AGENTS.md`, `docs/constitution.md` y la especificación afectada antes de proponer nada.
-2. Declarar el nivel del cambio y qué especificación y tareas toca.
-3. Si la petición contradice la especificación, parar y preguntar. La especificación manda hasta que se cambie.
-4. Explicar qué se va a hacer, cómo y por qué. No tocar código hasta que el desarrollador apruebe la especificación y el plan.
+1. Read `AGENTS.md`, `docs/constitution.md` and the affected spec before proposing anything.
+2. Declare the change level and which spec and tasks it touches.
+3. If the request contradicts the spec, stop and ask. The spec rules until it is changed.
+4. Explain what will be done, how and why. Do not touch code until the developer approves the spec and the plan.
 
-**Mientras se trabaja**
+**While working**
 
-5. Una tarea cada vez, en el orden de `tasks.md`.
-6. No inventar requisitos, datos ni comportamientos. Lo que no está escrito se pregunta y se marca `[DUDA]`.
-7. Las pruebas se escriben antes del código y cubren todo lo que puede hacer el usuario. Nadie las borra ni las debilita. Su nombre lleva el ID del requisito y del ejemplo.
-8. Las reglas de la normativa solo viven en `src/domain/`. La interfaz no calcula reglas.
-9. Los textos que ve el usuario van en `src/i18n/es.json`, nunca en el código.
-10. Ninguna dependencia nueva sin anotarla en `plan.md` con su motivo.
-11. No cambiar la constitución ni la arquitectura sin un ADR aprobado.
-12. Respetar las capas, las convenciones y el glosario de `docs/architecture.md`.
+5. One task at a time, in the order of `tasks.md`.
+6. Do not invent requirements, data or behaviour. Whatever is not written down is asked and marked `[DOUBT]`.
+7. Tests are written before the code and cover everything the user can do. Nobody deletes or weakens them. Their name carries the requirement and example ID.
+8. The rules of the regulations live only in `src/domain/`. The interface does not compute rules.
+9. The texts the user sees go in `src/i18n/es.json`, never in the code.
+10. No new dependency without recording it in `plan.md` with its reason.
+11. Do not change the constitution or the architecture without an approved ADR.
+12. Respect the layers, the conventions and the glossary in `docs/architecture.md`.
 
-**Al terminar**
+**When finishing**
 
-13. `scripts/verify.sh` en verde, con la salida adjunta. Sin esa salida, la tarea no está hecha.
-14. Un commit por tarea, en inglés, con el formato `T012 RF-018: description`.
-15. Marcar la tarea en `tasks.md` y anotar lo que quede pendiente.
-16. Quien implementó no revisa. La revisión del código la hace Codex con `scripts/review.sh`, y el rol de Seguridad audita si el cambio toca dependencias, datos, navegación o configuración.
-17. Terminar con el informe de qué se ha hecho, cómo y por qué, y guardarlo también en `resumen.md`.
+13. `scripts/verify.sh` green, with its output attached. Without that output, the task is not done.
+14. One commit per task, with the format `T012 RF-018: description`.
+15. Tick the task in `tasks.md` and record what is left pending.
+16. Whoever implemented does not review. The code review is done by Codex with `scripts/review.sh`, and the Security role audits if the change touches dependencies, data, navigation or configuration.
+17. Finish with the report of what was done, how and why, and also save it in `summary.md`.
 
-## Explicaciones antes y después
+## Explanations before and after
 
-El desarrollador usa este proyecto para aprender. Cada implementación se explica dos veces, en lenguaje claro.
+The developer uses this project to learn. Every implementation is explained twice, in plain language.
 
-|                  | Antes de ejecutar                                                         | Después de ejecutar                          |
-| ---------------- | ------------------------------------------------------------------------- | -------------------------------------------- |
-| Dónde            | Al principio de `plan.md` y en el chat, junto a la petición de aprobación | En el chat y en `resumen.md`                 |
-| Qué              | Qué se va a hacer, en dos o tres frases                                   | Qué se ha hecho y qué cambia para el usuario |
-| Cómo             | Pasos y ficheros que se van a tocar                                       | Ficheros tocados y piezas nuevas             |
-| Por qué          | Por qué de esta forma y qué alternativas se descartan                     | Decisiones tomadas por el camino y su motivo |
-| Para aprender    | Conceptos de TypeScript, React o Expo que van a aparecer                  | Esos conceptos explicados con el código real |
-| Para comprobarlo | Qué tendrá que probar el desarrollador                                    | Pasos o comandos para verlo funcionando      |
-| Pendiente        | Dudas que necesitan respuesta                                             | Riesgos o tareas que quedan                  |
+|             | Before running                                                       | After running                               |
+| ----------- | -------------------------------------------------------------------- | ------------------------------------------- |
+| Where       | At the start of `plan.md` and in the chat, with the approval request | In the chat and in `summary.md`             |
+| What        | What will be done, in two or three sentences                         | What was done and what changes for the user |
+| How         | Steps and files that will be touched                                 | Files touched and new pieces                |
+| Why         | Why this way and which alternatives are discarded                    | Decisions made along the way and why        |
+| To learn    | TypeScript, React or Expo concepts that will appear                  | Those concepts explained with the real code |
+| To check it | What the developer will have to test                                 | Steps or commands to see it working         |
+| Pending     | Doubts that need an answer                                           | Risks or tasks left                         |
 
-Codex comprueba en la revisión que las explicaciones coinciden con lo que de verdad se ha hecho.
+Codex checks during the review that the explanations match what was really done.
 
-## Ramas, commits y PR
+## Branches, commits and PRs
 
-- **Ramas:** una por especificación, con el nombre de su carpeta, como `001-planificador-v1`. Los cambios pequeños usan `fix/descripcion-corta`.
-- **Commits:** uno por tarea y en inglés, como `T012 RF-018: highlight periods in light red`. Si la tarea no tiene requisito asociado: `T001: description`.
-- **`main` está protegida:** solo se fusiona por PR y con la verificación de GitHub Actions en verde. Cada PR usa la plantilla `.github/pull_request_template.md`.
-- **Fusión:** las PR se fusionan con merge commit, para conservar los commits de cada tarea.
+- **Branches:** one per spec, named after its folder, such as `001-period-planner-v1`. Small changes use `fix/short-description`.
+- **Commits:** one per task, such as `T012 RF-018: highlight periods in light red`. If the task has no requirement: `T001: description`.
+- **`main` is protected:** merges only through a PR with the GitHub Actions verification green. Every PR uses the template `.github/pull_request_template.md`.
+- **Merging:** PRs are merged with a merge commit, to keep the commits of each task.
 
-## Verificación y revisión
+## Verification and review
 
-- **`scripts/verify.sh`** (o `npm run verify`) comprueba:
-  - tipos, lint y formato;
-  - que no quedan pruebas aisladas ni saltadas;
-  - pruebas con cobertura y trazabilidad;
-  - la base de datos, cuando exista;
+- **`scripts/verify.sh`** (or `npm run verify`) checks:
+  - types, lint and formatting;
+  - that no focused or skipped tests are left;
+  - tests with coverage and traceability;
+  - the database, once it exists;
   - Expo Doctor;
-  - pruebas de mutación, si cambia `src/domain/`;
-  - dependencias, secretos y análisis estático.
+  - mutation testing, if `src/domain/` changes;
+  - dependencies, secrets and static analysis.
 
-  Lo ejecuta el agente al terminar cada tarea y GitHub Actions en cada PR. Con `FORCE_MUTATION=1`, las pruebas de mutación se ejecutan aunque no cambie el dominio.
+  The agent runs it when finishing each task, and GitHub Actions on every PR. With `FORCE_MUTATION=1`, mutation testing runs even if the domain does not change.
 
-- **`scripts/review.sh specs/NNN-nombre`** lanza la revisión de Codex de la rama contra `main` y guarda la salida en `specs/NNN-nombre/codex-review.md`. Tarda varios minutos: lánzalo con un tiempo de espera largo o en segundo plano.
-- **El desarrollador** también puede usar el plugin de Codex en Claude Code: `/codex:review --base main` y `/codex:adversarial-review --base main <enfoque>`.
+- **`scripts/review.sh specs/NNN-name`** launches the Codex review of the branch against `main` and saves the output in `specs/NNN-name/codex-review.md`. It takes several minutes: launch it with a long timeout or in the background.
+- **The developer** can also use the Codex plugin in Claude Code: `/codex:review --base main` and `/codex:adversarial-review --base main <focus>`.
 
-## Comandos
+## Commands
 
-| Comando                                                 | Para qué                                                                                       |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run ios` / `npm run android`                       | Compilar e instalar la app en el simulador o el emulador, y arrancar el servidor de desarrollo |
-| `npm start`                                             | Solo el servidor de desarrollo, con la app ya instalada                                        |
-| `npm test`                                              | Pruebas                                                                                        |
-| `npm run test:coverage`                                 | Pruebas con cobertura                                                                          |
-| `npm run test:mutation`                                 | Pruebas de mutación de `src/domain/`                                                           |
-| `npm run verify`                                        | Verificación completa                                                                          |
-| `npm run typecheck` / `npm run lint` / `npm run format` | Comprobaciones sueltas y formato                                                               |
+| Command                                                 | What for                                                                         |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `npm run ios` / `npm run android`                       | Build and install the app on the simulator or emulator, and start the dev server |
+| `npm start`                                             | Only the dev server, with the app already installed                              |
+| `npm test`                                              | Tests                                                                            |
+| `npm run test:coverage`                                 | Tests with coverage                                                              |
+| `npm run test:mutation`                                 | Mutation testing of `src/domain/`                                                |
+| `npm run verify`                                        | Full verification                                                                |
+| `npm run typecheck` / `npm run lint` / `npm run format` | Single checks and formatting                                                     |
 
 ## Expo
 

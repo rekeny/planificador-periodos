@@ -2,7 +2,7 @@
 
 ## Claude Code
 
-- La sesión principal es el orquestador del flujo de `AGENTS.md`. Lanza cada rol como subagente de `.claude/agents/`.
-- Cada subagente fija su modelo y su esfuerzo en `model` y `effort`. Al lanzarlo no se cambian, salvo que el desarrollador lo pida.
-- El rol Revisor tiene dos subagentes: `reviewer` para la fase 4 y `codex-reviewer` para la fase 8. El de la fase 8 usa Haiku porque solo lanza `scripts/review.sh` y copia los hallazgos de Codex.
-- La revisión del código no la hace Claude: se lanza con `scripts/review.sh`, que usa Codex.
+- The main session is the orchestrator of the `AGENTS.md` flow. It launches each role as a subagent from `.claude/agents/`.
+- Each subagent sets its model and effort in `model` and `effort`. They are not changed when launching it, unless the developer asks.
+- The Reviewer role has two subagents: `reviewer` for phase 4 and `codex-reviewer` for phase 8. The phase 8 one uses Haiku because it only runs `scripts/review.sh` and copies Codex's findings.
+- The code review is not done by Claude: it is launched with `scripts/review.sh`, which uses Codex.

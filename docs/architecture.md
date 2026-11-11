@@ -1,151 +1,153 @@
-# Arquitectura
+# Architecture
 
 ## Stack
 
-| Pieza         | Elección                                                                      | Para qué                                                                 | Entra en               |
-| ------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------- |
-| Plataforma    | Expo SDK 58 (React Native)                                                    | Una sola base de código para iOS y Android                               | Fase 0                 |
-| Lenguaje      | TypeScript en modo estricto                                                   | Detectar errores al escribir                                             | Fase 0                 |
-| Navegación    | Expo Router                                                                   | Rutas a partir de los ficheros de `src/app/`                             | Fase 0                 |
-| Textos        | i18next y react-i18next                                                       | Textos de la interfaz en `es.json`, con claves tipadas                   | Fase 0                 |
-| Desarrollo    | expo-dev-client                                                               | Development builds locales en vez de Expo Go                             | Fase 0                 |
-| Base de datos | expo-sqlite, Drizzle ORM y drizzle-kit                                        | Guardar equipos, jugadores y partidos en el dispositivo, con migraciones | 001                    |
-| Estado        | Zustand                                                                       | Sesión del partido abierto y deshacer                                    | 001                    |
-| Gestos        | react-native-gesture-handler                                                  | Pulsación larga en las casillas                                          | 001                    |
-| Pruebas       | Jest (jest-expo), React Native Testing Library, fast-check, Stryker y Maestro | Ver «Pruebas»                                                            | Fase 0; Maestro en 001 |
-| Calidad       | ESLint (eslint-config-expo, boundaries, i18next) y Prettier                   | Estilo y límites entre capas                                             | Fase 0                 |
-| Seguridad     | npm audit, OSV-Scanner, gitleaks y Semgrep; MobSF antes de publicar           | Ver `docs/security.md`                                                   | Fase 0                 |
-| Publicación   | EAS Build y EAS Submit, plan gratuito                                         | Compilar y subir a las tiendas                                           | Antes de publicar      |
+| Piece       | Choice                                                                          | What for                                                        | Arrives in              |
+| ----------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------- |
+| Platform    | Expo SDK 58 (React Native)                                                      | A single code base for iOS and Android                          | Phase 0                 |
+| Language    | TypeScript in strict mode                                                       | Catch errors while writing                                      | Phase 0                 |
+| Navigation  | Expo Router                                                                     | Routes from the files in `src/app/`                             | Phase 0                 |
+| Texts       | i18next and react-i18next                                                       | Interface texts in `es.json`, with typed keys                   | Phase 0                 |
+| Development | expo-dev-client                                                                 | Local development builds instead of Expo Go                     | Phase 0                 |
+| Database    | expo-sqlite, Drizzle ORM and drizzle-kit                                        | Store teams, players and matches on the device, with migrations | 001                     |
+| State       | Zustand                                                                         | Session of the open match and undo                              | 001                     |
+| Gestures    | react-native-gesture-handler                                                    | Long press on the cells                                         | 001                     |
+| Tests       | Jest (jest-expo), React Native Testing Library, fast-check, Stryker and Maestro | See "Tests"                                                     | Phase 0; Maestro in 001 |
+| Quality     | ESLint (eslint-config-expo, boundaries, i18next) and Prettier                   | Style and boundaries between layers                             | Phase 0                 |
+| Security    | npm audit, OSV-Scanner, gitleaks and Semgrep; MobSF before publishing           | See `docs/security.md`                                          | Phase 0                 |
+| Publishing  | EAS Build and EAS Submit, free plan                                             | Build and upload to the stores                                  | Before publishing       |
 
-Las versiones exactas son las de `package-lock.json`. Expo elige las compatibles con el SDK al instalar con `npx expo install`.
+The exact versions are those in `package-lock.json`. Expo picks the ones compatible with the SDK when installing with `npx expo install`.
 
-## Cómo se ejecuta
+## How it runs
 
-- **Development builds locales.** `npm run ios` y `npm run android` compilan la app con Xcode o Android Studio, la instalan en el simulador o el emulador y arrancan Metro, el servidor que sirve el código JavaScript. Las compilaciones locales no gastan cuota de EAS.
-- **No se usa Expo Go.** Durante la transición a SDK 58, Expo Go en el móvil sigue en SDK 57, y Expo lo recomienda solo para aprender.
-- **`ios/` y `android/` no se versionan.** Expo las genera a partir de `app.json` (Continuous Native Generation). Cualquier ajuste nativo se hace en `app.json` o con un config plugin, nunca a mano en esas carpetas.
+- **Local development builds.** `npm run ios` and `npm run android` build the app with Xcode or Android Studio, install it on the simulator or emulator and start Metro, the server that serves the JavaScript code. Local builds do not use EAS quota.
+- **Expo Go is not used.** During the move to SDK 58, Expo Go on the phone is still on SDK 57, and Expo recommends it only for learning.
+- **`ios/` and `android/` are not versioned.** Expo generates them from `app.json` (Continuous Native Generation). Any native setting goes in `app.json` or a config plugin, never by hand in those folders.
 
-## Estructura
+## Structure
 
 ```text
 src/
-  app/            pantallas y navegación (Expo Router)
-  ui/             componentes que pintan
-  state/          sesión del partido y deshacer
-  data/           esquema, migraciones y repositorios
-  domain/         reglas puras y tipos
-  i18n/           configuración del idioma y es.json
-tests/app/        pruebas de las pantallas de src/app
-specs/            una carpeta por especificación
-docs/             constitución, arquitectura, seguridad y decisiones
-.agents/          roles y plantillas de los agentes
-.claude/agents/   subagentes de Claude Code, que remiten a .agents/roles
-scripts/          verify.sh, review.sh y check-traceability.mjs
+  app/            screens and navigation (Expo Router)
+  ui/             components that render
+  state/          match session and undo
+  data/           schema, migrations and repositories
+  domain/         pure rules and types
+  i18n/           language setup and es.json
+tests/app/        tests of the screens in src/app
+specs/            one folder per spec
+docs/             constitution, architecture, security and decisions
+.agents/          agent roles and templates
+.claude/agents/   Claude Code subagents, which point to .agents/roles
+scripts/          verify.sh, review.sh and check-traceability.mjs
 ```
 
-## Capas
+## Layers
 
-| Carpeta       | Contiene                            | Puede importar                                           | No puede importar                                       |
-| ------------- | ----------------------------------- | -------------------------------------------------------- | ------------------------------------------------------- |
-| `src/app/`    | Pantallas y navegación              | `src/ui`, `src/state`, `src/i18n`, tipos de `src/domain` | `src/data`, la base de datos                            |
-| `src/ui/`     | Componentes que pintan              | `src/state`, `src/i18n`, tipos de `src/domain`           | `src/data`, funciones de `src/domain`, la base de datos |
-| `src/state/`  | Sesión del partido y deshacer       | `src/domain`, `src/data`                                 | `src/app`, `src/ui`, `react-native`                     |
-| `src/data/`   | Esquema, migraciones y repositorios | Drizzle, expo-sqlite, tipos de `src/domain`              | `src/app`, `src/ui`, `src/state`                        |
-| `src/domain/` | Reglas puras y tipos                | Nada externo                                             | Cualquier paquete y cualquier otra capa                 |
-| `src/i18n/`   | Textos e idioma                     | i18next, react-i18next                                   | Cualquier otra capa                                     |
+| Folder        | Contains                            | May import                                                 | May not import                                        |
+| ------------- | ----------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------- |
+| `src/app/`    | Screens and navigation              | `src/ui`, `src/state`, `src/i18n`, types from `src/domain` | `src/data`, the database                              |
+| `src/ui/`     | Components that render              | `src/state`, `src/i18n`, types from `src/domain`           | `src/data`, functions from `src/domain`, the database |
+| `src/state/`  | Match session and undo              | `src/domain`, `src/data`                                   | `src/app`, `src/ui`, `react-native`                   |
+| `src/data/`   | Schema, migrations and repositories | Drizzle, expo-sqlite, types from `src/domain`              | `src/app`, `src/ui`, `src/state`                      |
+| `src/domain/` | Pure rules and types                | Nothing external                                           | Any package and any other layer                       |
+| `src/i18n/`   | Texts and language                  | i18next, react-i18next                                     | Any other layer                                       |
 
-- Si una capa importa algo que no le toca, ESLint falla (regla `boundaries`).
-- Las pruebas pueden importar lo que prueban.
+- If a layer imports something it should not, ESLint fails (`boundaries` rule).
+- Tests may import what they test.
 
-**Flujo de datos.**
+**Data flow.**
 
-1. El usuario toca y el componente de `ui` llama a una acción de `state`.
-2. `state` pide el nuevo estado y los avisos a una función pura de `domain`.
-3. `state` guarda el resultado con un repositorio de `data` y lo publica.
-4. `ui` lo pinta.
+1. The user taps and the `ui` component calls a `state` action.
+2. `state` asks a pure `domain` function for the new state and the warnings.
+3. `state` saves the result with a `data` repository and publishes it.
+4. `ui` renders it.
 
-La interfaz nunca calcula reglas.
+The interface never computes rules.
 
-## Convenciones
+## Conventions
 
-- **TypeScript estricto:** sin `any`, con tipos explícitos en todo lo exportado y con `noUncheckedIndexedAccess`.
-- **Dominio puro:** funciones sin efectos ni estado, que reciben datos y devuelven datos nuevos. Para los casos previstos no lanzan excepciones: devuelven el resultado.
-- **Una responsabilidad** por fichero y por función. Límites de ESLint:
-  - complejidad 10 como máximo;
-  - 250 líneas por fichero;
-  - 60 líneas por función (no se aplica a las pruebas);
-  - 4 parámetros;
-  - 3 niveles de anidamiento.
-- **Componentes de función con hooks,** con las props tipadas y sin lógica de negocio dentro.
-- **Datos solo a través de repositorios.** Nunca SQL montado concatenando texto.
-- **Nada «por si acaso»:** se generaliza cuando aparece un segundo caso real.
-- **Comentarios** para el porqué, no para el qué.
-- **Formato** con Prettier, sin configuración propia.
-- **Nombres:**
-  - ficheros en kebab-case, como `rule-window.ts`;
-  - componentes y tipos en PascalCase;
-  - funciones y variables en camelCase;
-  - imports con el alias `@/`, que equivale a `src/`.
-- **Exportaciones con nombre.** La exportación por defecto solo se usa en las rutas de `src/app/`, porque Expo Router la exige.
-- **Sin `console` en `src/`,** porque los registros podrían contener datos de jugadores.
-- **Sin llamadas de red:** `fetch`, `XMLHttpRequest`, `WebSocket` y `EventSource` están prohibidos.
-- **Sin comentarios que desactiven reglas:** ni `eslint-disable` ni `@ts-ignore`.
-- **Textos de la interfaz** solo en `src/i18n/es.json`. ESLint prohíbe el texto suelto en JSX.
+- **Strict TypeScript:** no `any`, explicit types on everything exported and `noUncheckedIndexedAccess`.
+- **Pure domain:** functions without side effects or state, which receive data and return new data. For expected cases they do not throw: they return the result.
+- **One responsibility** per file and per function. ESLint limits:
+  - complexity 10 at most;
+  - 250 lines per file;
+  - 60 lines per function (not applied to tests);
+  - 4 parameters;
+  - 3 levels of nesting.
+- **Function components with hooks,** with typed props and no business logic inside.
+- **Data only through repositories.** Never SQL built by concatenating text.
+- **Nothing "just in case":** generalise when a second real case appears.
+- **Comments** for the why, not the what.
+- **Formatting** with Prettier, with no custom configuration.
+- **Names:**
+  - files in kebab-case, such as `rule-window.ts`;
+  - components and types in PascalCase;
+  - functions and variables in camelCase;
+  - imports with the `@/` alias, which stands for `src/`.
+- **Named exports.** The default export is only used in the routes of `src/app/`, because Expo Router requires it.
+- **No `console` in `src/`,** because logs could contain player data.
+- **No network calls:** `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource` are forbidden.
+- **No comments that disable rules:** neither `eslint-disable` nor `@ts-ignore`.
+- **Interface texts** only in `src/i18n/es.json`. ESLint forbids loose text in JSX.
 
-## Glosario
+## Glossary
 
-| En la app                                   | En el código                   |
-| ------------------------------------------- | ------------------------------ |
-| Equipo                                      | `Team`                         |
-| Jugador, dorsal, activo                     | `Player`, `number`, `isActive` |
-| Partido, convocatoria                       | `Match`, `CallUp`              |
-| Variante (4, 6 u 8 periodos)                | `Format`                       |
-| Periodo, prórroga                           | `Period`, `Overtime`           |
-| Tramo con regla                             | `RuleWindow`                   |
-| Marca: titular (X) o cambio (X con círculo) | `Mark`: `starter` o `sub`      |
-| Jugado, descansado                          | `played`, `rested`             |
-| Aviso                                       | `Warning`                      |
+The app is in Spanish, so the first column shows the words the user sees.
 
-Un concepto nuevo se añade aquí antes de usarlo en el código.
+| In the app (Spanish)                        | Meaning                                     | In the code                    |
+| ------------------------------------------- | ------------------------------------------- | ------------------------------ |
+| Equipo                                      | Team                                        | `Team`                         |
+| Jugador, dorsal, activo                     | Player, shirt number, active                | `Player`, `number`, `isActive` |
+| Partido, convocatoria                       | Match, call-up (players picked for a match) | `Match`, `CallUp`              |
+| Variante (4, 6 u 8 periodos)                | Format (4, 6 or 8 periods)                  | `Format`                       |
+| Periodo, prórroga                           | Period, overtime                            | `Period`, `Overtime`           |
+| Tramo con regla                             | Window of periods with a rule               | `RuleWindow`                   |
+| Marca: titular (X) o cambio (X con círculo) | Mark: starter (X) or substitute (circled X) | `Mark`: `starter` or `sub`     |
+| Jugado, descansado                          | Played, rested                              | `played`, `rested`             |
+| Aviso                                       | Warning                                     | `Warning`                      |
 
-## Pruebas
+A new concept is added here before it is used in the code.
 
-- **Dónde:** junto al fichero que prueban, como `rule-window.test.ts`. Las pruebas de las pantallas de `src/app/` van en `tests/app/`, porque Expo Router trataría como ruta cualquier fichero de `src/app/`.
-- **Nombre:** empieza por los ID que cubre, como `it('RF-018 E-01: highlights P4 and P5 when the player has 3 X in the window', …)`. Así funciona la trazabilidad.
-- **Umbrales:** 90 % de cobertura en `src/domain/` y al menos 80 % de mutantes detectados por Stryker.
+## Tests
 
-| Nivel                    | Herramienta                  | Para qué                                                                       |
-| ------------------------ | ---------------------------- | ------------------------------------------------------------------------------ |
-| Reglas                   | Jest, con tablas `it.each`   | Cada requisito (RF) y cada ejemplo (E)                                         |
-| Reglas con datos al azar | fast-check                   | Propiedades que siempre se cumplen, como no tener nunca más de 5 X por periodo |
-| Componentes y pantallas  | React Native Testing Library | Lo que el usuario ve y toca                                                    |
-| Flujos completos         | Maestro, en `e2e/`           | Recorridos reales en el simulador                                              |
+- **Where:** next to the file they test, such as `rule-window.test.ts`. Tests of the screens in `src/app/` go in `tests/app/`, because Expo Router would treat any file in `src/app/` as a route.
+- **Name:** starts with the IDs it covers, such as `it('RF-018 E-01: highlights P4 and P5 when the player has 3 X in the window', …)`. That is how traceability works.
+- **Thresholds:** 90 % coverage in `src/domain/` and at least 80 % of mutants killed by Stryker.
 
-| Escenario         | Qué cubre                                          | Ejemplo                                                    |
-| ----------------- | -------------------------------------------------- | ---------------------------------------------------------- |
-| Camino normal     | Lo que se espera que haga el usuario               | Marcar 5 titulares en un periodo                           |
-| Límites           | Justo en el borde de una regla                     | La tercera X en el tramo de 6 periodos: aparecen los rojos |
-| Fuera de la norma | Lo que la normativa no permite y la app no bloquea | Cuarta X: el jugador sale en rojo                          |
-| Datos raros       | Vacíos, repetidos o extremos                       | Dos jugadores con el dorsal 7, o un nombre vacío           |
-| Secuencias        | Varias acciones seguidas                           | Marcar, cambiar de variante y deshacer tres veces          |
-| Interrupciones    | La app se cierra a mitad                           | Cerrar con el partido a medias y volver a abrir            |
-| Equivocaciones    | Errores típicos del usuario                        | Quitar la X del que sale en un cambio                      |
+| Level                  | Tool                         | What for                                                                   |
+| ---------------------- | ---------------------------- | -------------------------------------------------------------------------- |
+| Rules                  | Jest, with `it.each` tables  | Every requirement (RF) and every example (E)                               |
+| Rules with random data | fast-check                   | Properties that always hold, such as never having more than 5 X per period |
+| Components and screens | React Native Testing Library | What the user sees and touches                                             |
+| Full flows             | Maestro, in `e2e/`           | Real journeys on the simulator                                             |
 
-## Trazabilidad
+| Scenario          | What it covers                                         | Example                                                |
+| ----------------- | ------------------------------------------------------ | ------------------------------------------------------ |
+| Happy path        | What the user is expected to do                        | Mark 5 starters in a period                            |
+| Boundaries        | Right on the edge of a rule                            | The third X in the 6-period window: the reds appear    |
+| Outside the rules | What the regulations forbid and the app does not block | Fourth X: the player shows in red                      |
+| Odd data          | Empty, repeated or extreme                             | Two players with shirt number 7, or an empty name      |
+| Sequences         | Several actions in a row                               | Mark, change the format and undo three times           |
+| Interruptions     | The app closes halfway                                 | Close with the match half done and open again          |
+| Mistakes          | Typical user errors                                    | Remove the X of the player going off in a substitution |
 
-Cada requisito se sigue desde la especificación hasta el commit con el mismo identificador. `scripts/check-traceability.mjs` falla si hay un requisito o un ejemplo sin prueba.
+## Traceability
 
-| Dónde               | Cómo aparece                                                                   |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `spec.md`           | `- **RF-018** · Casilla que no se debería marcar en rojo clarito`              |
-| `spec.md`, ejemplos | `\| E-01 \| Juan con X en P1, P2 y P3 \| P4 y P5 en rojo clarito \| RF-018 \|` |
-| `tasks.md`          | `- [ ] **T012** · Evaluar casillas en rojo (RF-018, E-01, E-02)`               |
-| Prueba              | `it('RF-018 E-01: highlights P4 and P5 …')`                                    |
-| Commit              | `T012 RF-018: highlight periods in light red`                                  |
-| `review.md`         | Hallazgos y salida de la verificación de T012                                  |
+Each requirement is followed from the spec to the commit with the same identifier. `scripts/check-traceability.mjs` fails if a requirement or an example has no test.
 
-El script comprueba los ID de las tareas marcadas como hechas y, cuando la especificación está «Cerrada», todos sus ID.
+| Where               | How it appears                                                                   |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `spec.md`           | `- **RF-018** · Cell that should not be marked shows light red`                  |
+| `spec.md`, examples | `\| E-01 \| Juan with X in P1, P2 and P3 \| P4 and P5 in light red \| RF-018 \|` |
+| `tasks.md`          | `- [ ] **T012** · Evaluate red cells (RF-018, E-01, E-02)`                       |
+| Test                | `it('RF-018 E-01: highlights P4 and P5 …')`                                      |
+| Commit              | `T012 RF-018: highlight periods in light red`                                    |
+| `review.md`         | Findings and verification output of T012                                         |
 
-## Diseño visual
+The script checks the IDs of the tasks ticked as done and, when the spec status is "Closed", all of its IDs.
 
-Por ahora solo hay componentes básicos y un fichero mínimo con los colores de los avisos. Hacer la app más bonita y más fácil de usar será una especificación propia más adelante.
+## Visual design
+
+For now there are only basic components and a minimal file with the warning colours. Making the app nicer and easier to use will be a spec of its own later on.

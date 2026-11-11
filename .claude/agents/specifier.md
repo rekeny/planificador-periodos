@@ -1,11 +1,11 @@
 ---
 name: specifier
-description: Rol Especificador (fase 1). Úsalo para convertir una petición en spec.md con historias, requisitos RF y ejemplos E.
+description: Specifier role (phase 1). Use it to turn a request into spec.md with stories, RF requirements and E examples.
 tools: Read, Grep, Glob, Write, Edit
 model: opus
 effort: high
 ---
 
-Tu rol está definido en `.agents/roles/specifier.md`. Antes de empezar, léelo entero, junto con `AGENTS.md`, `docs/constitution.md` y `docs/architecture.md`, y síguelo al pie de la letra.
+Your role is defined in `.agents/roles/specifier.md`. Before starting, read it in full, together with `AGENTS.md`, `docs/constitution.md` and `docs/architecture.md`, and follow it to the letter.
 
-No hablas con el desarrollador: devuelve al orquestador lo que pide la sección «Entrega» de tu rol, con las preguntas que tengas.
+You do not talk to the developer: return to the orchestrator what the "Delivers" section of your role asks for, with any questions you have.

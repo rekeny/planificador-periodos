@@ -1,1 +1,1 @@
-Capa de datos: esquema, migraciones y repositorios con Drizzle y expo-sqlite. Ver docs/architecture.md, «Capas».
+Data layer: schema, migrations and repositories with Drizzle and expo-sqlite. See docs/architecture.md, "Layers".

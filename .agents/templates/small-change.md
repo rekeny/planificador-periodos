@@ -1,23 +1,23 @@
-# Ficha de cambio pequeño · <Título>
+# Small change form · <Title>
 
-- **Fecha:** <AAAA-MM-DD>
-- **Rama:** `fix/<descripcion-corta>`
-- **Aprobada por:** — <!-- nombre y fecha -->
+- **Date:** <YYYY-MM-DD>
+- **Branch:** `fix/<short-description>`
+- **Approved by:** — <!-- name and date -->
 
-## Qué
+## What
 
-<Qué cambia, en una o dos frases.>
+<What changes, in one or two sentences.>
 
-## Por qué
+## Why
 
-## Cómo
+## How
 
-<Ficheros que se tocan.>
+<Files touched.>
 
-## Por qué es pequeño
+## Why it is small
 
-<No cambia ningún comportamiento especificado ni toca src/domain/.>
+<It changes no specified behaviour and does not touch src/domain/.>
 
-## Pruebas
+## Tests
 
-<La prueba que falla antes del cambio y pasa después.>
+<The test that fails before the change and passes after.>

@@ -1,42 +1,42 @@
-# Rol · Diseñador de pruebas
+# Role · Test designer
 
-- **Fases:** 5, Diseñar pruebas, y 6, Implementar (antes del Implementador, en cada tarea).
-- **Objetivo:** que las pruebas encuentren fallos. Se escriben a partir de lo que el usuario puede hacer, no a partir del código.
+- **Phases:** 5, Design tests, and 6, Implement (before the Implementer, in each task).
+- **Goal:** tests that find bugs. They are written from what the user can do, not from the code.
 
-## Fase 5 · Escenarios
+## Phase 5 · Scenarios
 
-Para cada tarea, escribe en `tasks.md` los escenarios de los siete tipos que apliquen:
+For each task, write in `tasks.md` the scenarios of the seven kinds that apply:
 
-- camino normal;
-- límites;
-- fuera de la norma;
-- datos raros;
-- secuencias;
-- interrupciones;
-- equivocaciones.
+- happy path;
+- boundaries;
+- outside the rules;
+- odd data;
+- sequences;
+- interruptions;
+- mistakes.
 
-Ver `docs/architecture.md`, sección «Pruebas». Cada escenario indica los ID de RF y E, la situación, la acción y el resultado esperado. Para las reglas del dominio, añade también propiedades para fast-check, como «un periodo nunca tiene más de 5 X» o «jugados + descansados ≤ número de periodos».
+See `docs/architecture.md`, section "Tests". Each scenario states the RF and E IDs, the situation, the action and the expected result. For domain rules, also add properties for fast-check, such as "a period never has more than 5 X" or "played + rested ≤ number of periods".
 
-## Fase 6 · Pruebas de cada tarea, antes del código
+## Phase 6 · Tests of each task, before the code
 
-1. Escribe las pruebas de la tarea:
-   - Jest con `it.each` para las tablas de ejemplos;
-   - fast-check para las propiedades;
-   - React Native Testing Library para componentes y pantallas, buscando por rol y texto visible;
-   - Maestro en `e2e/` para los flujos completos.
-2. Pon en cada nombre de prueba los ID que cubre: `it('RF-018 E-01: highlights P4 and P5 when …')`.
-3. Ejecuta solo esas pruebas y comprueba que fallan **por el motivo correcto**: la aserción, no un import roto ni un error de sintaxis.
-4. Entrega al orquestador la lista de pruebas y la salida en rojo.
+1. Write the task's tests:
+   - Jest with `it.each` for the example tables;
+   - fast-check for the properties;
+   - React Native Testing Library for components and screens, querying by role and visible text;
+   - Maestro in `e2e/` for full flows.
+2. Put in each test name the IDs it covers: `it('RF-018 E-01: highlights P4 and P5 when …')`.
+3. Run only those tests and check that they fail **for the right reason**: the assertion, not a broken import or a syntax error.
+4. Hand the orchestrator the list of tests and the red output.
 
-## Prohibido
+## Forbidden
 
-- Escribir código de producción.
-- Adaptar las pruebas al código.
-- Escribir pruebas que pasan siempre.
-- Simular (mockear) el dominio: las reglas se prueban de verdad.
-- Usar `.only`, `.skip` o `xit`.
+- Writing production code.
+- Adapting the tests to the code.
+- Writing tests that always pass.
+- Mocking the domain: the rules are tested for real.
+- Using `.only`, `.skip` or `xit`.
 
-## Terminado cuando
+## Done when
 
-- Cada criterio de aceptación tiene escenarios.
-- Las pruebas de la tarea están en rojo por el motivo correcto.
+- Every acceptance criterion has scenarios.
+- The task's tests are red for the right reason.

@@ -1,13 +1,13 @@
-# ADR-NNN · <Título>
+# ADR-NNN · <Title>
 
-- **Estado:** Propuesta <!-- Propuesta | Aceptada | Sustituida por ADR-NNN -->
-- **Fecha:** <AAAA-MM-DD>
-- **Decide:** <nombre>
+- **Status:** Proposed <!-- Proposed | Accepted | Superseded by ADR-NNN -->
+- **Date:** <YYYY-MM-DD>
+- **Decided by:** <name>
 
-## Contexto
+## Context
 
-## Decisión
+## Decision
 
-## Alternativas descartadas
+## Discarded alternatives
 
-## Consecuencias
+## Consequences

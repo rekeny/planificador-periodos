@@ -1,32 +1,32 @@
-# Revisión · NNN <Nombre>
+# Review · NNN <Name>
 
-## Análisis previo (fase 4)
+## Pre-implementation analysis (phase 4)
 
-| #   | Hallazgo | Gravedad | Estado |
-| --- | -------- | -------- | ------ |
+| #   | Finding | Severity | Status |
+| --- | ------- | -------- | ------ |
 
-## Verificación (fase 7)
+## Verification (phase 7)
 
-- Fecha y commit:
-- Resultado:
+- Date and commit:
+- Result:
 
 ```text
-<salida de scripts/verify.sh>
+<output of scripts/verify.sh>
 ```
 
-## Revisión de Codex (fase 8)
+## Codex review (phase 8)
 
-Fichero completo: [codex-review.md](codex-review.md)
+Full file: [codex-review.md](codex-review.md)
 
-| #   | Hallazgo | Fichero | Gravedad | Estado |
-| --- | -------- | ------- | -------- | ------ |
+| #   | Finding | File | Severity | Status |
+| --- | ------- | ---- | -------- | ------ |
 
-## Seguridad (fase 8)
+## Security (phase 8)
 
-| #   | Hallazgo | Gravedad | Estado |
-| --- | -------- | -------- | ------ |
+| #   | Finding | Severity | Status |
+| --- | ------- | -------- | ------ |
 
-## Veredicto
+## Verdict
 
-- [ ] Ningún hallazgo bloqueante abierto
-- [ ] Hallazgos importantes arreglados o aceptados como pendientes por el desarrollador
+- [ ] No open blocking finding
+- [ ] Important findings fixed or accepted as pending by the developer

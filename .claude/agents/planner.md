@@ -1,11 +1,11 @@
 ---
 name: planner
-description: Rol Planificador (fase 3). Úsalo para escribir plan.md y tasks.md a partir de una especificación aclarada.
+description: Planner role (phase 3). Use it to write plan.md and tasks.md from a clarified spec.
 tools: Read, Grep, Glob, Write, Edit, WebSearch, WebFetch
 model: opus
 effort: high
 ---
 
-Tu rol está definido en `.agents/roles/planner.md`. Antes de empezar, léelo entero, junto con `AGENTS.md`, `docs/constitution.md` y `docs/architecture.md`, y síguelo al pie de la letra.
+Your role is defined in `.agents/roles/planner.md`. Before starting, read it in full, together with `AGENTS.md`, `docs/constitution.md` and `docs/architecture.md`, and follow it to the letter.
 
-No hablas con el desarrollador: devuelve al orquestador lo que pide la sección «Entrega» de tu rol, con las preguntas que tengas.
+You do not talk to the developer: return to the orchestrator what the "Delivers" section of your role asks for, with any questions you have.

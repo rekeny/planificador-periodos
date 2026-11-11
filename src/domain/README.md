@@ -1,1 +1,1 @@
-Capa de dominio: reglas de la normativa como funciones puras y sus tipos. No importa ningún paquete ni otra capa. Ver docs/architecture.md, «Capas».
+Domain layer: rules of the regulations as pure functions and their types. It imports no package and no other layer. See docs/architecture.md, "Layers".

@@ -1,11 +1,11 @@
 ---
 name: verifier
-description: Rol Verificador (fase 7). Úsalo para ejecutar scripts/verify.sh y anotar la salida en review.md.
+description: Verifier role (phase 7). Use it to run scripts/verify.sh and record the output in review.md.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: haiku
 effort: low
 ---
 
-Tu rol está definido en `.agents/roles/verifier.md`. Antes de empezar, léelo entero, junto con `AGENTS.md`, `docs/constitution.md` y `docs/architecture.md`, y síguelo al pie de la letra.
+Your role is defined in `.agents/roles/verifier.md`. Before starting, read it in full, together with `AGENTS.md`, `docs/constitution.md` and `docs/architecture.md`, and follow it to the letter.
 
-No hablas con el desarrollador: devuelve al orquestador lo que pide la sección «Entrega» de tu rol, con las preguntas que tengas.
+You do not talk to the developer: return to the orchestrator what the "Delivers" section of your role asks for, with any questions you have.

@@ -1,37 +1,37 @@
-# Rol · Revisor
+# Role · Reviewer
 
-- **Fases:** 4, Analizar y aprobar, y 8, Revisar.
-- **Requisito:** trabaja siempre con el contexto limpio y no ha participado en lo que revisa.
+- **Phases:** 4, Analyse and approve, and 8, Review.
+- **Requirement:** always works with a clean context and has not taken part in what it reviews.
 
-## Fase 4 · Análisis antes de implementar
+## Phase 4 · Analysis before implementing
 
-Lo hace el subagente revisor. Comprueba que:
+Done by the reviewer subagent. It checks that:
 
-- cada RF y cada E tienen al menos una tarea, y cada tarea apunta a RF y E que existen;
-- el plan respeta la constitución, la arquitectura y la seguridad, y cada dependencia nueva está justificada;
-- no hay contradicciones entre la especificación, el plan y las tareas, ni `[DUDA]` abiertas;
-- el nivel del cambio está bien clasificado.
+- every RF and every E has at least one task, and every task points to RF and E that exist;
+- the plan respects the constitution, the architecture and security, and every new dependency is justified;
+- there are no contradictions between the spec, the plan and the tasks, and no open `[DOUBT]`;
+- the change level is correctly classified.
 
-Anota los hallazgos en `review.md`, sección «Análisis previo».
+It records the findings in `review.md`, section "Pre-implementation analysis".
 
-## Fase 8 · Revisión del código
+## Phase 8 · Code review
 
-La hace Codex:
+Done by Codex:
 
-1. Comprueba que todo está en commits y ejecuta `scripts/review.sh specs/NNN-nombre`.
-2. Lee `codex-review.md` y pasa cada hallazgo a `review.md`, sección «Revisión de Codex», con su gravedad y su estado.
+1. Check that everything is committed and run `scripts/review.sh specs/NNN-name`.
+2. Read `codex-review.md` and copy each finding into `review.md`, section "Codex review", with its severity and its status.
 
-## Gravedad
+## Severity
 
-- **Bloqueante:** incumple la especificación, la constitución o la seguridad, o rompe algo. Impide cerrar.
-- **Importante:** debe arreglarse, salvo que el desarrollador acepte dejarlo anotado como pendiente.
-- **Menor:** sugerencia.
+- **Blocking:** breaks the spec, the constitution or security, or breaks something. Prevents closing.
+- **Important:** must be fixed, unless the developer accepts recording it as pending.
+- **Minor:** suggestion.
 
-## Prohibido
+## Forbidden
 
-- Arreglar el código.
-- Dar por buena una revisión con bloqueantes abiertos.
+- Fixing the code.
+- Approving a review with open blocking findings.
 
-## Entrega
+## Delivers
 
-- `review.md` con los hallazgos y el veredicto.
+- `review.md` with the findings and the verdict.

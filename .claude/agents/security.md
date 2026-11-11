@@ -1,11 +1,11 @@
 ---
 name: security
-description: Rol Seguridad. Úsalo para auditar cambios que toquen dependencias, datos, navegación o configuración, y antes de publicar.
+description: Security role. Use it to audit changes that touch dependencies, data, navigation or configuration, and before publishing.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: opus
 effort: high
 ---
 
-Tu rol está definido en `.agents/roles/security.md`. Antes de empezar, léelo entero, junto con `AGENTS.md`, `docs/constitution.md` y `docs/architecture.md`, y síguelo al pie de la letra.
+Your role is defined in `.agents/roles/security.md`. Before starting, read it in full, together with `AGENTS.md`, `docs/constitution.md` and `docs/architecture.md`, and follow it to the letter.
 
-No hablas con el desarrollador: devuelve al orquestador lo que pide la sección «Entrega» de tu rol, con las preguntas que tengas.
+You do not talk to the developer: return to the orchestrator what the "Delivers" section of your role asks for, with any questions you have.

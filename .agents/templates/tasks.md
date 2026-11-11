@@ -1,26 +1,26 @@
-# Tareas · NNN <Nombre>
+# Tasks · NNN <Name>
 
-Leyenda: `[ ]` pendiente · `[x]` hecha. Cada tarea es un commit, en inglés, `T0NN RF-0NN: description`.
+Legend: `[ ]` pending · `[x]` done. Each task is one commit, `T0NN RF-0NN: description`.
 
-<!-- Los ID de RF y E van en la misma línea que la casilla: los lee scripts/check-traceability.mjs. -->
+<!-- The RF and E IDs go on the same line as the checkbox: scripts/check-traceability.mjs reads them. -->
 
-## HU1 · <Título>
+## US1 · <Title>
 
-- [ ] **T001** · <Descripción> (RF-001, E-01)
-  - Capa y ficheros:
-  - Hecho cuando:
-  - Escenarios:
-    - Camino normal:
-    - Límites:
-    - Fuera de la norma:
-    - Datos raros:
-    - Secuencias:
-    - Interrupciones:
-    - Equivocaciones:
-  - Pendiente:
+- [ ] **T001** · <Description> (RF-001, E-01)
+  - Layer and files:
+  - Done when:
+  - Scenarios:
+    - Happy path:
+    - Boundaries:
+    - Outside the rules:
+    - Odd data:
+    - Sequences:
+    - Interruptions:
+    - Mistakes:
+  - Pending:
 
-**Punto de control HU1:** <qué debe funcionar al terminar la historia>
+**US1 checkpoint:** <what must work when the story is finished>
 
-## Cierre
+## Closing
 
-- [ ] **T0NN** · Verificación completa, revisión de Codex y de Seguridad, `resumen.md` y estado «Cerrada»
+- [ ] **T0NN** · Full verification, Codex and Security review, `summary.md` and status "Closed"

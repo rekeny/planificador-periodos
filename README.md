@@ -1,46 +1,46 @@
 # Planificador de periodos
 
-App para iOS y Android que ayuda a entrenadores de baloncesto de formación a planificar en qué periodos juega cada jugador. Avisa cuando la planificación incumple la normativa de la variante (4, 6 u 8 periodos), sin bloquear nunca. Funciona sin conexión y todos los datos se quedan en el dispositivo.
+An iOS and Android app that helps youth basketball coaches plan which periods each player plays. It warns when the plan breaks the rules of the format (4, 6 or 8 periods), without ever blocking. It works offline and all data stays on the device. The app is in Spanish.
 
-**Estado:** en desarrollo. La fase 0 deja preparado el proyecto; la primera funcionalidad llega con la especificación 001.
+**Status:** in development. Phase 0 sets up the project; the first feature arrives with spec 001.
 
-## Cómo está hecho
+## How it is built
 
-- **Tecnología:** Expo (React Native) con TypeScript estricto y Expo Router. El stack y las capas están en [`docs/architecture.md`](docs/architecture.md).
-- **Proceso:** desarrollo guiado por especificaciones con agentes de IA. Las reglas están en [`AGENTS.md`](AGENTS.md), los principios en [`docs/constitution.md`](docs/constitution.md) y cada funcionalidad en [`specs/`](specs/).
-- **Revisión:** la del código la hace Codex; la verificación automática, [`scripts/verify.sh`](scripts/verify.sh).
+- **Technology:** Expo (React Native) with strict TypeScript and Expo Router. The stack and the layers are in [`docs/architecture.md`](docs/architecture.md).
+- **Process:** spec-driven development with AI agents. The rules are in [`AGENTS.md`](AGENTS.md), the principles in [`docs/constitution.md`](docs/constitution.md) and each feature in [`specs/`](specs/).
+- **Review:** the code review is done by Codex; the automatic verification, by [`scripts/verify.sh`](scripts/verify.sh).
 
-## Puesta en marcha en local
+## Local setup
 
-Requisitos:
+Requirements:
 
-- macOS con Xcode y un simulador de iOS;
-- Android Studio con un emulador;
-- Node, en la versión de `.nvmrc`;
+- macOS with Xcode and an iOS simulator;
+- Android Studio with an emulator;
+- Node, in the version of `.nvmrc`;
 - CocoaPods;
-- gitleaks, osv-scanner y semgrep (`brew install cocoapods gitleaks osv-scanner semgrep`).
+- gitleaks, osv-scanner and semgrep (`brew install cocoapods gitleaks osv-scanner semgrep`).
 
 ```bash
 npm install
-npm run ios       # simulador de iOS
-npm run android   # emulador de Android
-npm run verify    # verificación completa
+npm run ios       # iOS simulator
+npm run android   # Android emulator
+npm run verify    # full verification
 ```
 
-## Estructura
+## Structure
 
 ```text
-src/app/      pantallas y navegación
-src/ui/       componentes que pintan
-src/state/    sesión del partido y deshacer
-src/data/     base de datos y repositorios
-src/domain/   reglas de la normativa, puras
-src/i18n/     textos en castellano
-specs/        una carpeta por especificación
-docs/         constitución, arquitectura, seguridad y decisiones
-.agents/      roles y plantillas de los agentes
+src/app/      screens and navigation
+src/ui/       components that render
+src/state/    match session and undo
+src/data/     database and repositories
+src/domain/   rules of the regulations, pure
+src/i18n/     Spanish texts
+specs/        one folder per spec
+docs/         constitution, architecture, security and decisions
+.agents/      agent roles and templates
 ```
 
-## Licencia
+## Licence
 
-Sin licencia: el código es público para consulta, pero todos los derechos están reservados.
+No licence: the code is public to read, but all rights are reserved.

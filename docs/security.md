@@ -1,48 +1,48 @@
-# Seguridad
+# Security
 
-La referencia es el estándar OWASP MASVS para apps móviles. Como la app funciona sin conexión, la superficie de ataque es pequeña, pero no nula. El rol de Seguridad (`.agents/roles/security.md`) audita cada cambio que toque dependencias, datos, navegación o configuración, y hace una auditoría completa antes de cada publicación.
+The reference is the OWASP MASVS standard for mobile apps. Since the app works offline, the attack surface is small, but not zero. The Security role (`.agents/roles/security.md`) audits every change that touches dependencies, data, navigation or configuration, and does a full audit before each release.
 
-## Controles
+## Controls
 
-| Qué puede salir mal                        | Control                                                                                                | Cómo se comprueba                                              |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| Una dependencia maliciosa o vulnerable     | Pocas dependencias, versiones fijadas en `package-lock.json` y revisión antes de añadir una            | `npm audit` y OSV-Scanner en `verify.sh`                       |
-| Que los datos salgan del dispositivo       | Sin analítica ni SDK de terceros; el permiso de Internet se bloquea en la versión publicada de Android | ESLint prohíbe las llamadas de red; MobSF revisa el manifiesto |
-| Inyección en la base de datos              | Solo consultas de Drizzle con parámetros                                                               | Semgrep y revisión de Codex                                    |
-| Un enlace externo que abre una pantalla    | Ningún enlace puede lanzar una acción destructiva, y los parámetros se validan                         | Pruebas y auditoría                                            |
-| Secretos en el repositorio                 | No hay claves, pero se escanea igualmente                                                              | gitleaks en `verify.sh`                                        |
-| Datos en registros o en copias del sistema | Copia automática de Android desactivada; sin `console` en `src/`                                       | ESLint, auditoría y MobSF                                      |
-| Permisos innecesarios                      | Solo los imprescindibles                                                                               | MobSF sobre el APK y el IPA antes de publicar                  |
-| Un workflow de CI comprometido             | Permisos mínimos del token y versiones de las acciones y herramientas fijadas                          | Auditoría de cada cambio en `.github/`                         |
+| What can go wrong                    | Control                                                                                             | How it is checked                                        |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| A malicious or vulnerable dependency | Few dependencies, versions pinned in `package-lock.json` and a review before adding one             | `npm audit` and OSV-Scanner in `verify.sh`               |
+| Data leaving the device              | No analytics or third-party SDKs; the Internet permission is blocked in the published Android build | ESLint forbids network calls; MobSF reviews the manifest |
+| Database injection                   | Only parameterised Drizzle queries                                                                  | Semgrep and the Codex review                             |
+| An external link that opens a screen | No link can trigger a destructive action, and parameters are validated                              | Tests and audit                                          |
+| Secrets in the repository            | There are no keys, but it is scanned anyway                                                         | gitleaks in `verify.sh`                                  |
+| Data in logs or system backups       | Android automatic backup disabled; no `console` in `src/`                                           | ESLint, audit and MobSF                                  |
+| Unnecessary permissions              | Only the essential ones                                                                             | MobSF on the APK and the IPA before publishing           |
+| A compromised CI workflow            | Minimal token permissions and pinned versions of actions and tools                                  | Audit of every change in `.github/`                      |
 
-**Datos de menores.** La app guarda nombres de niños. Nunca salen del dispositivo, y en las tiendas se declara que la app no recoge datos.
+**Children's data.** The app stores children's names. They never leave the device, and the stores are told that the app collects no data.
 
-## Auditoría de cada cambio
+## Audit of each change
 
-- [ ] Cada dependencia nueva o actualizada está justificada en `plan.md`, se mantiene y tiene una licencia compatible.
-- [ ] Ningún permiso nuevo en iOS ni en Android sin justificar.
-- [ ] Ninguna llamada de red ni dato de jugadores en registros.
-- [ ] Consultas a la base de datos solo con Drizzle y parámetros.
-- [ ] Parámetros de rutas validados; ningún enlace lanza acciones destructivas.
-- [ ] `app.json` sigue con `android.allowBackup: false`.
-- [ ] Workflows con permisos mínimos y versiones fijadas.
-- [ ] `npm audit`, OSV-Scanner, gitleaks y Semgrep en verde.
+- [ ] Each new or updated dependency is justified in `plan.md`, is maintained and has a compatible licence.
+- [ ] No new iOS or Android permission without a reason.
+- [ ] No network calls and no player data in logs.
+- [ ] Database queries only through Drizzle with parameters.
+- [ ] Route parameters validated; no link triggers destructive actions.
+- [ ] `app.json` still has `android.allowBackup: false`.
+- [ ] Workflows with minimal permissions and pinned versions.
+- [ ] `npm audit` (fails only at high severity or above), OSV-Scanner, gitleaks and Semgrep green.
 
-## Antes de cada publicación
+## Before each release
 
-- [ ] Bloquear el permiso de Internet en la compilación de producción de Android y comprobar que la app funciona sin él.
-- [ ] MobSF sobre el APK y el IPA, sin hallazgos altos abiertos.
-- [ ] Revisar `AndroidManifest.xml` e `Info.plist` generados: solo los permisos imprescindibles.
-- [ ] Declarar en App Store y Google Play que la app no recoge datos.
-- [ ] Revisar las obligaciones de privacidad del RGPD, porque hay datos de menores en el dispositivo.
-- [ ] Auditoría completa de dependencias, incluidas las de desarrollo.
+- [ ] Block the Internet permission in the Android production build and check that the app works without it.
+- [ ] MobSF on the APK and the IPA, with no open high findings.
+- [ ] Review the generated `AndroidManifest.xml` and `Info.plist`: only the essential permissions.
+- [ ] Declare in the App Store and Google Play that the app collects no data.
+- [ ] Review the GDPR privacy obligations, because there is children's data on the device.
+- [ ] Full dependency audit, including development ones.
 
-## Excepciones
+## Exceptions
 
-Si una vulnerabilidad no se puede corregir, se registra en `osv-scanner.toml` con:
+If a vulnerability cannot be fixed, it is recorded in `osv-scanner.toml` with:
 
-- el motivo;
-- una fecha de caducidad, de 90 días como máximo;
-- la aprobación del desarrollador.
+- the reason;
+- an expiry date, 90 days at most;
+- the developer's approval.
 
-Sin esos tres datos, no hay excepción.
+Without those three, there is no exception.

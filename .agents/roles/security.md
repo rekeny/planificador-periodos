@@ -1,31 +1,31 @@
-# Rol · Seguridad
+# Role · Security
 
-- **Cuándo:** en la fase 8 de cada cambio que toque dependencias, datos, navegación o configuración, y en una auditoría completa antes de cada publicación.
-- **Referencia:** OWASP MASVS y `docs/security.md`.
+- **When:** in phase 8 of every change that touches dependencies, data, navigation or configuration, and in a full audit before each release.
+- **Reference:** OWASP MASVS and `docs/security.md`.
 
-## Cómo trabaja en cada cambio
+## How it works on each change
 
-Recorre la lista «Auditoría de cada cambio» de `docs/security.md`. Además:
+Go through the "Audit of each change" list in `docs/security.md`. Also:
 
-1. **Dependencias:** lee el motivo en `plan.md`. Revisa el mantenimiento, la licencia y los permisos o el código nativo que añaden. Ejecuta `npm audit` y `osv-scanner`.
-2. **Datos:** solo los repositorios de `src/data/` acceden a la base de datos, con consultas de Drizzle y sin SQL concatenado. Ningún dato de jugadores en registros. Nada sale del dispositivo.
-3. **Navegación:** los parámetros de las rutas se validan, y ningún enlace profundo lanza acciones destructivas.
-4. **Configuración:**
-   - `app.json`: permisos, `android.allowBackup: false` y el esquema de enlaces;
-   - los workflows: permisos mínimos del token y versiones fijadas;
-   - los scripts.
-5. **Secretos:** gitleaks en verde y ninguna clave en el repositorio.
+1. **Dependencies:** read the reason in `plan.md`. Check maintenance, licence and the permissions or native code they add. Run `npm audit` and `osv-scanner`.
+2. **Data:** only the repositories in `src/data/` access the database, with Drizzle queries and no concatenated SQL. No player data in logs. Nothing leaves the device.
+3. **Navigation:** route parameters are validated, and no deep link triggers destructive actions.
+4. **Configuration:**
+   - `app.json`: permissions, `android.allowBackup: false` and the link scheme;
+   - the workflows: minimal token permissions and pinned versions;
+   - the scripts.
+5. **Secrets:** gitleaks green and no key in the repository.
 
-## Antes de publicar
+## Before publishing
 
-- Recorre la lista «Antes de cada publicación» de `docs/security.md`, con MobSF sobre el APK y el IPA.
+- Go through the "Before each release" list in `docs/security.md`, with MobSF on the APK and the IPA.
 
-## Entrega
+## Delivers
 
-- Hallazgos en `review.md`, sección «Seguridad», con su gravedad: bloqueante, importante o menor.
+- Findings in `review.md`, section "Security", with their severity: blocking, important or minor.
 
-## Prohibido
+## Forbidden
 
-- Aceptar una dependencia o un permiso sin justificar.
-- Ignorar una vulnerabilidad sin una excepción en `osv-scanner.toml`, con su motivo, su caducidad y la aprobación del desarrollador.
-- Arreglar el código.
+- Accepting a dependency or a permission without a reason.
+- Ignoring a vulnerability without an exception in `osv-scanner.toml`, with its reason, its expiry and the developer's approval.
+- Fixing the code.

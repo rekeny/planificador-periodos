@@ -1,50 +1,50 @@
-# Plan · NNN <Nombre>
+# Plan · NNN <Name>
 
-- **Especificación:** [spec.md](spec.md)
-- **Nivel:** <Pequeño | Medio | Grande>
-- **Estado:** Borrador <!-- Borrador | Aprobado -->
-- **Aprobado por:** — <!-- nombre y fecha -->
+- **Spec:** [spec.md](spec.md)
+- **Level:** <Small | Medium | Large>
+- **Status:** Draft <!-- Draft | Approved -->
+- **Approved by:** — <!-- name and date -->
 
-## Explicación antes de ejecutar
+## Explanation before running
 
-- **Qué:** <dos o tres frases>
-- **Cómo:** <pasos y ficheros>
-- **Por qué:** <por qué así y qué alternativas se descartan>
-- **Para aprender:** <conceptos de TypeScript, React o Expo que van a aparecer>
-- **Para comprobarlo:** <qué tendrá que probar el desarrollador>
-- **Pendiente:** <dudas que necesitan respuesta>
+- **What:** <two or three sentences>
+- **How:** <steps and files>
+- **Why:** <why this way and which alternatives are discarded>
+- **To learn:** <TypeScript, React or Expo concepts that will appear>
+- **To check it:** <what the developer will have to test>
+- **Pending:** <doubts that need an answer>
 
-## Comprobación de la constitución
+## Constitution check
 
-| Principio                 | ¿Se cumple? | Cómo |
-| ------------------------- | ----------- | ---- |
-| 1. Informa, nunca bloquea |             |      |
+| Principle              | Met? | How |
+| ---------------------- | ---- | --- |
+| 1. Inform, never block |      |     |
 
-## Diseño
+## Design
 
-### Datos
+### Data
 
-### Dominio: tipos y funciones
+### Domain: types and functions
 
-### Estado
+### State
 
-### Interfaz y navegación
+### Interface and navigation
 
-## Dependencias nuevas
+## New dependencies
 
-| Paquete | Versión | Motivo | Alternativa sin dependencia | Revisión de Seguridad |
-| ------- | ------- | ------ | --------------------------- | --------------------- |
+| Package | Version | Reason | Alternative without dependency | Security review |
+| ------- | ------- | ------ | ------------------------------ | --------------- |
 
-## Riesgos
+## Risks
 
-| Riesgo | Probabilidad | Mitigación |
-| ------ | ------------ | ---------- |
+| Risk | Likelihood | Mitigation |
+| ---- | ---------- | ---------- |
 
-## Estrategia de pruebas
+## Test strategy
 
 ## ADR
 
-## Desviaciones
+## Deviations
 
-| Fecha | Qué cambia respecto al plan | Motivo | Aprobado por |
-| ----- | --------------------------- | ------ | ------------ |
+| Date | What changes from the plan | Reason | Approved by |
+| ---- | -------------------------- | ------ | ----------- |

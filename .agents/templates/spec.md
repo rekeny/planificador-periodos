@@ -1,58 +1,58 @@
-# Especificación NNN · <Nombre>
+# Spec NNN · <Name>
 
-- **Estado:** Borrador <!-- Borrador | Aclarada | Aprobada | En desarrollo | Cerrada -->
-- **Nivel:** <Pequeño | Medio | Grande>
-- **Fecha:** <AAAA-MM-DD>
-- **Aprobada por:** — <!-- nombre y fecha -->
+- **Status:** Draft <!-- Draft | Clarified | Approved | In progress | Closed -->
+- **Level:** <Small | Medium | Large>
+- **Date:** <YYYY-MM-DD>
+- **Approved by:** — <!-- name and date -->
 
-## Propósito y principios
+## Purpose and principles
 
-<Qué problema resuelve y qué principios de la constitución pesan más aquí.>
+<What problem it solves and which principles of the constitution weigh most here.>
 
-## Alcance
+## Scope
 
-**Dentro**
-
-- …
-
-**Fuera**
+**In**
 
 - …
 
-## Historias de usuario
+**Out**
 
-### HU1 · <Título> (P1)
+- …
 
-Como <rol>, quiero <acción> para <beneficio>.
+## User stories
 
-Criterios de aceptación:
+### US1 · <Title> (P1)
+
+As a <role>, I want <action> so that <benefit>.
+
+Acceptance criteria:
 
 1. …
 
-## Requisitos funcionales
+## Functional requirements
 
-<!-- Uno por línea, con este formato exacto: lo lee scripts/check-traceability.mjs. -->
+<!-- One per line, with this exact format: scripts/check-traceability.mjs reads it. -->
 
-- **RF-001** · <Requisito>. Criterio: <cómo se comprueba>. Historias: HU1.
+- **RF-001** · <Requirement>. Criterion: <how it is checked>. Stories: US1.
 
-## Ejemplos
+## Examples
 
-<!-- El ID va en la primera columna: lo lee scripts/check-traceability.mjs. -->
+<!-- The ID goes in the first column: scripts/check-traceability.mjs reads it. -->
 
-| ID   | Situación | Resultado esperado | Requisitos |
-| ---- | --------- | ------------------ | ---------- |
-| E-01 | …         | …                  | RF-001     |
+| ID   | Situation | Expected result | Requirements |
+| ---- | --------- | --------------- | ------------ |
+| E-01 | …         | …               | RF-001       |
 
-## Dudas
+## Doubts
 
-- [DUDA] <Pregunta concreta> (RF-00N)
+- [DOUBT] <Concrete question> (RF-00N)
 
-## Aclaraciones
+## Clarifications
 
-| Fecha | Pregunta | Respuesta del desarrollador |
-| ----- | -------- | --------------------------- |
+| Date | Question | Developer's answer |
+| ---- | -------- | ------------------ |
 
-## Historial de cambios
+## Change history
 
-| Fecha | Cambio | Nivel |
-| ----- | ------ | ----- |
+| Date | Change | Level |
+| ---- | ------ | ----- |

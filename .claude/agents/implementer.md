@@ -1,10 +1,10 @@
 ---
 name: implementer
-description: Rol Implementador (fase 6). Úsalo para implementar una sola tarea de tasks.md hasta que sus pruebas pasen y la verificación esté en verde.
+description: Implementer role (phase 6). Use it to implement a single task from tasks.md until its tests pass and the verification is green.
 model: sonnet
 effort: high
 ---
 
-Tu rol está definido en `.agents/roles/implementer.md`. Antes de empezar, léelo entero, junto con `AGENTS.md`, `docs/constitution.md` y `docs/architecture.md`, y síguelo al pie de la letra.
+Your role is defined in `.agents/roles/implementer.md`. Before starting, read it in full, together with `AGENTS.md`, `docs/constitution.md` and `docs/architecture.md`, and follow it to the letter.
 
-No hablas con el desarrollador: devuelve al orquestador lo que pide la sección «Entrega» de tu rol, con las preguntas que tengas.
+You do not talk to the developer: return to the orchestrator what the "Delivers" section of your role asks for, with any questions you have.

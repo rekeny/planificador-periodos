@@ -1,77 +1,78 @@
-# Plan · 000 Puesta en marcha
+# Plan · 000 Project setup
 
-- **Nivel:** Grande (primera configuración del repositorio)
-- **Estado:** Aprobado
-- **Aprobado por:** Fernando, el 2026-11-10
-- **Especificación:** ninguna. La fase 0 no implementa funcionalidad, así que no tiene `spec.md`, requisitos RF ni ejemplos E. Su alcance lo fijan este plan y `tasks.md`. Como ninguna tarea lleva ID de RF o E, `scripts/check-traceability.mjs` no exige pruebas a esta carpeta.
+- **Level:** Large (first setup of the repository)
+- **Status:** Approved
+- **Approved by:** Fernando, on 2026-11-10
+- **Spec:** none. Phase 0 implements no feature, so it has no `spec.md`, RF requirements or E examples. Its scope is set by this plan and `tasks.md`. Since no task carries an RF or E ID, `scripts/check-traceability.mjs` requires no tests for this folder.
 
-## Explicación antes de ejecutar
+## Explanation before running
 
-- **Qué:** dejar el repositorio listo para trabajar con el proceso guiado por especificaciones. Incluye el proyecto Expo SDK 58, las reglas, los roles, las herramientas de calidad, pruebas y seguridad, la verificación automática y la integración continua. No se implementa ninguna funcionalidad: la única pantalla muestra el título.
-- **Cómo:** once tareas (T001–T011) en la rama `000-puesta-en-marcha`, con un commit por tarea y una PR a `main`.
-- **Por qué:** las reglas, las capas y las comprobaciones existen desde el primer commit, así que todo el código de la especificación 001 nace cumpliéndolas, lo escriba quien lo escriba.
-- **Para aprender:**
-  - Expo y su configuración;
+- **What:** leave the repository ready to work with the spec-driven process. It includes the Expo SDK 58 project, the rules, the roles, the quality, testing and security tools, the automatic verification and continuous integration. No feature is implemented: the only screen shows the title.
+- **How:** eleven tasks (T001–T011) on the `000-puesta-en-marcha` branch, with one commit per task and a PR to `main`.
+- **Why:** the rules, the layers and the checks exist from the first commit, so all the code of spec 001 is born following them, whoever writes it.
+- **To learn:**
+  - Expo and its configuration;
   - development builds;
   - Expo Router;
-  - TypeScript estricto;
-  - ESLint y sus límites entre capas;
-  - Jest, Testing Library, fast-check y Stryker;
-  - i18next con claves tipadas;
-  - scripts de bash;
-  - GitHub Actions y la protección de ramas.
-- **Para comprobarlo:**
-  - `npm run verify` en verde en local;
-  - la verificación en verde en la PR;
-  - el título visible en iPhone, iPad y Android.
-- **Pendiente:** nada.
+  - strict TypeScript;
+  - ESLint and its boundaries between layers;
+  - Jest, Testing Library, fast-check and Stryker;
+  - i18next with typed keys;
+  - bash scripts;
+  - GitHub Actions and branch protection.
+- **To check it:**
+  - `npm run verify` green locally;
+  - the verification green on the PR;
+  - the title visible on iPhone, iPad and Android.
+- **Pending:** nothing.
 
-## Decisiones
+## Decisions
 
-| Decisión                                         | Motivo                                                                                |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| Development builds locales con `expo-dev-client` | Expo Go en el móvil sigue en SDK 57; las compilaciones locales no gastan cuota de EAS |
-| Rutas en `src/app/`                              | Es la estructura de la plantilla actual                                               |
-| `CLAUDE.md` importa `AGENTS.md`                  | Claude Code lee `CLAUDE.md`; así las reglas viven en un solo fichero                  |
-| i18next desde la fase 0                          | La primera pantalla ya muestra un texto                                               |
-| Sin soporte web                                  | La app es solo para móvil y tablet                                                    |
-| Pruebas antes del código, tarea a tarea          | La verificación está siempre en verde                                                 |
-| Orientación `default`                            | La especificación pide vertical y horizontal                                          |
+| Decision                                        | Reason                                                                  |
+| ----------------------------------------------- | ----------------------------------------------------------------------- |
+| Local development builds with `expo-dev-client` | Expo Go on the phone is still on SDK 57; local builds use no EAS quota  |
+| Routes in `src/app/`                            | It is the structure of the current template                             |
+| `CLAUDE.md` imports `AGENTS.md`                 | Claude Code reads `CLAUDE.md`; this way the rules live in a single file |
+| i18next from phase 0                            | The first screen already shows a text                                   |
+| No web support                                  | The app is only for phones and tablets                                  |
+| Tests before code, task by task                 | The verification is always green                                        |
+| Orientation `default`                           | The spec asks for portrait and landscape                                |
 
-## Dependencias nuevas
+## New dependencies
 
-| Paquete                                                                                        | Motivo                               | Tipo                     |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------ |
-| `expo-dev-client`                                                                              | Development builds en vez de Expo Go | App (solo en desarrollo) |
-| `i18next`, `react-i18next`                                                                     | Textos de la interfaz en `es.json`   | App                      |
-| `eslint`, `eslint-config-expo` (con `npx expo lint`)                                           | Lint                                 | Desarrollo               |
-| `prettier`, `eslint-config-prettier`                                                           | Formato                              | Desarrollo               |
-| `eslint-plugin-boundaries` (y el resolver de TypeScript, solo si hace falta)                   | Límites entre capas                  | Desarrollo               |
-| `eslint-plugin-i18next`                                                                        | Prohibir texto suelto en JSX         | Desarrollo               |
-| `jest`, `jest-expo`, `@types/jest`                                                             | Pruebas                              | Desarrollo               |
-| `@testing-library/react-native`                                                                | Pruebas de componentes y pantallas   | Desarrollo               |
-| `fast-check`                                                                                   | Pruebas de propiedades               | Desarrollo               |
-| `@stryker-mutator/core`, `@stryker-mutator/jest-runner`, `@stryker-mutator/typescript-checker` | Pruebas de mutación                  | Desarrollo               |
+| Package                                                                                        | Reason                                | Type                   |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------- | ---------------------- |
+| `expo-dev-client`                                                                              | Development builds instead of Expo Go | App (development only) |
+| `i18next`, `react-i18next`                                                                     | Interface texts in `es.json`          | App                    |
+| `eslint`, `eslint-config-expo` (with `npx expo lint`)                                          | Lint                                  | Development            |
+| `prettier`, `eslint-config-prettier`                                                           | Formatting                            | Development            |
+| `eslint-plugin-boundaries` (and the TypeScript resolver, only if needed)                       | Boundaries between layers             | Development            |
+| `eslint-plugin-i18next`                                                                        | Forbid loose text in JSX              | Development            |
+| `jest`, `jest-expo`, `@types/jest`                                                             | Tests                                 | Development            |
+| `@testing-library/react-native`                                                                | Component and screen tests            | Development            |
+| `fast-check`                                                                                   | Property tests                        | Development            |
+| `@stryker-mutator/core`, `@stryker-mutator/jest-runner`, `@stryker-mutator/typescript-checker` | Mutation testing                      | Development            |
 
-## Riesgos
+## Risks
 
-| Riesgo                                                                   | Mitigación                                                                     |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Una herramienta ha cambiado sus opciones desde que se escribió este plan | Comprobar con `--help` o con su documentación y anotar la desviación           |
-| Stryker no funciona con `jest-expo`                                      | Ensayo con un fichero temporal en la T007                                      |
-| La verificación de CI es lenta                                           | Caché de npm; las pruebas de mutación solo se ejecutan si cambia `src/domain/` |
+| Risk                                                       | Mitigation                                                        |
+| ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| A tool has changed its options since this plan was written | Check with `--help` or its documentation and record the deviation |
+| Stryker does not work with `jest-expo`                     | Trial with a temporary file in T007                               |
+| The CI verification is slow                                | npm cache; mutation testing only runs if `src/domain/` changes    |
 
-## Desviaciones
+## Deviations
 
-| Fecha      | Qué cambia respecto al plan                                                                                                                                                                                                                                                                                                                               | Motivo                                                                                                                                                                                    | Aprobado por         |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| 2026-11-10 | T001: la plantilla de Expo ya traía un repositorio Git en `master` y un fichero `LICENSE` (MIT de Expo). Se renombra `master` a `main` y se borra `LICENSE`, porque el repositorio es público y sin licencia. El commit `T001` va encima del commit inicial de Expo.                                                                                      | El prompt daba por hecho que `create-expo-app` no iniciaba Git y que no había licencia                                                                                                    | Fernando, 2026-11-10 |
-| 2026-11-10 | T004: la plantilla `default@sdk-58` trae dependencias que el plan no lista (`react-native-gesture-handler`, `react-native-reanimated`, `react-native-worklets`, `@expo/ui`, `expo-glass-effect`, entre otras). Se dejan tal cual.                                                                                                                         | Las instala Expo con la plantilla y quitarlas puede romper el arranque; gesture handler entraba de todos modos en la 001                                                                  | Fernando, 2026-11-10 |
-| 2026-11-10 | T006: `src/i18n/index.ts` desactiva la regla `import/no-named-as-default-member` solo en ese fichero (en `eslint.config.js`). La opción de `eslint-plugin-boundaries` 7.4 se llama `policies`, no `rules`.                                                                                                                                                | `i18n.use(...)` es la forma documentada de react-i18next y la regla avisa en falso; con `--max-warnings 0` fallaría. La regla se aplica por configuración, no con un comentario.          | Fernando, 2026-11-10 |
-| 2026-11-10 | T007: `tests/app/index.test.tsx` usa `async` y `await render(...)`. `tsconfig.json` añade `"types": ["jest"]`. `jest.config.js` ignora `<rootDir>/.stryker-tmp/` y `<rootDir>/e2e/` en vez de `/.stryker-tmp/` y `/e2e/`. `eslint.config.js` declara `__dirname` como global de `jest.config.js`.                                                         | Testing Library 14 hace `render` asíncrono; TypeScript 6 ya no carga `@types/*` solo; Stryker ejecuta las pruebas dentro de `.stryker-tmp/` y el patrón anterior las ignoraba todas       | Fernando, 2026-11-10 |
-| 2026-11-10 | T008: se crea `osv-scanner.toml` con 7 excepciones (9 vulnerabilidades medias de `deepmerge`, `glob`, `minimatch` y `qs`), caducan el 2027-02-08.                                                                                                                                                                                                         | OSV-Scanner fallaba con vulnerabilidades en dependencias indirectas de Expo, Jest y Stryker, sin corrección sin subir versiones mayores ajenas. Es el procedimiento de `docs/security.md` | Fernando, 2026-11-10 |
-| 2026-11-10 | T011: `scripts/review.sh` usa `codex exec --sandbox read-only` con las instrucciones en vez de `codex review --base`.                                                                                                                                                                                                                                     | Con Codex 0.167.0, `codex review --base` no admite instrucciones personalizadas a la vez («the argument --base cannot be used with [PROMPT]»)                                             | Fernando, 2026-11-10 |
-| 2026-11-10 | T011: tras la revisión de Codex se endurecen `eslint.config.js` (paquetes por capa, `jsx-only` con atributos visibles, `checkGlobalObject`), `check-traceability.mjs` (solo nombres de pruebas), `verify.sh` (variantes `skip`/`only`) y `verify.yml` (SHA-256 de gitleaks y osv-scanner); `jest`, `jest-expo` y `@types/jest` pasan a `devDependencies`. | Hallazgos C-02 a C-08 de `review.md`                                                                                                                                                      | Fernando, 2026-11-10 |
-| 2026-11-11 | T011: el rol Revisor pasa a tener dos subagentes: `reviewer` (fase 4) y `codex-reviewer` (fase 8, `model: haiku`, `effort: low`). Los dos leen `.agents/roles/reviewer.md`; `CLAUDE.md` dice cuál se usa en cada fase. Quedan nueve subagentes.                                                                                                           | En la fase 8 la revisión la hace Codex y el subagente solo lanza `scripts/review.sh` y copia los hallazgos; un subagente solo puede fijar un modelo                                       | Fernando, 2026-11-11 |
-| 2026-11-11 | T011: cada subagente fija `model` y `effort`: Opus para `specifier` (high), `clarifier` (medium), `planner` (high), `reviewer` (medium), `security` (high) y `test-designer` (high); Sonnet para `implementer` (high); Haiku para `verifier` y `codex-reviewer` (low).                                                                                    | Ajustar el modelo al trabajo de cada rol: criterio donde se decide, Sonnet para escribir código contra pruebas ya hechas y Haiku donde solo se ejecuta un script                          | Fernando, 2026-11-11 |
-| 2026-11-11 | T011: los mensajes de commit pasan a escribirse en inglés (ADR-003). Cambian `AGENTS.md`, el ejemplo de `docs/architecture.md`, la plantilla `tasks.md` y el rol Implementador. Los commits anteriores no se reescriben.                                                                                                                                  | El repositorio es público y el código ya está en inglés; el historial debe entenderlo cualquiera                                                                                          | Fernando, 2026-11-11 |
+| Date       | What changes from the plan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Reason                                                                                                                                                                                        | Approved by          |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| 2026-11-10 | T001: the Expo template already came with a Git repository on `master` and a `LICENSE` file (Expo's MIT). `master` is renamed to `main` and `LICENSE` is deleted, because the repository is public and unlicensed. The `T001` commit sits on top of Expo's initial commit.                                                                                                                                                                                                                                                                                                       | The prompt assumed `create-expo-app` did not start Git and that there was no licence                                                                                                          | Fernando, 2026-11-10 |
+| 2026-11-10 | T004: the `default@sdk-58` template brings dependencies the plan does not list (`react-native-gesture-handler`, `react-native-reanimated`, `react-native-worklets`, `@expo/ui`, `expo-glass-effect`, among others). They are left as they are.                                                                                                                                                                                                                                                                                                                                   | Expo installs them with the template and removing them may break the start-up; gesture handler was coming in 001 anyway                                                                       | Fernando, 2026-11-10 |
+| 2026-11-10 | T006: `src/i18n/index.ts` turns off the `import/no-named-as-default-member` rule only for that file (in `eslint.config.js`). The `eslint-plugin-boundaries` 7.4 option is called `policies`, not `rules`.                                                                                                                                                                                                                                                                                                                                                                        | `i18n.use(...)` is the documented react-i18next way and the rule gives a false warning; with `--max-warnings 0` it would fail. The rule is set in the configuration, not with a comment.      | Fernando, 2026-11-10 |
+| 2026-11-10 | T007: `tests/app/index.test.tsx` uses `async` and `await render(...)`. `tsconfig.json` adds `"types": ["jest"]`. `jest.config.js` ignores `<rootDir>/.stryker-tmp/` and `<rootDir>/e2e/` instead of `/.stryker-tmp/` and `/e2e/`. `eslint.config.js` declares `__dirname` as a global of `jest.config.js`.                                                                                                                                                                                                                                                                       | Testing Library 14 makes `render` asynchronous; TypeScript 6 no longer loads `@types/*` by itself; Stryker runs the tests inside `.stryker-tmp/` and the previous pattern ignored all of them | Fernando, 2026-11-10 |
+| 2026-11-10 | T008: `osv-scanner.toml` is created with 7 exceptions (9 medium vulnerabilities in `deepmerge`, `glob`, `minimatch` and `qs`), expiring on 2027-02-08.                                                                                                                                                                                                                                                                                                                                                                                                                           | OSV-Scanner failed on vulnerabilities in indirect dependencies of Expo, Jest and Stryker, with no fix short of major versions we do not control. It is the procedure in `docs/security.md`    | Fernando, 2026-11-10 |
+| 2026-11-10 | T011: `scripts/review.sh` uses `codex exec --sandbox read-only` with the instructions instead of `codex review --base`.                                                                                                                                                                                                                                                                                                                                                                                                                                                          | With Codex 0.167.0, `codex review --base` does not accept custom instructions at the same time ("the argument --base cannot be used with [PROMPT]")                                           | Fernando, 2026-11-10 |
+| 2026-11-10 | T011: after the Codex review, `eslint.config.js` (packages per layer, `jsx-only` with visible attributes, `checkGlobalObject`), `check-traceability.mjs` (test names only), `verify.sh` (`skip`/`only` variants) and `verify.yml` (SHA-256 of gitleaks and osv-scanner) are hardened; `jest`, `jest-expo` and `@types/jest` move to `devDependencies`.                                                                                                                                                                                                                           | Findings C-02 to C-08 in `review.md`                                                                                                                                                          | Fernando, 2026-11-10 |
+| 2026-11-11 | T011: the Reviewer role gets two subagents: `reviewer` (phase 4) and `codex-reviewer` (phase 8, `model: haiku`, `effort: low`). Both read `.agents/roles/reviewer.md`; `CLAUDE.md` says which one is used in each phase. Nine subagents in total.                                                                                                                                                                                                                                                                                                                                | In phase 8 Codex does the review and the subagent only runs `scripts/review.sh` and copies the findings; a subagent can only pin one model                                                    | Fernando, 2026-11-11 |
+| 2026-11-11 | T011: each subagent pins `model` and `effort`: Opus for `specifier` (high), `clarifier` (medium), `planner` (high), `reviewer` (medium), `security` (high) and `test-designer` (high); Sonnet for `implementer` (high); Haiku for `verifier` and `codex-reviewer` (low).                                                                                                                                                                                                                                                                                                         | Match the model to each role's work: judgement where decisions are made, Sonnet to write code against existing tests and Haiku where only a script runs                                       | Fernando, 2026-11-11 |
+| 2026-11-11 | T011: commit messages are written in English (first version of ADR-003).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | The repository is public and the code is already in English; anyone should be able to read the history                                                                                        | Fernando, 2026-11-11 |
+| 2026-11-11 | T011: everything in the repository moves to English (ADR-003): rules, docs, ADRs, roles, templates, subagents, this spec folder, `osv-scanner.toml`, the layer READMEs and the PR. `resumen.md` becomes `summary.md`, `[DUDA]` becomes `[DOUBT]`, the closed status is "Closed" and the Codex severities are BLOCKING, IMPORTANT and MINOR; `check-traceability.mjs` and `review.sh` follow. The app stays in Spanish (`es.json`), and so does the chat with the developer. The folder and branch `000-puesta-en-marcha` keep their name, and earlier commits are not rewritten. | The repository is public: documentation and history in Spanish can only be read by people who read Spanish                                                                                    | Fernando, 2026-11-11 |

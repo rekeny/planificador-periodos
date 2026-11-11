@@ -1,23 +1,23 @@
-## Qué cambia
+## What changes
 
-<!-- Dos o tres frases. -->
+<!-- Two or three sentences. -->
 
-- **Especificación:** `specs/NNN-nombre/`
-- **Nivel:** Pequeño | Medio | Grande
-- **Tareas:** T0NN–T0NN
+- **Spec:** `specs/NNN-name/`
+- **Level:** Small | Medium | Large
+- **Tasks:** T0NN–T0NN
 
-## Definición de hecho
+## Definition of done
 
-- [ ] `scripts/verify.sh` en verde, con la salida adjunta
-- [ ] Escenarios de usuario probados para cada criterio de aceptación tocado
-- [ ] Especificación y plan aprobados, sin ninguna `[DUDA]` abierta
-- [ ] Revisión de Codex y auditoría de seguridad sin hallazgos bloqueantes
-- [ ] Informe de qué se ha hecho, cómo y por qué, en `resumen.md`
-- [ ] `spec.md` y `tasks.md` al día
-- [ ] Probado en móvil y en tablet, si toca la interfaz
-- [ ] Textos nuevos en `src/i18n/es.json`
+- [ ] `scripts/verify.sh` green, with the output attached
+- [ ] User scenarios tested for every acceptance criterion touched
+- [ ] Spec and plan approved, with no open `[DOUBT]`
+- [ ] Codex review and security audit with no blocking findings
+- [ ] Report of what was done, how and why, in `summary.md`
+- [ ] `spec.md` and `tasks.md` up to date
+- [ ] Tested on phone and tablet, if it touches the interface
+- [ ] New texts in `src/i18n/es.json`
 
-## Salida de la verificación
+## Verification output
 
 <details>
 <summary>scripts/verify.sh</summary>
