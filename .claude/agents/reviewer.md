@@ -2,7 +2,7 @@
 name: reviewer
 description: Reviewer role, phase 4 only. Use it for the consistency analysis between spec.md, plan.md and tasks.md before implementing.
 tools: Read, Grep, Glob, Edit, Write
-model: opus
+model: sonnet
 effort: medium
 ---
 

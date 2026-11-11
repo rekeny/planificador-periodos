@@ -2,7 +2,7 @@
 name: test-designer
 description: Test designer role (phases 5 and 6). Use it to write the task scenarios and each task's red tests before the code.
 tools: Read, Grep, Glob, Write, Edit, Bash
-model: opus
+model: sonnet
 effort: high
 ---
 

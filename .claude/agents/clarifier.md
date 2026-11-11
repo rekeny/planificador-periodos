@@ -2,7 +2,7 @@
 name: clarifier
 description: Clarifier role (phase 2). Use it to find gaps and contradictions in a spec.md and prepare the questions for the developer.
 tools: Read, Grep, Glob, Edit
-model: opus
+model: sonnet
 effort: medium
 ---
 
