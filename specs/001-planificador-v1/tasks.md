@@ -68,7 +68,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: "07" is not a valid number, but sorting never throws; two entries of the same player in different stays have different keys.
   - Pending: nothing.
 
-- [ ] **T005** · Tap on a cell (RF-044, RF-045, RF-048, RF-049, RF-050, RF-051, RF-055, E-011, E-012, E-013)
+- [x] **T005** · Tap on a cell (RF-044, RF-045, RF-048, RF-049, RF-050, RF-051, RF-055, E-011, E-012, E-013)
   - Layer and files: domain · `src/domain/marking.ts` (`tapCell`), test.
   - Done when: every row of the RF-044–RF-051 table returns the expected `MarkingResult`, and no tap returns a grid with 6 X in a column.
   - Scenarios:
