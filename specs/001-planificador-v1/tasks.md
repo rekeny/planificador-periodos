@@ -150,7 +150,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a circled X in the window counts as neither played nor rest (E-002, E-010).
   - Pending: nothing.
 
-- [ ] **T011** · Rule impossible to meet, by bounded flow (RF-003, RF-004, RF-010, RF-067, E-003, E-004, E-006, E-007, E-015, E-030)
+- [x] **T011** · Rule impossible to meet, by bounded flow (RF-003, RF-004, RF-010, RF-067, E-003, E-004, E-006, E-007, E-015, E-030)
   - Layer and files: domain · `src/domain/bounded-flow.ts`, `src/domain/rule-feasibility.ts`, tests.
   - Done when: `isRuleImpossible` is true for E-003, E-004, E-006, E-015 and E-030 and false for E-007; `bounded-flow.ts` passes its own tests on small networks with lower bounds; the algorithm follows `plan.md`.
   - Scenarios:
