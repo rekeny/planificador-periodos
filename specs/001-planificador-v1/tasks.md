@@ -260,7 +260,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## Examples, properties and delivery close
 
-- [ ] **T019** · Spec examples table through the public domain functions (E-001, E-002, E-003, E-004, E-005, E-006, E-007, E-008, E-009, E-010, E-011, E-012, E-013, E-014, E-015, E-016, E-017, E-018, E-020, E-026, E-027, E-030, E-031)
+- [x] **T019** · Spec examples table through the public domain functions (E-001, E-002, E-003, E-004, E-005, E-006, E-007, E-008, E-009, E-010, E-011, E-012, E-013, E-014, E-015, E-016, E-017, E-018, E-020, E-026, E-027, E-030, E-031)
   - Layer and files: domain tests · `src/domain/spec-examples.test.ts`, one `it.each` table, so the examples of the spec can be read in one place (the per-file tests of T004–T018 stay).
   - Done when: every row passes; for the examples that state the whole grid (E-001, E-002, E-005, E-007–E-010, E-015, E-030), the row also asserts that no other warning is shown.
   - Scenarios:
