@@ -189,7 +189,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: marks in free periods never add light red cells or players in red (RF-072).
   - Pending: nothing.
 
-- [ ] **T014** · Performance budget and mutation-run settings (RF-060)
+- [x] **T014** · Performance budget and mutation-run settings (RF-060)
   - Layer and files: domain tests and tooling · `src/domain/warnings.budget.test.ts`, `tests/setup/fast-check.ts`, `tests/setup/fast-check-mutation.ts`, `jest.config.js` (`setupFiles`), `jest.stryker.config.js`, `stryker.config.json` (`jest.configFile`, `timeoutMS`), `eslint.config.js` (Node globals for the new config file).
   - Done when: 500 calls of `evaluateWarnings` on the worst planned grid take under 2.5 s in Jest with coverage; Stryker runs only `src/domain/**/*.test.ts`, without `*.budget.test.ts`, with 100 fast-check runs; normal Jest runs use 1,000; `FORCE_MUTATION=1 npm run verify` is green and its duration is written in the task's commit message body.
   - Scenarios:

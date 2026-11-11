@@ -182,7 +182,7 @@ module.exports = defineConfig([
   },
   {
     // CommonJS config file: Node provides __dirname.
-    files: ["jest.config.js"],
+    files: ["jest.config.js", "jest.stryker.config.js"],
     languageOptions: { globals: { __dirname: "readonly" } },
   },
   {

@@ -64,7 +64,6 @@ describe("isRuleImpossible, properties", () => {
           expect(isRuleImpossible(grid)).toBe(true);
         }
       }),
-      { numRuns: 500 },
     );
   });
 
@@ -85,7 +84,6 @@ describe("isRuleImpossible, properties", () => {
           expect(isRuleImpossible(grid)).toBe(true);
         }
       }),
-      { numRuns: 500 },
     );
   });
 

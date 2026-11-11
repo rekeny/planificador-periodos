@@ -226,7 +226,6 @@ describe("hasFeasibleFlow, purity and agreement with brute force", () => {
       property(networkArbitrary, (net) => {
         expect(hasFeasibleFlow(net)).toBe(bruteForceFeasible(net));
       }),
-      { numRuns: 500 },
     );
   });
 });
