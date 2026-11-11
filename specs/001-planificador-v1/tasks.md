@@ -286,7 +286,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: no warning ever points at a free period or an overtime (RF-072).
   - Pending: nothing.
 
-- [ ] **T021** · Properties on random sequences of actions: 5-X limit, only the acted cells change, Undo never writes into re-created rows or columns (RF-054, RF-055, RF-057, RF-086)
+- [x] **T021** · Properties on random sequences of actions: 5-X limit, only the acted cells change, Undo never writes into re-created rows or columns (RF-054, RF-055, RF-057, RF-086)
   - Layer and files: domain tests · `src/domain/actions.properties.test.ts`, `tests/support/grid-arbitraries.ts` (adds the action generator: taps, menu choices, answers, undos, overtimes, format changes and call-up changes).
   - Done when: the action properties of `plan.md` hold for 1,000 random sequences each in normal runs.
   - Scenarios:
