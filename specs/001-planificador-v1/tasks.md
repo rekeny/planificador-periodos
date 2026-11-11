@@ -176,7 +176,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: 5 X and a sub → none; E-002 and E-010 → the period with the sub is inconsistent, not incomplete.
   - Pending: nothing.
 
-- [ ] **T013** · All warnings in one result, call-up range and legend items (RF-005, RF-010, RF-060, RF-061, RF-068, RF-072, RF-087, E-015, E-027, E-030)
+- [x] **T013** · All warnings in one result, call-up range and legend items (RF-005, RF-010, RF-060, RF-061, RF-068, RF-072, RF-087, E-015, E-027, E-030)
   - Layer and files: domain · `src/domain/call-up-range.ts`, `src/domain/warnings.ts`, `src/domain/legend.ts`, tests.
   - Done when: `evaluateWarnings` combines T010–T012 and the call-up range; `legendItems` returns only the kinds present, in a fixed order, and nothing when no mark is present; a complete 8-period window with 12 players, each with 2 or 3 X and no sub, reports nothing.
   - Scenarios:
