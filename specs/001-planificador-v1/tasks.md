@@ -163,7 +163,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: circled X cells are never used as free cells.
   - Pending: nothing.
 
-- [ ] **T012** · Incomplete and inconsistent periods (RF-065, RF-066, E-002, E-007, E-010, E-013)
+- [x] **T012** · Incomplete and inconsistent periods (RF-065, RF-066, E-002, E-007, E-010, E-013)
   - Layer and files: domain · `src/domain/period-warnings.ts`, test.
   - Done when: `periodWarning` returns "inconsistent" for any column with a circled X and fewer than 5 X, otherwise "incomplete" for window columns with fewer than 5 X, otherwise `null`.
   - Scenarios:
