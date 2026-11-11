@@ -59,5 +59,8 @@
     "test:mutation": "stryker run",
     "verify": "scripts/verify.sh"
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  }
 }
