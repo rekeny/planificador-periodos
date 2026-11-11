@@ -40,7 +40,9 @@ Once tareas, un commit por tarea (`T001` a `T011`), en la rama `000-puesta-en-ma
 - **`codex exec` en vez de `codex review --base`** (T011): con Codex 0.167.0 `--base` no admite instrucciones personalizadas. Además, el modelo `gpt-5.2` fijado en `~/.codex/config.toml` no lo admite una cuenta de ChatGPT; se quitó esa línea.
 - **Arreglos tras la revisión** (T011): paquetes por capa en ESLint, `jsx-only` con atributos visibles, `checkGlobalObject`, trazabilidad que solo lee nombres de pruebas, `verify.sh` que detecta `it.skip.each` y SHA-256 fijados en el workflow.
 
-- **Dos subagentes para el Revisor** (T011): `reviewer` hace el análisis de la fase 4 con el modelo de la sesión, y `codex-reviewer` la fase 8 con Haiku, porque ahí solo lanza `scripts/review.sh` y copia los hallazgos de Codex. Un subagente solo puede fijar un modelo, y así no depende de que el orquestador se acuerde de cambiarlo.
+- **Dos subagentes para el Revisor** (T011): `reviewer` hace el análisis de la fase 4 con Opus, y `codex-reviewer` la fase 8 con Haiku, porque ahí solo lanza `scripts/review.sh` y copia los hallazgos de Codex. Un subagente solo puede fijar un modelo, y así no depende de que el orquestador se acuerde de cambiarlo.
+
+- **Un modelo por subagente** (T011): Opus en los roles que deciden (especificar, aclarar, planificar, analizar, auditar y diseñar pruebas), Sonnet en el Implementador, que escribe código contra pruebas ya hechas y pasa por `verify.sh` y Codex, y Haiku en el Verificador y en `codex-reviewer`, que solo ejecutan un script. Cada fichero de `.claude/agents/` lo fija con `model` y `effort`; la sesión principal sigue con el modelo que elijas.
 
 Todas las desviaciones están en la tabla «Desviaciones» de `plan.md`, con su aprobación.
 

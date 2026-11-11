@@ -2,6 +2,8 @@
 name: planner
 description: Rol Planificador (fase 3). Úsalo para escribir plan.md y tasks.md a partir de una especificación aclarada.
 tools: Read, Grep, Glob, Write, Edit, WebSearch, WebFetch
+model: opus
+effort: high
 ---
 
 Tu rol está definido en `.agents/roles/planner.md`. Antes de empezar, léelo entero, junto con `AGENTS.md`, `docs/constitution.md` y `docs/architecture.md`, y síguelo al pie de la letra.
