@@ -2,32 +2,120 @@
 
 ## Pre-implementation analysis (phase 4)
 
-Reviewed on 2026-11-11 at commit `ef3e852` (branch `001-planificador-v1-spec`), with a clean context. Inputs: `spec.md`, `plan.md`, `tasks.md`, ADR-004, `source-en.md`, `AGENTS.md`, `docs/constitution.md`, `docs/architecture.md`, `docs/security.md`, `eslint.config.js`, `scripts/check-traceability.mjs`, `scripts/verify.sh`, `jest.config.js`, `stryker.config.json` and `.github/workflows/verify.yml`.
+First pass on 2026-11-11 at commit `ef3e852` (branch `001-planificador-v1-spec`), with a clean context. Inputs: `spec.md`, `plan.md`, `tasks.md`, ADR-004, `source-en.md`, `AGENTS.md`, `docs/constitution.md`, `docs/architecture.md`, `docs/security.md`, `eslint.config.js`, `scripts/check-traceability.mjs`, `scripts/verify.sh`, `jest.config.js`, `stryker.config.json` and `.github/workflows/verify.yml`.
 
-| #    | Finding                                                 | Severity  | Status |
-| ---- | ------------------------------------------------------- | --------- | ------ |
-| P-01 | Layers: ui and data would have to call domain functions | Important | Open   |
-| P-02 | `src/data/test-database.ts` imports `better-sqlite3`    | Important | Open   |
-| P-03 | Plan decisions add behaviour that is not in the spec    | Important | Open   |
-| P-04 | Principle 5: iOS backups undecided, check says Yes      | Important | Open   |
-| P-05 | RF-082 forbids a save button, but forms use «Guardar»   | Important | Open   |
-| P-06 | Brute-force oracle for RF-067 is vacuous as planned     | Important | Open   |
-| P-07 | `babel-plugin-inline-import` is unmaintained            | Important | Open   |
-| P-08 | Mutation testing may exceed the 30-minute CI limit      | Important | Open   |
-| P-09 | Plan and tasks still call the answers pending           | Minor     | Open   |
-| P-10 | Examples leave the rest of the grid undefined           | Minor     | Open   |
-| P-11 | Some tasks are likely longer than three hours           | Minor     | Open   |
-| P-12 | Small mismatches between plan and tasks                 | Minor     | Open   |
-| P-13 | Spec bookkeeping: US2 list, RF-074, Q20                 | Minor     | Open   |
-| P-14 | Code names drift from the glossary                      | Minor     | Open   |
-| P-15 | ADR-004 loose ends                                      | Minor     | Open   |
-| P-16 | Some RFs are traced only by manual Maestro flows        | Minor     | Open   |
-| P-17 | D2 interim gap missing from the constitution check      | Minor     | Open   |
-| P-18 | Undo after a player is removed and re-added             | Minor     | Open   |
-| P-19 | Tablet height budget for RF-081                         | Minor     | Open   |
-| P-20 | Contradictory wording of the RF-061 property            | Minor     | Open   |
+Second pass on 2026-11-11 at commit `b7b4b9a` (same branch), by a new reviewer with a clean context. Inputs: the same files, plus `package.json`. Every first-pass finding was checked against the current files, and P-21 to P-29 are new.
 
-### Details
+| #    | Finding                                                         | Severity  | Status                         |
+| ---- | --------------------------------------------------------------- | --------- | ------------------------------ |
+| P-01 | Layers: ui and data would have to call domain functions         | Important | Fixed                          |
+| P-02 | `src/data/test-database.ts` imports `better-sqlite3`            | Important | Fixed                          |
+| P-03 | Plan decisions add behaviour that is not in the spec            | Important | Fixed                          |
+| P-04 | Principle 5: iOS backups undecided, check says Yes              | Important | Fixed                          |
+| P-05 | RF-082 forbids a save button, but forms use «Guardar»           | Important | Fixed                          |
+| P-06 | Brute-force oracle for RF-067 is vacuous as planned             | Important | Fixed                          |
+| P-07 | `babel-plugin-inline-import` is unmaintained                    | Important | Fixed                          |
+| P-08 | Mutation testing may exceed the 30-minute CI limit              | Important | Fixed                          |
+| P-09 | Plan and tasks still call the answers pending                   | Minor     | Fixed (one leftover, see P-22) |
+| P-10 | Examples leave the rest of the grid undefined                   | Minor     | Fixed (one leftover, see P-24) |
+| P-11 | Some tasks are likely longer than three hours                   | Minor     | Fixed (new candidates, P-27)   |
+| P-12 | Small mismatches between plan and tasks                         | Minor     | Fixed                          |
+| P-13 | Spec bookkeeping: US2 list, RF-074, Q20                         | Minor     | Fixed                          |
+| P-14 | Code names drift from the glossary                              | Minor     | Fixed                          |
+| P-15 | ADR-004 loose ends                                              | Minor     | Fixed (new stale text, P-29)   |
+| P-16 | Some RFs are traced only by manual Maestro flows                | Minor     | Accepted (with plan approval)  |
+| P-17 | D2 interim gap missing from the constitution check              | Minor     | Fixed                          |
+| P-18 | Undo after a player is removed and re-added                     | Minor     | Fixed                          |
+| P-19 | Tablet height budget for RF-081                                 | Minor     | Fixed                          |
+| P-20 | Contradictory wording of the RF-061 property                    | Minor     | Fixed                          |
+| P-21 | "Leaving the match" undefined: undo history vs child routes     | Important | Open                           |
+| P-22 | Android Back (D46) not carried into the plan and tasks          | Minor     | Open                           |
+| P-23 | Interface texts the plan needs that are not in the approved set | Minor     | Open                           |
+| P-24 | E-007 claims a whole grid but leaves P6 and subs open           | Minor     | Open                           |
+| P-25 | RF-081 says nothing about more than 12 players on a tablet      | Minor     | Open                           |
+| P-26 | Match edit screen mixes «Guardar» with an at-once format change | Minor     | Open                           |
+| P-27 | T023 and T030 are likely longer than three hours                | Minor     | Open                           |
+| P-28 | New folders missing from the architecture "Structure"           | Minor     | Open                           |
+| P-29 | ADR-004 stale numbers                                           | Minor     | Open                           |
+
+### Second pass: status of P-01 to P-20
+
+- **P-01 Fixed.** `src/state/` publishes `MatchView` (columns, rows with counters and red flags, cells with state and light red, legend, format options, players to add, replaceable starters), `MatchListItem` with dates already formatted, and `formatOptions`. Repositories return plain records, and state narrows them with `isFormat` and sorts them with the domain comparators. Against the `boundaries` policies in `eslint.config.js`, every planned import is allowed: app and ui import state values and domain types, state imports domain and data, and data imports only domain types and the `expo-sqlite` and `drizzle-orm` subpaths.
+- **P-02 Fixed.** The helper is `tests/support/test-database.ts`. It matches `TEST_FILES` (`tests/**`), it is not a `*.test.ts` file, so Jest does not run it as a suite, and it is outside `collectCoverageFrom`.
+- **P-03 Fixed.** Plan decisions 1–8 and the extra task behaviours are recorded in the spec as RF-083–RF-088, E-020–E-032 and clarifications D37–D47, and the texts table includes `error.saveFailed`, the header marks and `match.clearTime`. Leftovers are in P-23, P-25 and P-26.
+- **P-04 Fixed.** RF-088 and E-028 were added. The config plugin covers Android `dataExtractionRules`, with `<cloud-backup>` and `<device-transfer>`, and `fullBackupContent`, and adds `isExcludedFromBackup` on the iOS database folder. The constitution check says how, Security audits it in T023, and `docs/security.md` is updated there.
+- **P-05 Fixed.** RF-082 separates grid changes and confirmed actions, saved at once, from forms saved with «Guardar». E-029 and D40 were added.
+- **P-06 Fixed.** The oracle covers all three formats, with call-ups from the format minimum to 13 and at most 4 X missing. It has a mixed generator with both outcomes guaranteed, and a possible-by-construction generator. Checked by hand: a cyclic assignment gives every player ⌊T/n⌋ or ⌈T/n⌉ X, where T is 15, 25 or 30. That meets both minimums for every in-range call-up (4 periods, 8–12 players: 1–2 played, 1–2 rested; 6 periods, 9–12: 2–3 played, 2–3 rested; 8 periods, 8–12: 2–4 played, 2–4 rested). Circled X go only into cells that were empty in the valid window, so refilling the removed X always works.
+- **P-07 Fixed.** The plugin was dropped in favour of `scripts/bundle-migrations.mjs`, with a staleness test.
+- **P-08 Fixed.** `jest.stryker.config.js` runs only domain tests, without the budget test and with `numRuns: 100`. It also sets an explicit `timeoutMS` and records the run time at each close, with the incremental-mode fallback (T013, T021).
+- **P-09 Fixed.** The plan "Pending" field and the task "Pending:" fields no longer point to pending questions. The exception is T040, see P-22.
+- **P-10 Fixed.** The paragraph above the examples says which examples state the whole grid. E-001, E-002, E-005 and E-008–E-010 now fix the call-up and the rest of the grid, E-015 shows the rule-impossible warning, and E-030 was added. The exception is E-007, see P-24.
+- **P-11 Fixed** for the tasks it named: the old T016, T019, T031 and T040 were split (now T018–T020, T024–T026, T031 and T040, and T051–T052). T030 is still large, see P-27.
+- **P-12 Fixed.** T022 installs every D2 package, `zustand` included. T037 creates the session store before the call-up actions use it. `openCellMenu` and `matches-store.ts` are in the plan's state design. The quick home/away option is `useMyTeamAs` in the draft store, and no domain function is claimed.
+- **P-13 Fixed.** US1, US2 and US6 all list RF-001. RF-074 and RF-075 are recorded through review P-13. The Q20 row says the texts are approved.
+- **P-14 Fixed.** The plan uses `Team`, `Player`, `Match`, `CallUp`, `Format`, `Period`, `Overtime`, `RuleWindow` and `Mark`. Every new code name is in "Glossary additions" (T002). `Warning` appears as a suffix (`Warnings`, `PeriodWarning`, `CallUpRangeWarning`), which is acceptable.
+- **P-15 Fixed.** ADR-004 now names the `NNN-name-spec` branch. T001 sets the spec to "In progress" and adds the numbering rule to `specifier.md`. The D1 scope lists T001, T002 and T013. New stale text is in P-29.
+- **P-16 Accepted.** The plan's table "IDs that a machine can only check in part" accepts it explicitly and names the Jest tests and the manual checks. It becomes final when Fernando approves the plan.
+- **P-17 Fixed.** The principle 1 row and the D2 checkpoint state the known D2 gap.
+- **P-18 Fixed.** Rows are keyed by `CallUpEntryId`, and a re-added player gets a new entry. T014, T017, T019, T035 and T037 test it.
+- **P-19 Fixed.** The plan has a height table: 238 pt above the rows and 530 pt left, which is at least 528. The banners are measured with `onLayout`, the grid buttons go in the header on tablets, and T048 and T052 check it. The margin is recorded as a risk.
+- **P-20 Fixed.** The property now says "every warning it reports is justified", and there is a separate example for a complete, valid grid.
+
+### New findings (second pass)
+
+- **P-21 · Important.** RF-057 says the undo history "is lost when leaving [the match]". The plan empties it in `closeMatch()`, and T050 lists "leaving the screen empties the history" as a scenario. The plan never says when `closeMatch()` runs. Two flows of the spec happen on child routes of the match:
+  - E-026 removes Eva from the call-up on `/matches/[matchId]/call-up` (T041), then presses Undo back on the grid;
+  - RF-086 skips the cells of periods that disappeared in a format change, and that change happens on `/matches/[matchId]/edit` (T067).
+
+  If `closeMatch()` runs when the grid screen loses focus or unmounts, which T050's wording invites, the history is empty when the coach comes back. E-026 then fails in the real app, while the state tests of T047 still pass, because they call the store directly. The plan should define "leaving the match" (for example, the match route is popped back to the team or the match list, and opening the call-up, new-player or edit routes is not leaving). T050's scenario should be reworded to match, and T051 or T043 should add a Maestro step for E-026 through the call-up screen. If the intended meaning differs, the Specifier should record it in RF-057.
+
+- **P-22 · Minor.** The plan and the tasks do not fully carry D44–D46.
+  - The `choice-dialog.tsx` design describes tapping outside, but not the Android Back button. With React Native `Modal`, that is `onRequestClose`: it must do nothing for confirmations and cancel questions, the replaced-X choice, the reminder and the menu.
+  - T040 still has "Pending: Android back button behaviour (plan "Pending", point 2), to be recorded in the spec before approval", but the plan has no such point and D46 settled it.
+  - The scenarios of T050, T059, T060, T067, T071 and T072 mention tapping outside but not Back.
+  - T060 adds «Cancelar» to the long-press menu, while RF-052 says "the menu always shows the three options". A cancel control is reasonable, but the plan should say it is not a fourth option.
+- **P-23 · Minor.** Some interface texts that the plan implies are not in the approved Spanish texts table:
+  - the "not found" state of `route-params.ts` and T031 (or the plan should say it goes back silently);
+  - the accessible labels of the three cell states (T049), which ESLint checks as JSX attributes;
+  - the empty-state text of the "players to add" list (T041).
+
+  Principle 12 and the Specifier's texts table cover these. Add them through the Specifier, or state that the screens show no text there.
+
+- **P-24 · Minor.** The paragraph above the examples says E-007 states the whole grid and that anything not listed is not shown. E-007 does not fix P6, and it does not say "no subs". A circled X in P5 would turn its «!» into «≠», and a sub in P6 with fewer than 5 X would add «≠» on P6, so "Only «!» on P5" depends on how the test fills the grid. Add "no subs; P6 is empty", as E-005 does. By-hand check of E-007 otherwise: P1–P4 hold 20 X across 10 players with at most 5 per period, so each period has exactly 5 X. Every player has 3 possible rests, so no light red cell, and U = 1. With five slots in P5 and ten players able to take one, the window is feasible.
+- **P-25 · Minor.** RF-081 says "the whole grid of the format fits in both orientations" on a tablet, and its criterion uses 12 players. RF-010 allows 13 or more. With 44-pt rows, the iPad landscape budget (530 pt) holds only 12. T048 decides that "13 players on a tablet → vertical scroll allowed", which the spec does not say. Record it in RF-081 through the Specifier, as was done for the overtimes in Q19.
+- **P-26 · Minor.** RF-082 treats "match details" as a form saved with «Guardar», and "the format change of a saved match, once confirmed" as saved at once. The plan puts both on `/matches/[matchId]/edit`, through `match-form.tsx` and `changeFormat` in the session store. Neither the plan nor T067 says that the format picker there acts on its own (confirmation, then saved at once) and outside «Guardar». They also do not say what the coach sees after confirming a format change and then leaving without «Guardar». T067's scenario "leaving without «Guardar» keeps the saved details" could be read as also reverting the format. State it in the plan's US6 design and in T067.
+- **P-27 · Minor.** These two tasks look longer than three hours.
+  - T023 covers two Android XML files with manifest attributes, an iOS `AppDelegate.swift` modification with an anchor check and idempotent merge, a Jest test, `prebuild` on both platforms, device checks with `xattr` and `bmgr`, the Security audit and `docs/security.md`. Split it into Android and iOS tasks.
+  - T030 covers the root layout, three routes, `team-form.tsx`, `format-picker.tsx`, `input-limits.ts`, `save-error-banner.tsx`, `es.json` and tests. Split it into the list and navigation, then the form and its edit route.
+
+  T001, T019 and T037 are also at the edge. D2 is re-planned before it starts, so only T001 and T019 (D1) need a look now.
+
+- **P-28 · Minor.** The plan creates folders that the "Structure" of `docs/architecture.md` does not list: `plugins/` (config plugin), `tests/support/`, `tests/scripts/`, `tests/plugins/` and `tests/setup/`. Rule 12 asks to respect the structure, and rule 11 asks for an ADR for architecture changes. Add these folders to the structure in the documentation PR, as a consequence of ADR-004 or as a recorded clarification.
+- **P-29 · Minor.** In ADR-004, "the next spec continues after the highest ID used so far (today `RF-089` and `E-033`)" reads as if those were the highest IDs used. The highest are `RF-088` and `E-032`, and the next spec starts at `RF-089` and `E-033`. The discarded alternative "spec 001 already has 19 examples" should now say 32.
+
+### Second pass: checks with no finding
+
+- **Coverage:** every RF-001–RF-088 and every E-001–E-032 appears on at least one task checkbox line, which is where `check-traceability.mjs` reads them. Every task ID points to an existing RF and E. T001–T074 are sequential, with no gaps or repeats. No `[DOUBT]` is open (D1–D47 answered and dated). The level, Large, is right.
+- **Examples checked by hand** for the new or changed ones:
+  - E-001: Juan has U = 0 and the nine others have L = 2 and U = 3; 22 X are needed, between 18 and 27.
+  - E-002: P3 shows «≠»; 23 X are needed.
+  - E-005: 23 X fit both counts (20 + 3 and 1 + 11 × 2). Pedro has 4 possible rests, and the others have 3. Two slots are left in P5, and Pedro, with L = 1, takes one: feasible.
+  - E-008: 26 X are needed, between 18 and 36.
+  - E-009: P3 is light red at the minimum of 1; 13 X are needed, between 9 and 18.
+  - E-010: 14 X are needed, between 9 and 18.
+  - E-015: at most 8 × 3 = 24 of 25 X.
+  - E-030: at least 13 × 2 = 26 of 25 X.
+  - E-026: the replacement entry keeps Ana's cell after Eva is pruned, so P2 has 4 X.
+  - E-031: the overtime entry is pruned on removal, and one press empties Ana's P1.
+
+  All of them match RF-062–RF-067. E-007 also holds once P-24 is fixed.
+
+- **Layers and conventions:** domain functions are pure and never read the clock, and "today" comes from state. `grid-layout.ts` computes only sizes. Input limits are interface constants, not regulation rules. No `react-native` is imported in `src/state/`.
+- **Dependencies:** each one has its reason, alternative, licence and security review. `expo-splash-screen`, `@expo/ui` and `react-native-gesture-handler` are already in `package.json`. No new dependency makes network calls.
+- **Spec, plan and tasks:** the task numbers quoted in the plan (T013, T020, T023, T024, T027, T032, T033, T038, T043, T048, T051, T052, T055, T060–T062, T068 and T074) match `tasks.md`. The budget numbers (500 calls, 2.5 s) and the mutation settings agree between the plan and T013. The D2 and D3 split agrees with ADR-004.
+- **Source coverage:** every item of `source-en.md` maps to an RF, an example or "Out of scope" in the spec's coverage table. Every addition is traced to Q1–Q20, plan decisions 1–9, review findings or D36–D47. The one exception is P-25.
+
+### First pass details
 
 - **P-01 · Important.** `docs/architecture.md` and `eslint.config.js` let `src/app/`, `src/ui/` and `src/data/` import only types from `src/domain/`. The plan exposes from `match-session-store.ts` only `grid` and `warnings`, so the grid components (T038, T041) would need `gridColumns`, `columnKey`, `cellKey` (to look up `GridWarnings.lightRedCells`), `cellState`, `playerCounter` and `isRuleWindowColumn`, and `format-picker.tsx` (T023) would need `FORMAT_IDS`. On the data side, T034 asks `loadGrid` to return the call-up "sorted", which needs `comparePlayers`, and turning the stored integer into `FormatId` needs `isFormatId`. All of these are domain functions, so ESLint `boundaries` would fail. The plan must define what state publishes for the interface (for example a grid view with columns, rows with counters, cell states and warning flags, and the format options), and move sorting and narrowing from `src/data/` to `src/state/`.
 - **P-02 · Important.** T019 puts `src/data/test-database.ts`, a helper built on `better-sqlite3`, inside `src/data/`. It is not a `*.test.ts` file, so the boundaries rule for `data` (only `expo-sqlite` and `drizzle-orm`) rejects the import. This contradicts the plan's own line "`better-sqlite3` is only imported by tests", and the helper would also count in coverage. Move it to `tests/` (test category) or name it so that it falls under `TEST_FILES`.
@@ -50,7 +138,7 @@ Reviewed on 2026-11-11 at commit `ef3e852` (branch `001-planificador-v1-spec`), 
 - **P-19 · Minor.** RF-081 needs 12 rows without vertical scroll on a tablet in landscape (768 pt high). The grid shares that height with the header row, the general warning, the call-up banner, the legend and the undo and overtime buttons. T037 should include them in the height calculation.
 - **P-20 · Minor.** The property "`evaluateWarnings` … white on an empty, complete and valid grid" contradicts itself: an empty grid shows incomplete marks in the window. Say "a complete grid that meets every rule".
 
-### Checks with no finding
+### First pass: checks with no finding
 
 - **Coverage:** every RF-001–RF-082 and E-001–E-019 is in at least one task line; every task ID points to an existing RF and E; T001–T059 are sequential; no `[DOUBT]` is open; the level, Large, is right.
 - **Source coverage:** every item of `source-en.md` maps to an RF or to Out of scope. Apart from P-03 and P-13, every addition is backed by Q1–Q20 or D36.

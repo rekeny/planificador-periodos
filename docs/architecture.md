@@ -35,13 +35,22 @@ src/
   data/           schema, migrations and repositories
   domain/         pure rules and types
   i18n/           language setup and es.json
-tests/app/        tests of the screens in src/app
+tests/
+  app/            tests of the screens in src/app
+  scripts/        tests of the scripts in scripts/
+  plugins/        tests of the config plugins in plugins/
+  setup/          Jest setup files, such as the fast-check settings
+  support/        test helpers, such as the in-memory database and fast-check generators
+e2e/              Maestro flows
+plugins/          config plugins that write native settings at prebuild
 specs/            one folder per spec
 docs/             constitution, architecture, security and decisions
 .agents/          agent roles and templates
 .claude/agents/   Claude Code subagents, which point to .agents/roles
-scripts/          verify.sh, review.sh and check-traceability.mjs
+scripts/          verify.sh, review.sh, check-traceability.mjs and other tooling scripts
 ```
+
+The folders outside `src/` are created by the task that first needs them (spec 001, ADR-004). Files under `tests/` are test code for ESLint, like `*.test.ts` files, and they do not count in coverage.
 
 ## Layers
 

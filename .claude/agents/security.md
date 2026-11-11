@@ -2,7 +2,7 @@
 name: security
 description: Security role. Use it to audit changes that touch dependencies, data, navigation or configuration, and before publishing.
 tools: Read, Grep, Glob, Bash, Edit, Write
-model: opus
+model: sonnet
 effort: high
 ---
 
