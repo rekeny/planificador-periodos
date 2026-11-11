@@ -81,7 +81,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: tap Eva's X in P3 with a sub (E-013) → `confirmRemoveStarter`, grid untouched.
   - Pending: nothing.
 
-- [ ] **T006** · Player counter (RF-007, RF-008, RF-009, RF-070, RF-071, RF-072, E-014)
+- [x] **T006** · Player counter (RF-007, RF-008, RF-009, RF-070, RF-071, RF-072, E-014)
   - Layer and files: domain · `src/domain/counter.ts`, test.
   - Done when: `playerCounter` counts X as played and empty as rested over every column, overtimes included, and circled X as neither.
   - Scenarios:
