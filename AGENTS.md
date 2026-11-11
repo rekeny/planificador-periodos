@@ -17,7 +17,8 @@ App para iOS y Android, en móvil y tablet, que ayuda a entrenadores de balonces
 ## Idiomas
 
 - **Código en inglés:** identificadores, comentarios, nombres de pruebas, mensajes de los scripts y nombres de ficheros de código.
-- **Castellano en todo lo demás:** documentación, especificaciones, commits, PR y explicaciones al desarrollador.
+- **Commits en inglés:** el título y el cuerpo del mensaje, para que el historial lo entienda cualquiera (ADR-003).
+- **Castellano en todo lo demás:** documentación, especificaciones, PR y explicaciones al desarrollador.
 - **Textos de la interfaz:** solo en `src/i18n/es.json`, nunca escritos en el código.
 - Los nombres del dominio salen siempre del glosario de `docs/architecture.md`.
 
@@ -105,7 +106,7 @@ Así las pruebas siempre van antes que el código y la rama nunca acumula prueba
 **Al terminar**
 
 13. `scripts/verify.sh` en verde, con la salida adjunta. Sin esa salida, la tarea no está hecha.
-14. Un commit por tarea, con el formato `T012 RF-018: descripción`.
+14. Un commit por tarea, en inglés, con el formato `T012 RF-018: description`.
 15. Marcar la tarea en `tasks.md` y anotar lo que quede pendiente.
 16. Quien implementó no revisa. La revisión del código la hace Codex con `scripts/review.sh`, y el rol de Seguridad audita si el cambio toca dependencias, datos, navegación o configuración.
 17. Terminar con el informe de qué se ha hecho, cómo y por qué, y guardarlo también en `resumen.md`.
@@ -129,7 +130,7 @@ Codex comprueba en la revisión que las explicaciones coinciden con lo que de ve
 ## Ramas, commits y PR
 
 - **Ramas:** una por especificación, con el nombre de su carpeta, como `001-planificador-v1`. Los cambios pequeños usan `fix/descripcion-corta`.
-- **Commits:** uno por tarea, como `T012 RF-018: evaluación de casillas en rojo`. Si la tarea no tiene requisito asociado: `T001: descripción`.
+- **Commits:** uno por tarea y en inglés, como `T012 RF-018: highlight periods in light red`. Si la tarea no tiene requisito asociado: `T001: description`.
 - **`main` está protegida:** solo se fusiona por PR y con la verificación de GitHub Actions en verde. Cada PR usa la plantilla `.github/pull_request_template.md`.
 - **Fusión:** las PR se fusionan con merge commit, para conservar los commits de cada tarea.
 

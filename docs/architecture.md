@@ -141,7 +141,7 @@ Cada requisito se sigue desde la especificación hasta el commit con el mismo id
 | `spec.md`, ejemplos | `\| E-01 \| Juan con X en P1, P2 y P3 \| P4 y P5 en rojo clarito \| RF-018 \|` |
 | `tasks.md`          | `- [ ] **T012** · Evaluar casillas en rojo (RF-018, E-01, E-02)`               |
 | Prueba              | `it('RF-018 E-01: highlights P4 and P5 …')`                                    |
-| Commit              | `T012 RF-018: evaluación de casillas en rojo`                                  |
+| Commit              | `T012 RF-018: highlight periods in light red`                                  |
 | `review.md`         | Hallazgos y salida de la verificación de T012                                  |
 
 El script comprueba los ID de las tareas marcadas como hechas y, cuando la especificación está «Cerrada», todos sus ID.

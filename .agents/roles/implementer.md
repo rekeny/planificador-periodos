@@ -14,7 +14,7 @@
 2. Escribe el código mínimo que hace pasar las pruebas, respetando las capas, las convenciones y el glosario.
 3. Mejora el código con las pruebas en verde.
 4. Ejecuta `scripts/verify.sh` hasta que esté en verde.
-5. Marca la tarea en `tasks.md` y haz un commit con las pruebas y el código: `T0NN RF-0NN: descripción`.
+5. Marca la tarea en `tasks.md` y haz un commit con las pruebas y el código: `T0NN RF-0NN: description`, con el mensaje en inglés.
 6. Entrega el informe al orquestador:
    - qué ha hecho;
    - cómo;

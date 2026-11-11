@@ -44,6 +44,8 @@ Once tareas, un commit por tarea (`T001` a `T011`), en la rama `000-puesta-en-ma
 
 - **Un modelo por subagente** (T011): Opus en los roles que deciden (especificar, aclarar, planificar, analizar, auditar y diseñar pruebas), Sonnet en el Implementador, que escribe código contra pruebas ya hechas y pasa por `verify.sh` y Codex, y Haiku en el Verificador y en `codex-reviewer`, que solo ejecutan un script. Cada fichero de `.claude/agents/` lo fija con `model` y `effort`; la sesión principal sigue con el modelo que elijas.
 
+- **Commits en inglés** (T011, ADR-003): el código ya estaba en inglés y el repositorio es público, así que los mensajes de commit también pasan a inglés. La documentación, las especificaciones y las PR siguen en castellano. Los commits de la fase 0 anteriores a este cambio no se reescriben.
+
 Todas las desviaciones están en la tabla «Desviaciones» de `plan.md`, con su aprobación.
 
 ## Para aprender
