@@ -55,7 +55,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US3 · Plan the periods (domain)
 
-- [ ] **T004** · Squad types, call-up entries, grid model, cell states and player order (RF-016, RF-019, RF-042, RF-043, E-020)
+- [x] **T004** · Squad types, call-up entries, grid model, cell states and player order (RF-016, RF-019, RF-042, RF-043, E-020)
   - Layer and files: domain · `src/domain/squad.ts`, `src/domain/player-order.ts`, `src/domain/grid.ts`, tests.
   - Done when: `Team`, `Player`, `Match`, `CallUpEntry` and `MatchGrid` follow `plan.md`; `comparePlayers` sorts by numeric value, then "0" before "00", then by name in Spanish order; rows and cells are keyed by call-up entry; `cellState` always returns exactly one of three states; `cellExists`, `starterCount` and `hasSub` work per column.
   - Scenarios:
