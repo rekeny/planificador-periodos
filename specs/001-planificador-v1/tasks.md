@@ -94,7 +94,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: one circled X in 6 periods → played + rested = 5 (RF-071).
   - Pending: nothing.
 
-- [ ] **T007** · Overtimes: add, remove the last one, detect its marks (RF-058, RF-059)
+- [x] **T007** · Overtimes: add, remove the last one, detect its marks (RF-058, RF-059)
   - Layer and files: domain · `src/domain/overtime.ts`, test.
   - Done when: `addOvertime` adds one empty column after the last one; `lastOvertimeHasMarks` and `removeLastOvertime` work only on the last overtime and remove its marks.
   - Scenarios:
