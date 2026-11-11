@@ -8,7 +8,7 @@
 // cells an Undo may touch, so the properties can tell a re-created row or column from an old one without
 // trusting the code under test.
 import { columnKey, gridColumns, type Column } from "@/domain/column";
-import { removeFromCallUp } from "@/domain/call-up";
+import { addToCallUp, removeFromCallUp } from "@/domain/call-up";
 import { chooseCellMenuOption } from "@/domain/cell-menu";
 import { changeFormat } from "@/domain/format-change";
 import {
@@ -276,10 +276,13 @@ function addPlayer(session: Session): Session {
     id,
     playerId: 1000 + id,
     name: `Added ${id}`,
-    number: String(id % 100),
+    number: String(id % 12), // repeats on purpose: equal numbers and mid-grid insertions
   };
-  const grid = { ...session.grid, callUp: [...session.grid.callUp, entry] };
-  return { ...session, grid, nextEntryId: id + 1 };
+  return {
+    ...session,
+    grid: addToCallUp(session.grid, entry),
+    nextEntryId: id + 1,
+  };
 }
 
 export function applyAction(before: Session, action: Action): Step {

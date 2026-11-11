@@ -17,6 +17,7 @@ import {
   type MatchGrid,
 } from "@/domain/grid";
 import {
+  addToCallUp,
   callUpEntryFor,
   entryHasMarks,
   playersToAdd,
@@ -73,12 +74,10 @@ describe("removeFromCallUp in sequences", () => {
     const removed = removeFromCallUp(grid, ANA);
     const offered = playersToAdd([ana], removed.callUp);
     const newEntry: CallUpEntry = { id: 50, ...callUpEntryFor(ana) };
-    const readded: MatchGrid = {
-      ...removed,
-      callUp: [newEntry, ...removed.callUp],
-    };
+    const readded = addToCallUp(removed, newEntry);
 
     expect(offered).toEqual([ana]);
+    expect(readded.callUp.map((entry) => entry.id)).toEqual([50, EVA, LUIS]);
     for (const column of gridColumns(6, 0)) {
       expect(cellState(readded, { entryId: 50, column })).toBe("empty");
     }
@@ -95,10 +94,14 @@ describe("removeFromCallUp in sequences", () => {
       id: 2,
       ...callUpEntryFor(player(7, "Juan", "9")),
     };
+    const readded = addToCallUp(removed, second);
 
     expect(first.number).toBe("7");
     expect(removed.callUp).toEqual([]);
-    expect(second.number).toBe("9");
+    expect(readded.callUp).toEqual([
+      { id: 2, playerId: 7, name: "Juan", number: "9" },
+    ]);
+    expect(entryHasMarks(readded, 1)).toBe(false);
   });
 
   it("RF-034 E-017: for any marks, removing an entry deletes exactly its marks and no other", () => {

@@ -64,3 +64,17 @@ export function removeFromCallUp(
     marks,
   };
 }
+
+// The entry joins as a new empty row in call-up order, after any equal row (RF-032, RF-042).
+export function addToCallUp(grid: MatchGrid, entry: CallUpEntry): MatchGrid {
+  const after = grid.callUp.findIndex((row) => comparePlayers(row, entry) > 0);
+  const index = after === -1 ? grid.callUp.length : after;
+  return {
+    ...grid,
+    callUp: [
+      ...grid.callUp.slice(0, index),
+      entry,
+      ...grid.callUp.slice(index),
+    ],
+  };
+}
