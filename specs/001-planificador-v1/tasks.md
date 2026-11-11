@@ -532,7 +532,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 - [ ] **T040** · State: new-match draft (RF-026, RF-027, RF-030, RF-031, RF-036, RF-068, RF-083, RF-084, RF-085, E-015, E-024, E-030)
   - Layer and files: state · `src/state/new-match-draft.ts`, tests.
-  - Done when: the draft starts with the team default format, today's date, no time and every active player selected; `setFormat` changes it without confirmation and without touching the team; `clearTime` leaves no time; `useMyTeamAs` writes the team name only; deselecting updates the range warning; `create` saves and returns the match id, or `saveFailed` with nothing saved.
+  - Done when: the draft starts with the team default format, today's date, no time and every active player selected; `setFormat` changes it without confirmation and without touching the team; `clearTime` leaves no time; `useMyTeamAs` writes the team name only; deselecting updates the range warning; `create` saves and returns the match id, or `saveFailed` with nothing saved; after a successful `create`, calling it again returns the same match id and writes nothing, until the draft is reset (review P-30).
   - Scenarios:
     - Happy path: 12 active → 12 selected, no warning in 6 periods.
     - Boundaries: deselect to 9 → none; to 8 → warning (E-015); 13 selected → warning (E-030).
@@ -540,7 +540,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Odd data: team without players → empty call-up and warning.
     - Sequences: E-024 → 8 periods created, team default still 6; deselect in one match, next new match has everyone selected again.
     - Interruptions: the draft is dropped when the screen closes without «Guardar».
-    - Mistakes: quick home then edit the text → edited text kept; the category is never copied.
+    - Mistakes: quick home then edit the text → edited text kept; the category is never copied; `create` called twice in a row → one match in the database and the same id both times; after a reset, `create` makes a new match.
   - Pending: nothing.
 
 - [ ] **T041** · State: match session, opening and closing, and the first row view (RF-042, RF-068, E-020)
@@ -583,16 +583,16 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T044** · UI: call-up selection in the new-match screen, with count and range warning (RF-005, RF-010, RF-030, RF-031, RF-068, E-015, E-030)
-  - Layer and files: app and UI · `src/app/teams/[teamId]/matches/new.tsx` (call-up part and «Guardar»), `src/ui/call-up-selector.tsx`, `src/ui/warnings/call-up-range-banner.tsx`, `src/i18n/es.json`, tests.
-  - Done when: every active player is listed and selected at first; the count and the range warning follow the selection; creating opens the match screen.
+  - Layer and files: app and UI · `src/app/teams/[teamId]/matches/new.tsx` (call-up part and «Guardar»), `src/ui/call-up-selector.tsx`, `src/ui/warnings/call-up-range-banner.tsx`, `src/i18n/es.json`, tests next to the components and in `tests/app/` (`renderRouter` from `expo-router/testing-library`).
+  - Done when: every active player is listed and selected at first; the count and the range warning follow the selection; a successful «Guardar» opens the grid of the created match with `router.replace`, never `router.push`, so the new-match route leaves the stack and Back from the grid goes to the team screen, never to the filled form (plan "After «Guardar»", review P-30); when `create` does not return `saved`, the screen stays on the form and does not navigate.
   - Scenarios:
-    - Happy path: create with defaults and 12 players.
+    - Happy path: create with defaults and 12 players → the grid of the new match is shown.
     - Boundaries: 8 players in 6 periods → warning visible, button still enabled (E-015).
     - Outside the rules: 13 players → warning, created (E-030).
     - Odd data: team with no active players.
-    - Sequences: toggle players, change the format, create.
+    - Sequences: toggle players, change the format, create; with `renderRouter` starting at `/teams/1` and pushing `/teams/1/matches/new`: create, then Back (`testRouter.back()`) → the pathname is `/teams/1`, the team screen, and not the new-match form, and the in-memory database holds exactly one match for the team (the team's match list arrives in D3, T071).
     - Interruptions: not applicable.
-    - Mistakes: the deactivated players are not listed.
+    - Mistakes: the deactivated players are not listed; two quick presses on «Guardar» → one match in the database.
   - Pending: nothing.
 
 - [ ] **T045** · UI: confirmation dialog that closes only with its buttons, also against the Android Back button (RF-034)
@@ -623,7 +623,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 - [ ] **T047** · UI: create a new player from the match (RF-035, RF-085)
   - Layer and files: app and UI · `src/app/matches/[matchId]/new-player.tsx` (pushed on top of the match screen), reusing `src/ui/player-form.tsx`, tests.
-  - Done when: the player is created in the team and in the call-up of that match in one step; a failed save shows the message and creates neither.
+  - Done when: the player is created in the team and in the call-up of that match in one step; «Guardar» returns with `router.back()` to the screen that opened the form (the call-up screen, with the grid underneath) and never pushes a second grid (plan "After «Guardar»", review P-30); a failed save shows the message and creates neither.
   - Scenarios:
     - Happy path: create «Nora 15» → in the team and in the grid.
     - Boundaries: name of 40 characters.
@@ -637,7 +637,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 - [ ] **T048** · Maestro US2 journey (RF-030, RF-031, RF-035, RF-036, RF-037, RF-068, RF-083, RF-084, E-015, E-017, E-023, E-024, E-032)
   - Layer and files: e2e · `e2e/us2-match-and-call-up.yaml`.
   - Done when: the flow covers the US2 acceptance criteria 1–6 with the real native pickers and passes on both platforms; output in `review.md`.
-  - Scenarios: default format and date, everyone selected, 8 players warning, player created from the match, format changed in the form, «Quitar hora».
+  - Scenarios: default format and date, everyone selected, 8 players warning, player created from the match, format changed in the form, «Quitar hora»; create the match, then Back from its grid (Maestro `back` on Android, the header back button on iOS) → the team screen, and the new-match form is not shown (review P-30; the "listed once" check is in T073, once the team's match list exists).
   - Pending: nothing.
 
 **US2 checkpoint:** Fernando creates a match with today's date and the team's format, picks the call-up, sees the range warning when it applies and edits the call-up afterwards.
@@ -916,7 +916,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Boundaries: match without score or time; E-023 date format.
     - Outside the rules: not applicable.
     - Odd data: long team names.
-    - Sequences: create a match, back to the list → it appears.
+    - Sequences: create a match, then Back from its grid → the team screen lists it exactly once, and the new-match form is not in the stack (review P-30); the list of every match also shows it once.
     - Interruptions: not applicable.
     - Mistakes: the team list never shows other teams' matches or the team name.
   - Pending: nothing.
@@ -937,7 +937,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 - [ ] **T073** · Maestro US6 journey (RF-028, RF-029, RF-039, RF-057, RF-074, RF-075, RF-082, RF-083, E-016, E-032)
   - Layer and files: e2e · `e2e/us6-matches.yaml`.
   - Done when: the flow covers the US6 acceptance criteria 1–5 and E-032 with the real pickers on both platforms; output in `review.md`.
-  - Scenarios: the five US6 acceptance criteria, including a format change confirmed and the details left without «Guardar»; marking a cell, opening the details and coming back, then «Deshacer» removes the mark.
+  - Scenarios: the five US6 acceptance criteria, including a format change confirmed and the details left without «Guardar»; marking a cell, opening the details and coming back, then «Deshacer» removes the mark; creating a match and pressing Back from its grid → the team's list shows it exactly once (review P-30).
   - Pending: nothing.
 
 **US6 checkpoint:** Fernando browses every match and each team's matches, edits a saved match, changes its format with the warning and deletes a match after confirming.

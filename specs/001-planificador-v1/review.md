@@ -6,37 +6,40 @@ First pass on 2026-11-11 at commit `ef3e852` (branch `001-planificador-v1-spec`)
 
 Second pass on 2026-11-11 at commit `b7b4b9a` (same branch), by a new reviewer with a clean context. Inputs: the same files, plus `package.json`. Every first-pass finding was checked against the current files, and P-21 to P-29 are new.
 
-| #    | Finding                                                         | Severity  | Status                         |
-| ---- | --------------------------------------------------------------- | --------- | ------------------------------ |
-| P-01 | Layers: ui and data would have to call domain functions         | Important | Fixed                          |
-| P-02 | `src/data/test-database.ts` imports `better-sqlite3`            | Important | Fixed                          |
-| P-03 | Plan decisions add behaviour that is not in the spec            | Important | Fixed                          |
-| P-04 | Principle 5: iOS backups undecided, check says Yes              | Important | Fixed                          |
-| P-05 | RF-082 forbids a save button, but forms use «Guardar»           | Important | Fixed                          |
-| P-06 | Brute-force oracle for RF-067 is vacuous as planned             | Important | Fixed                          |
-| P-07 | `babel-plugin-inline-import` is unmaintained                    | Important | Fixed                          |
-| P-08 | Mutation testing may exceed the 30-minute CI limit              | Important | Fixed                          |
-| P-09 | Plan and tasks still call the answers pending                   | Minor     | Fixed (one leftover, see P-22) |
-| P-10 | Examples leave the rest of the grid undefined                   | Minor     | Fixed (one leftover, see P-24) |
-| P-11 | Some tasks are likely longer than three hours                   | Minor     | Fixed (new candidates, P-27)   |
-| P-12 | Small mismatches between plan and tasks                         | Minor     | Fixed                          |
-| P-13 | Spec bookkeeping: US2 list, RF-074, Q20                         | Minor     | Fixed                          |
-| P-14 | Code names drift from the glossary                              | Minor     | Fixed                          |
-| P-15 | ADR-004 loose ends                                              | Minor     | Fixed (new stale text, P-29)   |
-| P-16 | Some RFs are traced only by manual Maestro flows                | Minor     | Accepted (with plan approval)  |
-| P-17 | D2 interim gap missing from the constitution check              | Minor     | Fixed                          |
-| P-18 | Undo after a player is removed and re-added                     | Minor     | Fixed                          |
-| P-19 | Tablet height budget for RF-081                                 | Minor     | Fixed                          |
-| P-20 | Contradictory wording of the RF-061 property                    | Minor     | Fixed                          |
-| P-21 | "Leaving the match" undefined: undo history vs child routes     | Important | Open                           |
-| P-22 | Android Back (D46) not carried into the plan and tasks          | Minor     | Open                           |
-| P-23 | Interface texts the plan needs that are not in the approved set | Minor     | Open                           |
-| P-24 | E-007 claims a whole grid but leaves P6 and subs open           | Minor     | Open                           |
-| P-25 | RF-081 says nothing about more than 12 players on a tablet      | Minor     | Open                           |
-| P-26 | Match edit screen mixes «Guardar» with an at-once format change | Minor     | Open                           |
-| P-27 | T023 and T030 are likely longer than three hours                | Minor     | Open                           |
-| P-28 | New folders missing from the architecture "Structure"           | Minor     | Open                           |
-| P-29 | ADR-004 stale numbers                                           | Minor     | Open                           |
+Third pass on 2026-11-11 at commit `2dd63d0` (same branch), a short pass by a new reviewer with a clean context. Inputs: `spec.md`, `plan.md`, `tasks.md`, ADR-004, `AGENTS.md`, `docs/constitution.md` and `docs/architecture.md`. It checks P-21 to P-29 and repeats the coverage and consistency checks; P-30 is new. `tasks.md` was renumbered (T001–T079, review P-27), so the findings of the first and second passes quote the old task numbers.
+
+| #    | Finding                                                         | Severity  | Status                               |
+| ---- | --------------------------------------------------------------- | --------- | ------------------------------------ |
+| P-01 | Layers: ui and data would have to call domain functions         | Important | Fixed                                |
+| P-02 | `src/data/test-database.ts` imports `better-sqlite3`            | Important | Fixed                                |
+| P-03 | Plan decisions add behaviour that is not in the spec            | Important | Fixed                                |
+| P-04 | Principle 5: iOS backups undecided, check says Yes              | Important | Fixed                                |
+| P-05 | RF-082 forbids a save button, but forms use «Guardar»           | Important | Fixed                                |
+| P-06 | Brute-force oracle for RF-067 is vacuous as planned             | Important | Fixed                                |
+| P-07 | `babel-plugin-inline-import` is unmaintained                    | Important | Fixed                                |
+| P-08 | Mutation testing may exceed the 30-minute CI limit              | Important | Fixed                                |
+| P-09 | Plan and tasks still call the answers pending                   | Minor     | Fixed (one leftover, see P-22)       |
+| P-10 | Examples leave the rest of the grid undefined                   | Minor     | Fixed (one leftover, see P-24)       |
+| P-11 | Some tasks are likely longer than three hours                   | Minor     | Fixed (new candidates, P-27)         |
+| P-12 | Small mismatches between plan and tasks                         | Minor     | Fixed                                |
+| P-13 | Spec bookkeeping: US2 list, RF-074, Q20                         | Minor     | Fixed                                |
+| P-14 | Code names drift from the glossary                              | Minor     | Fixed                                |
+| P-15 | ADR-004 loose ends                                              | Minor     | Fixed (new stale text, P-29)         |
+| P-16 | Some RFs are traced only by manual Maestro flows                | Minor     | Accepted (with plan approval)        |
+| P-17 | D2 interim gap missing from the constitution check              | Minor     | Fixed                                |
+| P-18 | Undo after a player is removed and re-added                     | Minor     | Fixed                                |
+| P-19 | Tablet height budget for RF-081                                 | Minor     | Fixed                                |
+| P-20 | Contradictory wording of the RF-061 property                    | Minor     | Fixed                                |
+| P-21 | "Leaving the match" undefined: undo history vs child routes     | Important | Fixed (one gap left, see P-30)       |
+| P-22 | Android Back (D46) not carried into the plan and tasks          | Minor     | Fixed                                |
+| P-23 | Interface texts the plan needs that are not in the approved set | Minor     | Fixed (texts approved with the plan) |
+| P-24 | E-007 claims a whole grid but leaves P6 and subs open           | Minor     | Fixed                                |
+| P-25 | RF-081 says nothing about more than 12 players on a tablet      | Minor     | Fixed                                |
+| P-26 | Match edit screen mixes «Guardar» with an at-once format change | Minor     | Fixed                                |
+| P-27 | T023 and T030 are likely longer than three hours                | Minor     | Fixed                                |
+| P-28 | New folders missing from the architecture "Structure"           | Minor     | Fixed                                |
+| P-29 | ADR-004 stale numbers                                           | Minor     | Fixed                                |
+| P-30 | Back from a newly created match lands on the new-match form     | Important | Fixed in plan, T040, T044, T048      |
 
 ### Second pass: status of P-01 to P-20
 
@@ -115,6 +118,38 @@ Second pass on 2026-11-11 at commit `b7b4b9a` (same branch), by a new reviewer w
 - **Spec, plan and tasks:** the task numbers quoted in the plan (T013, T020, T023, T024, T027, T032, T033, T038, T043, T048, T051, T052, T055, T060–T062, T068 and T074) match `tasks.md`. The budget numbers (500 calls, 2.5 s) and the mutation settings agree between the plan and T013. The D2 and D3 split agrees with ADR-004.
 - **Source coverage:** every item of `source-en.md` maps to an RF, an example or "Out of scope" in the spec's coverage table. Every addition is traced to Q1–Q20, plan decisions 1–9, review findings or D36–D47. The one exception is P-25.
 
+### Third pass: status of P-21 to P-29
+
+Task numbers below are the new ones (T001–T079).
+
+- **P-21 Fixed.** D48 is recorded, and RF-057 now defines leaving the match as "only going back out of it, to the team or to a match list", with criteria for the call-up and the details. The plan section "Leaving the match" runs `closeMatch()` only in the cleanup of the grid screen's mount effect, so it runs when that route is popped and not on blur, and the child routes are always pushed. T046 and T055 state it, T052 tests that the history survives call-up actions, and T055 tests it with `renderRouter`. T056 covers the call-up screen, T072 and T073 the details, and T066 runs E-026 through the call-up screen. One gap is left: P-30.
+- **P-22 Fixed.** `choice-dialog.tsx` handles `onRequestClose` in both modes: confirmations ignore Back, and questions cancel through the same `onCancel`. The old T040 pending point is gone, and the only "Pending:" fields left are the D2 and D3 re-plans (T023, T061). Back appears in the scenarios of T045, T046, T055, T062, T064, T065, T072, T076 and T077. RF-052 and plan US5 say «Cancelar» is a separate button and not a fourth option, and T065 tests that.
+- **P-23 Fixed.** The keys `notFound.message`, `grid.cell.empty`, `grid.cell.starter`, `grid.cell.sub` and `callUp.addEmpty` are in the texts table, marked "P-23 proposal". The plan uses them in `route-params.ts`, `not-found.tsx`, the grid cells and the call-up screen. The tasks that use them are T034, T035, T046, T054 and T075. The table says Fernando approves them together with the plan, so his plan approval must mention them.
+- **P-24 Fixed.** E-007 now says "no subs" and "P5 and P6 are empty". T019 and T059 use exactly that grid.
+- **P-25 Fixed.** D49 is recorded, and RF-081 covers more than 12 players with its own criterion. The plan has a "More than 12 players on a tablet" paragraph. T053 tests 13 players at both tablet sizes (572 > 530 pt in landscape), and T057 checks it on the device.
+- **P-26 Fixed.** D50 is recorded. RF-082 states the exception and has a criterion for it, and US6 has criterion 5. In the plan's US6 design, the details are form fields, `updateDetails` takes an input without the format, and the picker acts through the session's `changeFormat` after confirmation. T072 tests "new home name, format 6 → 8 confirmed, back without «Guardar» → 8 periods and the old name". T073 repeats it in Maestro.
+- **P-27 Fixed.** The old T023 is now T025 (Android) and T026 (iOS and the Security audit). The old T030 is now T033 (navigation and list) and T034 (form, routes, picker and not-found). The old T001, T019 and T037 were also split (T001–T002, T020–T021, T041–T042). Every task now looks like three hours or less. T066 (two Maestro flows plus a device check) is the largest D3 task, and the D3 re-plan can split it if needed.
+- **P-28 Fixed.** The "Structure" of `docs/architecture.md` lists `plugins/`, `tests/scripts/`, `tests/plugins/`, `tests/setup/`, `tests/support/` and `e2e/`, and says they are test code that does not count in coverage. ADR-004 records it as a consequence, and the ADR becomes "Accepted" in the documentation PR.
+- **P-29 Fixed.** ADR-004 now says "today the highest are `RF-088` and `E-032`, so the next spec starts at `RF-089` and `E-033`". The discarded alternative says 32 examples.
+
+### New findings (third pass)
+
+- **P-30 · Important.** The plan does not say how the new-match screen moves to the grid of the match it has just created (T044: "creating opens the match screen"). RF-057 and plan decision 12 define leaving the match as going back to the team or to a match list. Suppose `/teams/[teamId]/matches/new` pushes `/matches/[matchId]`, the natural `router.push`. Then Back from the grid shows the new-match form again, still holding its draft. That is neither the team nor a list. Pressing «Guardar» there would create a second match with the same call-up. T040 only drops the draft "when the screen closes without «Guardar»", and here the screen never closed.
+  - **Fix:** in the plan's navigation section and in T044, state that a successful «Guardar» replaces the new-match route with the grid (`router.replace`, or `dismiss` followed by `push`, as the SDK 58 Expo Router docs advise). Back from the new match then goes to the team screen.
+  - **Tests:** T044 should have a `renderRouter` scenario, "create, then Back → team screen, and the match is listed once". T048 should include that step in Maestro.
+
+### Third pass: checks with no finding
+
+- **Coverage:** every RF-001–RF-088 and every E-001–E-032 appears on at least one task checkbox line. Every RF and E quoted by a task exists in the spec. T001–T079 are sequential, with no gaps or repeats. The tasks state their delivery ranges (D1 T001–T023, D2 T024–T061, D3 T062–T079), and those match the plan and ADR-004.
+- **Doubts:** no `[DOUBT]` is open. D1–D50 are answered and dated 2026-11-11, D48–D50 with their option labels. The change history records the P-21–P-26 changes.
+- **Consistency of D48–D50, RF-052, RF-057, RF-081 and RF-082:**
+  - D48 and RF-057: spec, US3 criterion 7, plan decision 12, "Leaving the match", the risk row, T046, T052, T055, T056, T066, T072 and T073 all agree.
+  - D49 and RF-081: spec, US3 criterion 8, plan decision 13, the grid layout rules, T053 and T057 agree.
+  - D50 and RF-082: spec RF-039 and RF-082, US6 criterion 5, plan decision 14, plan US6, T070, T072 and T073 agree.
+  - RF-052 «Cancelar»: spec, the coverage table row, `common.cancel`, the plan's `choice-dialog.tsx` and US5, and T063 and T065 agree.
+- **Task numbers quoted in the plan** match `tasks.md`: T001–T003, T014, T018, T020–T027, T030, T036, T037, T041–T043, T048, T052, T053, T055–T057, T060–T062, T065–T067, T073, T074, T078 and T079. The "T004" in "New dependencies" refers to phase 0, as the text says.
+- **Level:** Large is still right.
+
 ### First pass details
 
 - **P-01 · Important.** `docs/architecture.md` and `eslint.config.js` let `src/app/`, `src/ui/` and `src/data/` import only types from `src/domain/`. The plan exposes from `match-session-store.ts` only `grid` and `warnings`, so the grid components (T038, T041) would need `gridColumns`, `columnKey`, `cellKey` (to look up `GridWarnings.lightRedCells`), `cellState`, `playerCounter` and `isRuleWindowColumn`, and `format-picker.tsx` (T023) would need `FORMAT_IDS`. On the data side, T034 asks `loadGrid` to return the call-up "sorted", which needs `comparePlayers`, and turning the stored integer into `FormatId` needs `isFormatId`. All of these are domain functions, so ESLint `boundaries` would fail. The plan must define what state publishes for the interface (for example a grid view with columns, rows with counters, cell states and warning flags, and the format options), and move sorting and narrowing from `src/data/` to `src/state/`.
@@ -177,5 +212,5 @@ Full file: [codex-review.md](codex-review.md)
 
 ## Verdict
 
-- [ ] No open blocking finding
-- [ ] Important findings fixed or accepted as pending by the developer
+- [x] No open blocking finding
+- [x] Important findings fixed or accepted as pending by the developer
