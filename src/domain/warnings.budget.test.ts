@@ -1,14 +1,20 @@
 // Performance budget of the warnings (RF-060). It lives in its own file so that
 // mutation runs can leave it out: timing has no place under Stryker.
-import { columnKey, gridColumns } from "@/domain/column";
-import { MAX_STARTERS_PER_PERIOD, type Format } from "@/domain/format";
+import { columnKey, gridColumns, ruleWindowColumns } from "@/domain/column";
 import {
+  FORMAT_RULES,
+  MAX_STARTERS_PER_PERIOD,
+  type Format,
+} from "@/domain/format";
+import {
+  cellState,
   starterCount,
   type CallUpEntry,
   type CellKey,
   type Mark,
   type MatchGrid,
 } from "@/domain/grid";
+import { isRuleImpossible } from "@/domain/rule-feasibility";
 import { evaluateWarnings } from "@/domain/warnings";
 
 const CALLS = 500;
@@ -82,6 +88,35 @@ function worstGrid(): MatchGrid {
   return { format: FORMAT, overtimeCount: OVERTIMES, callUp, marks };
 }
 
+// Same size as the worst grid, but built so that the max-flow of RF-067 really
+// runs: no player has invalid flow bounds, the marks are sparse (1 or 2 X per
+// window period) and so most window cells are empty and the network has to
+// augment many paths to fill the 3 or 4 missing X of every period.
+const FLOW_STARTERS_PER_COLUMN = [1, 2, 1, 2, 2, 1, 3, 2, 1, 0, 1];
+const FLOW_SUBS_PER_COLUMN = [1, 0, 1, 1, 0, 1, 1, 0, 2, 1, 0];
+
+function flowGrid(): MatchGrid {
+  const next = sequence(19790415);
+  const callUp = callUpOf(PLAYERS);
+  const marks: Partial<Record<CellKey, Mark>> = {};
+
+  gridColumns(FORMAT, OVERTIMES).forEach((column, index) => {
+    const key = columnKey(column);
+    const pool = shuffled(
+      callUp.map((entry) => entry.id),
+      next,
+    );
+    const starters = pool.slice(0, FLOW_STARTERS_PER_COLUMN[index]);
+    const subs = pool
+      .slice(starters.length)
+      .slice(0, FLOW_SUBS_PER_COLUMN[index]);
+    for (const id of starters) marks[`${id}:${key}`] = "starter";
+    for (const id of subs) marks[`${id}:${key}`] = "sub";
+  });
+
+  return { format: FORMAT, overtimeCount: OVERTIMES, callUp, marks };
+}
+
 describe("evaluateWarnings, performance budget", () => {
   it("RF-060: the worst planned grid is 8 periods, 3 overtimes and 13 players, with marks that break every rule", () => {
     const grid = worstGrid();
@@ -106,6 +141,52 @@ describe("evaluateWarnings, performance budget", () => {
 
   it("RF-060: 500 calls of evaluateWarnings on the worst planned grid take under 2.5 seconds", () => {
     const grid = worstGrid();
+    evaluateWarnings(grid); // warm-up, so the first compilation is not timed
+
+    const start = performance.now();
+    for (let call = 0; call < CALLS; call += 1) evaluateWarnings(grid);
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(BUDGET_MS);
+  });
+
+  it("RF-060: the flow grid has valid bounds for every player and many empty window cells to fill", () => {
+    const grid = flowGrid();
+    const { minPlayed, minRested } = FORMAT_RULES[grid.format].ruleWindow;
+    const window = ruleWindowColumns(grid.format);
+
+    expect(grid.format).toBe(8);
+    expect(grid.overtimeCount).toBe(3);
+    expect(grid.callUp).toHaveLength(13);
+    for (const column of gridColumns(grid.format, grid.overtimeCount)) {
+      expect(starterCount(grid, column)).toBeLessThanOrEqual(
+        MAX_STARTERS_PER_PERIOD,
+      );
+    }
+    // Every window period still needs X: its edge to the sink has demand > 0.
+    for (const column of window) {
+      expect(starterCount(grid, column)).toBeLessThan(MAX_STARTERS_PER_PERIOD);
+    }
+    // Every player's edge has min <= max, so the flow is never skipped early.
+    let emptyWindowCells = 0;
+    for (const entry of grid.callUp) {
+      const states = window.map((column) =>
+        cellState(grid, { entryId: entry.id, column }),
+      );
+      const played = states.filter((state) => state === "starter").length;
+      const empty = states.filter((state) => state === "empty").length;
+      emptyWindowCells += empty;
+      expect(empty - minRested).toBeGreaterThanOrEqual(
+        Math.max(0, minPlayed - played),
+      );
+    }
+    expect(emptyWindowCells).toBeGreaterThanOrEqual(50);
+    // The rule can be met, so the flow ran to the end and found a solution.
+    expect(isRuleImpossible(grid)).toBe(false);
+  });
+
+  it("RF-060: 500 calls of evaluateWarnings on a grid whose max-flow really runs take under 2.5 seconds", () => {
+    const grid = flowGrid();
     evaluateWarnings(grid); // warm-up, so the first compilation is not timed
 
     const start = performance.now();

@@ -8,8 +8,7 @@ import {
   type CellState,
   type MatchGrid,
 } from "@/domain/grid";
-
-const MAX_STARTERS = 5; // RF-055
+import { MAX_STARTERS_PER_PERIOD } from "@/domain/format";
 
 export interface CellChange {
   readonly cell: Cell;
@@ -104,7 +103,10 @@ function revert(
     const isNewStarter =
       change.state === "starter" &&
       cellState(current, change.cell) !== "starter";
-    if (isNewStarter && startersIn(current, change.cell) >= MAX_STARTERS) {
+    if (
+      isNewStarter &&
+      startersIn(current, change.cell) >= MAX_STARTERS_PER_PERIOD
+    ) {
       continue;
     }
     if (cellState(current, change.cell) === change.state) continue;
