@@ -4,6 +4,7 @@
 - **Level:** Large
 - **Date:** 2026-11-11
 - **Approved by:** Fernando, 2026-11-11 (includes the «Cancelar» button of RF-052 and the five "P-23 proposal" texts)
+- **D2 approved by:** Fernando, 2026-11-12 (chat).
 - **Source:** `specs/001-planificador-v1/source-en.md` (Fernando, 2026-11-09, translated from the original Spanish specification).
 
 ## Purpose and principles
