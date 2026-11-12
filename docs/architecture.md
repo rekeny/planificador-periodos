@@ -12,6 +12,9 @@
 | Database    | expo-sqlite, Drizzle ORM and drizzle-kit                                        | Store teams, players and matches on the device, with migrations | 001                     |
 | State       | Zustand                                                                         | Session of the open match and undo                              | 001                     |
 | Gestures    | react-native-gesture-handler                                                    | Long press on the cells                                         | 001                     |
+| Test DB     | better-sqlite3 (dev only)                                                       | Real SQLite and the migrations in Jest (ADR-005)                | 001                     |
+| Pickers     | @expo/ui                                                                        | Native date and time pickers of the new-match form (ADR-005)    | 001                     |
+| Splash      | expo-splash-screen                                                              | Keep the splash screen until the database is ready (ADR-005)    | 001                     |
 | Tests       | Jest (jest-expo), React Native Testing Library, fast-check, Stryker and Maestro | See "Tests"                                                     | Phase 0; Maestro in 001 |
 | Quality     | ESLint (eslint-config-expo, boundaries, i18next) and Prettier                   | Style and boundaries between layers                             | Phase 0                 |
 | Security    | npm audit, OSV-Scanner, gitleaks and Semgrep; MobSF before publishing           | See `docs/security.md`                                          | Phase 0                 |
