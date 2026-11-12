@@ -153,6 +153,16 @@ module.exports = defineConfig([
     },
   },
   {
+    // The same 250-line limit for the tests, the scripts and the plugins (T080).
+    files: ["tests/**/*.{ts,tsx}", "scripts/**/*.{js,mjs}", "plugins/**/*.js"],
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 250, skipBlankLines: true, skipComments: true },
+      ],
+    },
+  },
+  {
     // Expo Router requires default exports in routes.
     files: ["src/app/**/*.{ts,tsx}"],
     rules: { "import/no-default-export": "off" },
