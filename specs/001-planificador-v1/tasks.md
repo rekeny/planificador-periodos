@@ -321,19 +321,36 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 # D2 · Usable in a match (US1–US4)
 
+**Reviewed by the Planner on 2026-11-12 with the D1 lessons** (`plan.md` "Deviations"; Fernando approves again before T024). Rules for every D2 task:
+
+1. **"Done when" is never shorter than the plan (Codex D1-01).** Every function, type, component, repository method, store action, view field, screen state and text key that `plan.md` assigns to a task is named in its "Done when". If the Implementer finds something in the plan that the task does not name, it stops and asks.
+2. **Test names (traceability).** `scripts/check-traceability.mjs` reads only the literal first argument of `it(…)`, `test(…)` and `it.each(…)(…)`, and in Maestro files any text that is not a `#` comment. For tables: pass the table as a named constant (`it.each(CASES)(…)`: the argument of `it.each` may hold at most one level of nested parentheses, or the title is silently missed; tagged-template tables are not read) and write ONE literal title that carries every RF and E ID of the table, such as `it.each(CASES)("RF-016 E-021: %s is a valid number", …)`. IDs placed in a row, a `%s`, a `${}`, a variable, a `describe` or a comment do not count.
+3. **Size limits.** ESLint applies to `src/**` (tests next to the code included): 250 lines per file, and, outside test files, 60 lines per function (components too), complexity 10, 4 parameters and 3 levels of nesting. Files under `tests/` are not covered by `max-lines`, but screen tests are still split by task. Each task below names its split files where the plan's single file would pass the limit.
+4. **Mutation testing.** From T030 on, the D2 branch differs from `main` in `src/domain/`, so every `verify.sh` runs Stryker (locally in full, on CI incremental). The tasks that change `src/domain/` (T030, T037) record the local mutation time in the commit body, and at the next CI run check that the cache was restored and the incremental run reused it (see "Mutation" notes in those tasks).
+5. **Database in screen tests.** Screens and stores in tests use the in-memory database of `tests/support/test-database.ts`: state tests pass it to the store factories, and screen tests replace `@/data/database` with `jest.mock` (`plan.md`, "State").
+
 ## Setup
 
-- [ ] **T024** · Data stack: install expo-sqlite, Drizzle 0.45, drizzle-kit, Zustand and the test driver
-  - Layer and files: configuration · `package.json`, `package-lock.json`, `drizzle.config.ts` (`dialect: "sqlite"`, no driver), `eslint.config.js` and `.prettierignore` (ignore `src/data/migrations/`), `plan.md` "New dependencies" (exact versions).
-  - Done when: every package of the D2 dependency table is installed once here, `zustand` included; Security has reviewed them; the dev build starts on iOS and Android; `verify.sh` is green with `drizzle-kit check`.
+- [ ] **T024** · Data stack install, and the focused-test check of `verify.sh` only matches real calls
+  - Layer and files: tooling and configuration · `scripts/check-focused-tests.sh` (new: the check moves out of `verify.sh`), `scripts/verify.sh` (calls it), `tests/scripts/check-focused-tests.test.ts`; `package.json`, `package-lock.json`, `eslint.config.js` and `.prettierignore` (ignore `src/data/migrations/`, which T027 fills), `app.json` (only if `npx expo install` adds the `expo-sqlite` plugin entry: kept, with no options), `plan.md` "New dependencies" (installed versions), `osv-scanner.toml` (only with Fernando's approval, see "Mistakes").
+  - Done when:
+    - **Focused-test check.** Today `verify.sh` runs `grep -rEn '\b(it|test|describe)(\.[A-Za-z]+)*\.(only|skip)\b|\b(xit|xtest|xdescribe|fit|ftest|fdescribe)\b'`. Its second half matches the words `fit`, `xit`… anywhere on a line, also inside test titles, strings and comments, so a title such as "RF-079: 4 and 6 periods fit at 375 pt" (T053) fails `verify.sh`; its first half also matches `it.skip`-like text inside strings. Neither half is tied to a call. `scripts/check-focused-tests.sh [dir…]` (default `src tests`) searches `*.test.ts` and `*.test.tsx` with `grep -rEn` and this POSIX extended pattern, which matches only a call at the start of a line (Prettier puts every test call on its own line); the last bracket also accepts a backtick, for tagged-template tables:
+
+      ```text
+      ^[[:space:]]*((it|test|describe)(\.[A-Za-z]+)*\.(only|skip)|x(it|test|describe)|f(it|test|describe))(\.[A-Za-z]+)*[[:space:]]*[(`]
+      ```
+
+      It exits 1 and lists the lines when something matches, and 0 otherwise; `verify.sh` calls it in the step "Focused or skipped tests" with the same message.
+
+    - **Install.** `expo-sqlite`, `drizzle-orm` and `zustand` with `npx expo install expo-sqlite drizzle-orm zustand`, and `drizzle-kit`, `better-sqlite3` and `@types/better-sqlite3` with `npx expo install drizzle-kit better-sqlite3 @types/better-sqlite3 -- -D`, each once, here; `drizzle-orm` resolves to the 0.45 line and `drizzle-kit` to its matching 0.31 line (decision 9; if npm `latest` has moved to 1.x by then, install `drizzle-orm@0.45` and `drizzle-kit@0.31` explicitly); the installed versions are written in `plan.md` "New dependencies"; Security has reviewed every new package (licence, maintenance, install scripts, native code); the dev build starts on iOS and Android; `verify.sh` is green. `drizzle.config.ts` is created in T027, with the schema, so that `drizzle-kit check` never runs without one.
   - Scenarios:
-    - Happy path: dev build opens the app with the new packages.
-    - Boundaries: not applicable.
-    - Outside the rules: no new permission in the generated manifests.
-    - Odd data: not applicable.
-    - Sequences: `npx expo-doctor` and `npm audit` green after installing.
+    - Happy path: dev build opens the app with the new packages; `it.only(`, `describe.skip(`, `fit(`, `xit(` and `test.concurrent.only(` at the start of a line each make the script exit 1.
+    - Boundaries: `it.only.each(TABLE)(`, `it.skip.each`, `fit.each` and `fdescribe(` are found; indented calls are found.
+    - Outside the rules: no new permission in the generated manifests; a test title "6 periods fit across", a comment `// it.only(` and a variable `const fit =` are not found.
+    - Odd data: an empty folder and a folder with no test files → exit 0; a `.ts` file that is not a test is not searched.
+    - Sequences: `npx expo-doctor` and `npm audit` green after installing; the script run twice gives the same result.
     - Interruptions: not applicable.
-    - Mistakes: `better-sqlite3` is a development dependency and is not bundled; no `babel.config.js` or `metro.config.js` is created.
+    - Mistakes: `better-sqlite3` is a development dependency and is not bundled; no `babel.config.js` or `metro.config.js` is created; the fixtures of the script test are written at run time to a temporary folder, as quoted strings (never a template literal whose lines start with a call), so the script never flags its own test file, and neither the fixtures nor the test names carry RF or E IDs. If `osv-scanner` reports advisories in `drizzle-kit`'s tree (it depends on the deprecated `@esbuild-kit/esm-loader`, which brings an old `esbuild`), Security records them and Fernando decides on an exception in `osv-scanner.toml` with a reason and an expiry of 90 days at most (`docs/security.md`); if `expo-doctor` flags a new package in its React Native Directory check, the Implementer stops and asks.
   - Pending: nothing.
 
 - [ ] **T025** · Keep the data out of Android backups and device-to-device transfer: config plugin, Android part (RF-088, E-028)
@@ -363,8 +380,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T027** · Schema, first migration and the migration bundle script (RF-011, RF-082)
-  - Layer and files: data and tooling · `src/data/schema.ts`, `src/data/migrations/` (generated SQL and `meta/`), `scripts/bundle-migrations.mjs`, `src/data/migrations/bundle.ts` (generated), `package.json` (`db:generate`), `tests/scripts/bundle-migrations.test.ts`.
-  - Done when: the five tables of `plan.md` exist with their checks and cascades in the generated SQL; `bundle.ts` has the shape that the installed `drizzle-orm/expo-sqlite/migrator` expects (checked against its types); the test fails when `bundle.ts` differs from the SQL files; `drizzle-kit check` green.
+  - Layer and files: data and tooling · `drizzle.config.ts` (moved here from T024: `dialect: "sqlite"`, no driver, `schema: "./src/data/schema.ts"`, `out: "./src/data/migrations"`), `src/data/schema.ts`, `src/data/migrations/` (generated SQL and `meta/`), `scripts/bundle-migrations.mjs`, `src/data/migrations/bundle.ts` (generated), `package.json` (`db:generate`), `tests/scripts/bundle-migrations.test.ts`.
+  - Done when: the five tables of `plan.md` (`teams`, `players`, `matches`, `call_up_entries`, `marks`) exist with every column, check, unique index, index and cascade of the plan's table in the generated SQL; `bundle.ts` exports the journal and every migration as a string, in the shape that the installed `drizzle-orm/expo-sqlite/migrator` `migrate()` expects (checked against its types; Drizzle's current Expo guide is written for the 1.0 release candidate, with `babel-plugin-inline-import`, so it is not the reference for 0.45); `db:generate` runs `drizzle-kit generate` and then the script; the test fails when `bundle.ts` differs from the SQL files; `drizzle-kit check` green.
   - Scenarios:
     - Happy path: `npm run db:generate` writes the SQL and the bundle.
     - Boundaries: a migration with quotes, backticks and `${` in its SQL is bundled unchanged.
@@ -376,8 +393,9 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T028** · Test database helper and schema tests (RF-016, RF-017, RF-025)
-  - Layer and files: tests · `tests/support/test-database.ts` (in-memory `better-sqlite3`, the real migrations), `src/data/schema.test.ts`.
-  - Done when: the helper opens a migrated database per test with foreign keys on; tests prove each check and each cascade; no file under `src/` imports `better-sqlite3`.
+  - Layer and files: tests · `tests/support/test-database.ts` (in-memory `better-sqlite3` with `drizzle-orm/better-sqlite3`, the real SQL files applied with `migrate()` from `drizzle-orm/better-sqlite3/migrator`), `src/data/schema.checks.test.ts` and `src/data/schema.cascades.test.ts` (two files, to stay under 250 lines).
+  - Done when: the helper opens a migrated database per test with foreign keys on, typed as Drizzle's common synchronous SQLite database type (the type the repositories use, `plan.md` "Data"); tests prove each check and each cascade; no file under `src/` imports `better-sqlite3`.
+  - Mutation cache: the CI cache key hashes `tests/support/**`, so the first CI run after this task (and after any later change in `tests/support/`) runs Stryker in full, about 25 minutes against the 40-minute timeout; the next run must be short again. Write both times in `review.md` at T061.
   - Scenarios:
     - Happy path: a fresh database migrates and has the five tables.
     - Boundaries: format 4 and 8 accepted, 5 rejected by the check; "0" and "00" stored distinct.
@@ -389,8 +407,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T029** · Open the database and migrate at start-up (RF-011, RF-082)
-  - Layer and files: data, state and app · `src/data/database.ts`, `src/state/database-ready.ts`, `src/state/app-stores.ts` (first version), `src/app/_layout.tsx`.
-  - Done when: the app opens the database, sets foreign keys and WAL, runs the bundled migration once, and keeps the splash screen until it ends; the dev build starts on both platforms with an empty list.
+  - Layer and files: data, state and app · `src/data/database.ts`, `src/state/database-ready.ts`, `src/state/app-stores.ts` (first version), `src/app/_layout.tsx`, `tests/support/` (the `jest.mock` helper for `@/data/database`), tests.
+  - Done when: `database.ts` opens the database with `openDatabaseSync` from `expo-sqlite` in its default directory (`defaultDatabaseDirectory`, the folder T026 excludes from iOS backups; no `directory` argument), wraps it with `drizzle()` from `drizzle-orm/expo-sqlite`, sets `PRAGMA foreign_keys = ON` and `PRAGMA journal_mode = WAL`, and runs `migrate()` from `drizzle-orm/expo-sqlite/migrator` with `bundle.ts` once; it gives the database, typed as Drizzle's common synchronous SQLite type, through a getter, and opens it only when `initializeDatabase()` runs, so importing it never touches the native module; `initializeDatabase(): Promise<void>` (`database-ready.ts`) is called by the root layout, which keeps the splash screen with `expo-splash-screen` (API read in the SDK 58 docs) until it ends; `SQLiteProvider` and `useSQLiteContext` are not used (`plan.md` "Data"); screen tests can replace `@/data/database` with the in-memory database through the helper; the dev build starts on both platforms with an empty list.
   - Scenarios:
     - Happy path: first launch creates and migrates the database.
     - Boundaries: second launch does not migrate again.
@@ -405,7 +423,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 - [ ] **T030** · Domain: team and player validation, team order (RF-013, RF-016, RF-073, E-021)
   - Layer and files: domain · `src/domain/squad-validation.ts`, `src/domain/team-order.ts`, tests.
-  - Done when: a blank or spaces-only name gives `nameRequired`; E-021 holds; category is optional; teams sort alphabetically in Spanish.
+  - Done when: `ValidationError` is the union `"nameRequired" | "numberInvalid" | "scoreIncomplete"` of `plan.md`; `validateTeamInput({ name, category })` gives `nameRequired` for a blank or spaces-only name, and a category is optional; `validatePlayerInput({ name, number })` gives `nameRequired` and `numberInvalid` as RF-016 and E-021 say; `compareTeams` sorts alphabetically in Spanish (RF-073). The E-021 cases are one `it.each` table with one literal title carrying `RF-016 E-021`.
+  - Mutation: first D2 task that changes `src/domain/`. Record the local Stryker time in the commit body; at the next CI run, check in the job log that the cache was restored (a `package-lock.json` change from T024 or a `tests/support/` change from T028 makes that run full) and that the run after it reuses the file.
   - Scenarios:
     - Happy path: «Cadete B» and «Alevín A» → «Alevín A» first.
     - Boundaries: E-021: "0", "00", "7", "99" valid; "07", "100" and "" give `numberInvalid`.
@@ -417,8 +436,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T031** · Data: team and player repositories (RF-013, RF-014, RF-016, RF-017, RF-085)
-  - Layer and files: data · `src/data/records.ts`, `src/data/team-repository.ts`, `src/data/player-repository.ts`, tests with `tests/support/test-database.ts`.
-  - Done when: teams are created, edited, listed and read; players are created and listed for one team only; duplicates are saved; records carry the format as a number; a failing write throws and leaves nothing written.
+  - Layer and files: data · `src/data/records.ts` (`TeamRecord`, `PlayerRecord`), `src/data/team-repository.ts`, `src/data/player-repository.ts`, `team-repository.test.ts` and `player-repository.test.ts` with `tests/support/test-database.ts`.
+  - Done when: `createTeam`, `updateTeam`, `listTeams` and `getTeam` create, edit, list and read teams; `createPlayer` and `listPlayers` create players and list them for one team only; duplicates are saved; records carry the format as a number and lists come in database order (sorting is the state layer's, review P-01); repositories take the database as an argument typed as Drizzle's common synchronous SQLite type and use only Drizzle's synchronous API with parameters; `src/data/` imports only types from the domain; a failing write throws and leaves nothing written.
   - Scenarios:
     - Happy path: create two teams → both listed.
     - Boundaries: "0" and "00" stored and read back distinct.
@@ -430,8 +449,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T032** · State: squad store, route parameters, format options and save results (RF-001, RF-013, RF-014, RF-016, RF-017, RF-069, RF-073, RF-085, E-020)
-  - Layer and files: state · `src/state/squad-store.ts`, `src/state/route-params.ts`, `src/state/format-options.ts`, `src/state/save-result.ts`, tests.
-  - Done when: actions validate with the domain, save through the repositories and publish teams sorted, players sorted and duplicate numbers; invalid input returns its errors and saves nothing; a failed write returns `saveFailed` and publishes nothing; `openTeam` with an unknown ID publishes "not found".
+  - Layer and files: state · `src/state/squad-store.ts` (factory `createSquadStore(db)`), `src/state/route-params.ts`, `src/state/format-options.ts`, `src/state/save-result.ts`, `src/state/app-stores.ts` (adds the squad store), tests split as `squad-store.teams.test.ts`, `squad-store.players.test.ts` and `route-params.test.ts`.
+  - Done when: the store publishes `teams` sorted with `compareTeams` and, for the open team, `players` sorted with `comparePlayers` and `duplicateNumbers`; its actions are `loadTeams()`, `openTeam(id)`, `createTeam(input)`, `updateTeam(id, input)` and `addPlayer(input)`, each returning a `SaveResult` (`saved`, `invalid` with its `ValidationError`s, or `saveFailed`) when it writes; they validate with `validateTeamInput` and `validatePlayerInput`, save through the repositories of T031 and only then publish; invalid input saves nothing; a failed write returns `saveFailed` and publishes nothing; `openTeam` with an unknown ID publishes "not found"; `route-params.ts` turns `teamId`, `playerId` and `matchId` into positive integers or `null`; `format-options.ts` exports `formatOptions`, the domain's `FORMATS` (RF-001).
   - Scenarios:
     - Happy path: create team → appears in the sorted list.
     - Boundaries: adding the second 7 publishes the duplicate warning; E-020 order published.
@@ -455,22 +474,22 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: two teams with the same name are both listed (RF-014).
   - Pending: nothing.
 
-- [ ] **T034** · UI: team form, new and edit routes, format picker, save error and the not-found state (RF-001, RF-012, RF-013, RF-082, RF-085, E-022)
-  - Layer and files: app and UI · `src/app/teams/new.tsx`, `src/app/teams/[teamId]/edit.tsx`, `src/ui/team-form.tsx`, `src/ui/format-picker.tsx`, `src/ui/input-limits.ts`, `src/ui/save-error-banner.tsx`, `src/ui/not-found.tsx`, `src/i18n/es.json` (`team.field.*`, `common.save`, `format.option`, `validation.nameRequired`, `error.saveFailed`, `notFound.message`), tests in `tests/app/` and next to the components.
-  - Done when: a team can be created and edited with name, category and default format; the format picker shows exactly «4 periodos», «6 periodos» and «8 periodos»; name and category stop at 40 characters with no message; leaving the form without «Guardar» discards it without asking; a failed save shows `error.saveFailed`; the edit route with a malformed or unknown `teamId` shows only `notFound.message` («No se ha encontrado: puede que se haya borrado.») and changes nothing. This is the first route with an ID, so `not-found.tsx` is created here and reused by T035, T046 and later screens.
+- [ ] **T034** · UI: team form, new and edit routes, format picker, save error and the not-found state (RF-001, RF-012, RF-013, RF-082, RF-085, E-022, E-029)
+  - Layer and files: app and UI · `src/app/teams/new.tsx`, `src/app/teams/[teamId]/edit.tsx`, `src/ui/team-form.tsx`, `src/ui/format-picker.tsx`, `src/ui/input-limits.ts`, `src/ui/save-error-banner.tsx`, `src/ui/not-found.tsx`, `src/i18n/es.json` (`team.field.name`, `team.field.category`, `team.field.defaultFormat`, `common.save`, `format.option`, `validation.nameRequired`, `error.saveFailed`, `notFound.message`), tests in `tests/app/` and next to the components.
+  - Done when: a team can be created and edited with name, category and default format; the format picker shows exactly «4 periodos», «6 periodos» and «8 periodos» from `formatOptions`; `input-limits.ts` holds the limits 40, 500 and 3 digits as constants, and name and category stop at 40 characters (`maxLength`) with no message; a successful «Guardar» returns with `router.back()` to the screen that opened the form (plan "After «Guardar»"); leaving the form without «Guardar» discards it without asking; a failed save shows `error.saveFailed` in `save-error-banner.tsx`, drawn over the screen so it takes no layout height; the edit route with a malformed or unknown `teamId` shows only `notFound.message` («No se ha encontrado: puede que se haya borrado.») and changes nothing. This is the first route with an ID, so `not-found.tsx` is created here and reused by T035, T046 and later screens. No component function passes 60 lines: the form fields are split out of `team-form.tsx` if needed.
   - Scenarios:
     - Happy path: create «Alevín A», 6 periods → listed.
     - Boundaries: the format picker shows exactly three options; a 40-character name is saved, a 41st character is not accepted (E-022).
     - Outside the rules: not applicable.
     - Odd data: empty category; `/teams/abc/edit` and the ID of a deleted team → not-found message.
     - Sequences: create, edit, list updated.
-    - Interruptions: go back from a half-filled form → no question, no team saved (RF-082).
+    - Interruptions: go back from a half-filled form → no question, no team saved (RF-082); E-029 as far as Jest can go: type «Cadete B» in the new-team form, unmount it without «Guardar» (the app being closed), render the list of teams with a new squad store on the same in-memory database → no «Cadete B», and every team saved before is listed (the real close and reopen is T036).
     - Mistakes: save with a blank name → «Escribe un nombre.», nothing saved; save fails → message, team not in the list.
   - Pending: nothing.
 
 - [ ] **T035** · UI: team screen with sorted players, new player form and duplicate-number warning (RF-016, RF-017, RF-069, E-020, E-021, E-022)
-  - Layer and files: app and UI · `src/app/teams/[teamId]/index.tsx`, `src/app/teams/[teamId]/players/new.tsx`, `src/ui/player-form.tsx`, `src/ui/warnings/duplicate-number-banner.tsx`, `src/i18n/es.json`, tests.
-  - Done when: the team shows its players sorted; a player is added with name and number; the name stops at 40 characters; an invalid number shows `validation.numberInvalid`; the duplicate-number banner lists the numbers; an unknown `teamId` shows `notFound.message`.
+  - Layer and files: app and UI · `src/app/teams/[teamId]/index.tsx`, `src/app/teams/[teamId]/players/new.tsx` (modal), `src/ui/player-form.tsx`, `src/ui/warnings/duplicate-number-banner.tsx`, `src/i18n/es.json` (`team.players`, `players.new`, `player.field.name`, `player.field.number`, `validation.numberInvalid`, `warning.duplicateNumber`, `common.edit`), tests.
+  - Done when: the team shows its players sorted (number and name); the team screen links to the edit route of T034 («Editar») and to the new-player form («Nuevo jugador»); a player is added with name and number; the name stops at 40 characters and the number at two; a blank name shows `validation.nameRequired` and an invalid number `validation.numberInvalid`; a successful «Guardar» returns with `router.back()` to the team screen; the duplicate-number banner lists the numbers (`warning.duplicateNumber`); an unknown `teamId` shows `notFound.message`.
   - Scenarios:
     - Happy path: add 9, 4, 7 → 4, 7, 9.
     - Boundaries: E-020 order on screen; the number field accepts at most two characters.
@@ -493,7 +512,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 - [ ] **T037** · Domain: match input, defaults and date and time display (RF-025, RF-026, RF-036, RF-083, RF-084, E-023, E-032)
   - Layer and files: domain · `src/domain/match-input.ts`, `src/domain/match-date.ts`, tests.
-  - Done when: `newMatchDefaults` gives the team's default format, today's date and no time; one score without the other gives `scoreIncomplete`; `displayDate` and `displayTime` give «01/03/2026» and «18:30»; `isoDate` and `isoTime` pad with zeros.
+  - Done when: `newMatchDefaults(defaultFormat, today)` gives the team's default format, `today` and no time; `validateMatchInput({ homeScore, awayScore })` gives `scoreIncomplete` for one score without the other, and nothing for both or none; `displayDate` and `displayTime` give «01/03/2026» and «18:30», and `displayTime(null)` gives `null`; `isoDate` and `isoTime` pad with zeros; the domain never reads the clock (`today` is a parameter). Table tests use one literal title per table with its IDs (for example `RF-083 E-023 E-032`).
+  - Mutation: changes `src/domain/`. Record the local Stryker time in the commit body and check, at the next CI run, that only the new mutants run (the cache from the run after T030 is reused).
   - Scenarios:
     - Happy path: team with 6 periods, today 2026-11-11 → 6 periods, 2026-11-11, no time; E-023 → «11/11/2026».
     - Boundaries: score 0–0 and 999–0 valid; both empty valid; 00:00 and 23:59.
@@ -504,9 +524,9 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: only the home score → `scoreIncomplete`; 1 March is «01/03/2026», never «1/3/2026».
   - Pending: nothing.
 
-- [ ] **T038** · Data: match repository, create with call-up snapshot and read (RF-025, RF-026, RF-030, RF-036, RF-037, RF-084)
-  - Layer and files: data · `src/data/match-repository.ts` (`createMatch`, `getMatch`), tests.
-  - Done when: a match and its call-up entries (with name and number) are created in one transaction and read back unchanged; changing the team default does not change existing matches.
+- [ ] **T038** · Data: match repository, create with call-up snapshot and read, and the grid records (RF-019, RF-025, RF-026, RF-030, RF-036, RF-037, RF-084)
+  - Layer and files: data · `src/data/records.ts` (`MatchRecord`, `CallUpEntryRecord`, `MarkRecord`), `src/data/match-repository.ts` (`createMatch`, `getMatch`), `src/data/grid-repository.ts` (created here with `loadGridRecords`, which T041 needs to open a match; T049 adds the writes), tests.
+  - Done when: `createMatch` creates a match and its call-up entries (with the name and number of each player, RF-019) in one transaction; `getMatch` reads the match back unchanged; `loadGridRecords(matchId)` returns the match, its call-up entries and its marks (none yet, or rows written directly by the test); changing the team default does not change existing matches.
   - Scenarios:
     - Happy path: create with 12 players → 12 entries.
     - Boundaries: match with only format and date.
@@ -519,20 +539,20 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 - [ ] **T039** · Data: call-up repository, add, remove with marks, create a player from the match (RF-019, RF-032, RF-033, RF-034, RF-035, E-017)
   - Layer and files: data · `src/data/call-up-repository.ts`, tests.
-  - Done when: adding stores the snapshot and returns the new entry with its `id`; removing deletes the entry and its marks; `createPlayerInMatch` creates the player in the team and in the call-up in one transaction.
+  - Done when: `addToCallUp` stores the snapshot and returns the new entry with its `id`; `removeFromCallUp` deletes the entry and its marks; `createPlayerInMatch` creates the player in the team and in the call-up in one transaction and returns both; a write that breaks the unique index throws, like any failed write, and leaves nothing written.
   - Scenarios:
     - Happy path: add a player → entry with current name and number.
     - Boundaries: remove the last player of the call-up.
     - Outside the rules: not applicable.
-    - Odd data: adding the same player twice is rejected by the unique index and reported, not thrown to the user.
+    - Odd data: adding the same player twice is rejected by the unique index; the repository throws and the state layer turns it into `saveFailed` (T042), so nothing reaches the user as an exception.
     - Sequences: remove Ana with marks (E-017), add her again → new entry `id`, empty row.
     - Interruptions: failure creating the entry → no player created either.
     - Mistakes: removing from one match leaves her in other matches.
   - Pending: nothing.
 
 - [ ] **T040** · State: new-match draft (RF-026, RF-027, RF-030, RF-031, RF-036, RF-068, RF-083, RF-084, RF-085, E-015, E-024, E-030)
-  - Layer and files: state · `src/state/new-match-draft.ts`, tests.
-  - Done when: the draft starts with the team default format, today's date, no time and every active player selected; `setFormat` changes it without confirmation and without touching the team; `clearTime` leaves no time; `useMyTeamAs` writes the team name only; deselecting updates the range warning; `create` saves and returns the match id, or `saveFailed` with nothing saved; after a successful `create`, calling it again returns the same match id and writes nothing, until the draft is reset (review P-30).
+  - Layer and files: state · `src/state/new-match-draft.ts`, `src/state/app-stores.ts` (adds the draft), tests split as `new-match-draft.fields.test.ts` and `new-match-draft.create.test.ts`.
+  - Done when: a reset (when the screen opens) fills the draft with `newMatchDefaults`: the team default format, today's date from a clock passed to the factory (so tests fix 2026-11-11) and no time, and `callUpSelection` lists the team's active players only, sorted (`initialCallUp`), all selected, with `callUpRange` (RF-068); `setFormat(format)` changes it without confirmation and without touching the team (RF-084, E-024); `setDate` and `setTime` take the picker's parts and store them with `isoDate` and `isoTime`; `clearTime()` leaves no time (RF-083); `useMyTeamAs("home" | "away")` writes the team name only (RF-027); the home, away, score and notes fields are set as typed; `toggle(playerId)` selects or deselects and updates `callUpRange`; `create()` validates with `validateMatchInput` and returns `invalid` with `scoreIncomplete` and nothing saved, saves with `createMatch` and the snapshots of `callUpEntryFor`, and returns `saved` with the match id, or `saveFailed` with nothing saved; after a successful `create`, calling it again returns the same match id and writes nothing, until the draft is reset (review P-30).
   - Scenarios:
     - Happy path: 12 active → 12 selected, no warning in 6 periods.
     - Boundaries: deselect to 9 → none; to 8 → warning (E-015); 13 selected → warning (E-030).
@@ -540,12 +560,12 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Odd data: team without players → empty call-up and warning.
     - Sequences: E-024 → 8 periods created, team default still 6; deselect in one match, next new match has everyone selected again.
     - Interruptions: the draft is dropped when the screen closes without «Guardar».
-    - Mistakes: quick home then edit the text → edited text kept; the category is never copied; `create` called twice in a row → one match in the database and the same id both times; after a reset, `create` makes a new match.
+    - Mistakes: quick home then edit the text → edited text kept; the category is never copied; only the home score → `invalid` with `scoreIncomplete`, no match saved; `create` called twice in a row → one match in the database and the same id both times; after a reset, `create` makes a new match.
   - Pending: nothing.
 
 - [ ] **T041** · State: match session, opening and closing, and the first row view (RF-042, RF-068, E-020)
-  - Layer and files: state · `src/state/match-session-store.ts` (created here: `status`, `openMatch`, `closeMatch`), `src/state/match-view.ts` (first version: rows sorted, with number, name and `hasMarks`; `callUpRange`), `src/state/app-stores.ts`, tests.
-  - Done when: `openMatch` narrows and sorts the records into a `MatchGrid`, evaluates the warnings and publishes the view; an unknown ID gives `notFound`; `closeMatch` empties the grid, the warnings, the view and the history and sets `closed`; opening another match replaces the whole session.
+  - Layer and files: state · `src/state/match-session-store.ts` (created here, factory `createMatchSessionStore(db)`: the state of `plan.md` with `status`, `grid`, `warnings`, `view`, `history` and `saveFailed`, and the actions `openMatch` and `closeMatch`; the other actions go to their own slice files, `plan.md` "State"), `src/state/match-view.ts` (first version of `buildMatchView(source)`: `matchId`, `format`, rows sorted, with `entryId`, number, name and `hasMarks`; `callUpRange`), `src/state/app-stores.ts`, tests split as `match-session-store.open.test.ts` and `match-view.rows.test.ts`.
+  - Done when: `openMatch(id)` reads the records with `loadGridRecords` (T038) and the team's players with `listPlayers` (T031), narrows the format with `isFormat` and sorts the entries with `comparePlayers` into a `MatchGrid`, evaluates the warnings with `evaluateWarnings` and publishes the view; an unknown ID gives `notFound`; `closeMatch` empties the grid, the warnings, the view and the history and sets `closed`; opening another match replaces the whole session. The view fields that later tasks fill (columns, cells, counters, warnings, `playersToAdd`) are added to the `MatchView` type by those tasks, and the D3 fields (`formatOptions`, `replaceableStarters`) in D3.
   - Scenarios:
     - Happy path: open a match with 12 players → 12 rows in E-020 order.
     - Boundaries: a player without marks has `hasMarks` false; 9 players in 6 periods → no range warning.
@@ -556,9 +576,9 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: `closeMatch` twice, or with no match open, does nothing more.
   - Pending: nothing.
 
-- [ ] **T042** · State: call-up actions in the open match (RF-023, RF-032, RF-033, RF-034, RF-035, RF-085, RF-086, E-017)
-  - Layer and files: state · `src/state/match-session-store.ts` (`addToCallUp`, `removeFromCallUp`, `createPlayerInMatch`), `src/state/match-view.ts` (`playersToAdd`), tests.
-  - Done when: call-up changes save first, then publish; removal prunes the history; `playersToAdd` offers only active players not in the call-up; a failed save leaves the view as it was and returns `saveFailed`.
+- [ ] **T042** · State: call-up actions in the open match (RF-023, RF-032, RF-033, RF-034, RF-035, RF-060, RF-085, RF-086, E-017)
+  - Layer and files: state · `src/state/match-session-call-up.ts` (slice of the session store: `addToCallUp(playerId)`, `removeFromCallUp(entryId)`, `createPlayerInMatch(input)`), `src/state/match-view.ts` (`playersToAdd`), tests split as `match-session-store.call-up.test.ts` and `match-view.players-to-add.test.ts`.
+  - Done when: `addToCallUp` builds the snapshot with `callUpEntryFor`, saves it with the repository's `addToCallUp`, and inserts the returned entry with the domain's `addToCallUp` (the D1-01 function: new empty row in `comparePlayers` order); `removeFromCallUp` saves with the repository's `removeFromCallUp`, applies the domain's `removeFromCallUp` and runs `pruneHistory`; `createPlayerInMatch` validates with `validatePlayerInput` (returns `invalid` and saves nothing on errors), saves with the repository's `createPlayerInMatch` and adds the entry like `addToCallUp`; every action saves first, then re-evaluates the warnings and publishes the view (RF-060), and none pushes an undo entry; `playersToAdd` (from the domain's `playersToAdd`) offers only active players not in the call-up; a failed save leaves the view as it was, sets `saveFailed` and returns `saveFailed`; the next successful change clears `saveFailed`.
   - Scenarios:
     - Happy path: add two players → two new empty rows in order.
     - Boundaries: remove the only player → no rows; add a 13th → range warning.
@@ -570,8 +590,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T043** · UI: new-match form with format, date and time pickers and quick home and away (RF-025, RF-026, RF-027, RF-036, RF-083, RF-084, E-022, E-023, E-024, E-032)
-  - Layer and files: app and UI · `src/app/teams/[teamId]/matches/new.tsx` (form part), `src/ui/match-form.tsx` (the format and its change handler come as props, so the details screen of T072 can reuse it), `src/ui/date-time-field.ios.tsx`, `src/ui/date-time-field.android.tsx`, `src/i18n/es.json`, tests (pickers replaced by a test double).
-  - Done when: the form shows every field of RF-025 with its defaults and limits; the format picker is filled with the team default and changes without a dialog; the date and time are chosen with the `@expo/ui` pickers (API read in the SDK 58 docs) and shown as «01/03/2026» and «18:30»; «Quitar hora» clears the time; there is no text field for the date or the time.
+  - Layer and files: app and UI · `src/app/teams/[teamId]/index.tsx` (the «Nuevo partido» button), `src/app/teams/[teamId]/matches/new.tsx` (form part; resets the draft when it opens), `src/ui/match-form.tsx` (the format and its change handler come as props, so the details screen of T072 can reuse it), `src/ui/score-fields.tsx` (the two scores, split out so no component function passes 60 lines and no file 250), `src/ui/date-time-field.ios.tsx`, `src/ui/date-time-field.android.tsx`, `src/i18n/es.json` (`matches.new`, `match.field.format`, `match.field.date`, `match.field.time`, `match.field.home`, `match.field.away`, `match.field.score`, `match.field.notes`, `match.clearTime`, `match.quickHome`, `match.quickAway`, `validation.scoreIncomplete`), tests (pickers replaced by a test double).
+  - Done when: the team screen opens `/teams/[teamId]/matches/new` with «Nuevo partido»; the form shows every field of RF-025 with its defaults and limits (`input-limits.ts`); the format picker is filled with the team default and changes without a dialog; the date and time are chosen with the `@expo/ui` pickers, each inside its `Host` (API read in the SDK 58 docs: `DatePicker` from `@expo/ui/swift-ui` and `DateTimePicker` from `@expo/ui/jetpack-compose`; SDK 58 also has a drop-in `DateTimePicker` compatible with `@react-native-community/datetimepicker`, and if it gives the native pickers on both platforms with one file, it may replace the two platform files, recorded in "Deviations"), and shown with the strings the draft formats, «01/03/2026» and «18:30»; «Quitar hora» clears the time; there is no text field for the date or the time; the quick buttons call `useMyTeamAs`; a `scoreIncomplete` result shows `validation.scoreIncomplete`.
   - Scenarios:
     - Happy path: keep the defaults → today shown as «11/11/2026» (E-023).
     - Boundaries: home and away stop at 40 characters, notes at 500, each score at 3 digits (E-022).
@@ -583,7 +603,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T044** · UI: call-up selection in the new-match screen, with count and range warning (RF-005, RF-010, RF-030, RF-031, RF-068, E-015, E-030)
-  - Layer and files: app and UI · `src/app/teams/[teamId]/matches/new.tsx` (call-up part and «Guardar»), `src/ui/call-up-selector.tsx`, `src/ui/warnings/call-up-range-banner.tsx`, `src/i18n/es.json`, tests next to the components and in `tests/app/` (`renderRouter` from `expo-router/testing-library`).
+  - Layer and files: app and UI · `src/app/teams/[teamId]/matches/new.tsx` (call-up part and «Guardar»), `src/ui/call-up-selector.tsx`, `src/ui/warnings/call-up-range-banner.tsx`, `src/i18n/es.json` (`callUp.title`, `callUp.count`, `warning.callUpRange`), tests next to the components and in `tests/app/` (`renderRouter` from `expo-router/testing-library`; its `testRouter` calls are asynchronous and awaited).
   - Done when: every active player is listed and selected at first; the count and the range warning follow the selection; a successful «Guardar» opens the grid of the created match with `router.replace`, never `router.push`, so the new-match route leaves the stack and Back from the grid goes to the team screen, never to the filled form (plan "After «Guardar»", review P-30); when `create` does not return `saved`, the screen stays on the form and does not navigate.
   - Scenarios:
     - Happy path: create with defaults and 12 players → the grid of the new match is shown.
@@ -596,8 +616,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T045** · UI: confirmation dialog that closes only with its buttons, also against the Android Back button (RF-034)
-  - Layer and files: UI · `src/ui/choice-dialog.tsx` (confirmation mode), tests.
-  - Done when: the dialog shows title, message, the confirm button and «Cancelar»; tapping outside does nothing; `onRequestClose`, which React Native's `Modal` calls for the Android Back button, does nothing, so Back neither closes the dialog nor leaves the screen (D44, D46); it is used first by the call-up removal of RF-034.
+  - Layer and files: UI · `src/ui/choice-dialog.tsx` (confirmation mode, on React Native `Modal`; not `Alert`), `src/i18n/es.json` (`common.cancel`), tests.
+  - Done when: the dialog shows title, message, the confirm button and «Cancelar» (`common.cancel`); tapping outside does nothing; `onRequestClose`, which React Native's `Modal` calls for the Android Back button, does nothing, so Back neither closes the dialog nor leaves the screen (D44, D46); it is used first by the call-up removal of RF-034.
   - Scenarios:
     - Happy path: confirm → the callback runs once.
     - Boundaries: a long title wraps and the buttons stay visible.
@@ -609,8 +629,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T046** · UI: match screen first version and call-up screen (RF-023, RF-032, RF-033, RF-034, RF-035, RF-068, E-017)
-  - Layer and files: app and UI · `src/app/matches/[matchId]/index.tsx` (first version: call-up list and range warning; `openMatch` when it mounts and `closeMatch` only in that effect's cleanup, as in `plan.md` "Leaving the match"), `src/app/matches/[matchId]/call-up.tsx` (pushed on top of the match screen), `src/i18n/es.json` (`callUp.*`, including `callUp.addEmpty`), tests in `tests/app/`.
-  - Done when: only active players not in the call-up are offered; when none is left, the list shows `callUp.addEmpty` («No quedan jugadores activos por añadir. Puedes crear uno nuevo.») and «Crear jugador nuevo» is still offered; removing a player with marks asks `confirm.removeFromCallUp.*`; without marks it asks nothing; the call-up screen is opened with `router.push`; a call-up route whose match session is not open shows `notFound.message`.
+  - Layer and files: app and UI · `src/app/matches/[matchId]/index.tsx` (first version: call-up list, range warning and the «Convocatoria» button; `openMatch` when it mounts and `closeMatch` only in that effect's cleanup, as in `plan.md` "Leaving the match"), `src/app/matches/[matchId]/call-up.tsx` (pushed on top of the match screen), `src/i18n/es.json` (`callUp.title`, `callUp.add`, `callUp.remove`, `callUp.createPlayer`, `callUp.addEmpty`, `confirm.removeFromCallUp.title`, `confirm.removeFromCallUp.message`, `confirm.removeFromCallUp.confirm`), tests in `tests/app/`.
+  - Done when: the match screen opens the call-up screen with `router.push`; the call-up screen lists the call-up and offers `view.playersToAdd`, so only active players not in the call-up are offered; adding and removing call the session's `addToCallUp` and `removeFromCallUp`, and a `saveFailed` result shows `error.saveFailed`; when none is left, the list shows `callUp.addEmpty` («No quedan jugadores activos por añadir. Puedes crear uno nuevo.») and «Crear jugador nuevo» is still offered; removing a player with marks asks `confirm.removeFromCallUp.*`; without marks it asks nothing; the call-up screen is opened with `router.push`; a call-up route whose match session is not open shows `notFound.message`.
   - Scenarios:
     - Happy path: add two players.
     - Boundaries: a player without marks is removed without a dialog.
@@ -622,13 +642,13 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T047** · UI: create a new player from the match (RF-035, RF-085)
-  - Layer and files: app and UI · `src/app/matches/[matchId]/new-player.tsx` (pushed on top of the match screen), reusing `src/ui/player-form.tsx`, tests.
-  - Done when: the player is created in the team and in the call-up of that match in one step; «Guardar» returns with `router.back()` to the screen that opened the form (the call-up screen, with the grid underneath) and never pushes a second grid (plan "After «Guardar»", review P-30); a failed save shows the message and creates neither.
+  - Layer and files: app and UI · `src/app/matches/[matchId]/new-player.tsx` (modal, pushed from the call-up screen with `router.push`, with the grid underneath), reusing `src/ui/player-form.tsx`, `src/i18n/es.json` (reuses `players.new` and `player.field.*`), tests.
+  - Done when: the player is created in the team and in the call-up of that match in one step, through the session's `createPlayerInMatch`; a route whose match session is not open for its `matchId` shows only `notFound.message` and creates nothing (plan "Child routes without the grid below"); «Guardar» returns with `router.back()` to the screen that opened the form (the call-up screen, with the grid underneath) and never pushes a second grid (plan "After «Guardar»", review P-30); a failed save shows the message and creates neither.
   - Scenarios:
     - Happy path: create «Nora 15» → in the team and in the grid.
     - Boundaries: name of 40 characters.
     - Outside the rules: a duplicate number is allowed.
-    - Odd data: "00".
+    - Odd data: "00"; the route opened for a match whose session is not open → not-found message.
     - Sequences: create, then remove her from the call-up → still in the team.
     - Interruptions: leaving without «Guardar» creates nothing.
     - Mistakes: "07" → number message, nothing created.
@@ -644,9 +664,9 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US3 · Plan the periods
 
-- [ ] **T049** · Data: grid repository, load records, save cell changes, overtimes (RF-056, RF-058, RF-059, RF-082, RF-085)
-  - Layer and files: data · `src/data/grid-repository.ts`, tests.
-  - Done when: `loadGridRecords` returns the match, its entries and its marks; `saveCellChanges` upserts or deletes marks in one transaction; adding and removing the last overtime update `overtime_count` and delete its marks.
+- [ ] **T049** · Data: grid repository, save cell changes and overtimes (RF-056, RF-058, RF-059, RF-082, RF-085)
+  - Layer and files: data · `src/data/grid-repository.ts` (adds the writes to the file of T038), tests split as `grid-repository.marks.test.ts` and `grid-repository.overtimes.test.ts`.
+  - Done when: `saveCellChanges(matchId, changes)` upserts or deletes marks (an `"empty"` state deletes the row) in one transaction, mapping each `Cell` to `column_kind` and `column_number`; `addOvertime` and `removeLastOvertime` update `overtime_count`, and `removeLastOvertime` deletes the marks of that overtime in the same transaction; what is saved reads back the same with `loadGridRecords`.
   - Scenarios:
     - Happy path: save three marks, load → same records.
     - Boundaries: removing an overtime with marks deletes only its marks.
@@ -658,8 +678,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T050** · State: grid view with columns, cells and counters (RF-042, RF-043, RF-070, RF-071, E-014, E-020)
-  - Layer and files: state · `src/state/match-view.ts` (columns, cells, counters, `canUndo`, `canRemoveOvertime`, `lastOvertimeHasMarks`), tests.
-  - Done when: `buildMatchView` gives one column per period then per overtime, one row per entry in E-020 order, one cell per row and column with its state, and the counter of each row; it calls only domain functions.
+  - Layer and files: state · `src/state/match-view.ts` (`ColumnView` with `key` and `column`, `CellView` with `key`, `cell` and `state`, `RowView.counter` and `cells`, `canUndo`, `canRemoveOvertime`, `lastOvertimeHasMarks`), tests in `match-view.grid.test.ts`.
+  - Done when: `buildMatchView` gives one column per period then per overtime (`gridColumns`), one row per entry in E-020 order, one cell per row and column with its state (`cellState`), and the counter of each row (`playerCounter`); `canUndo` is true when the history has an entry; `canRemoveOvertime` is true only with an overtime; `lastOvertimeHasMarks` comes from the domain's `lastOvertimeHasMarks`; it calls only domain functions. If `match-view.ts` nears 250 lines, the columns and cells move to `src/state/match-view-grid.ts`.
   - Scenarios:
     - Happy path: 6 periods + 1 overtime, 10 players → 10 rows, 7 columns.
     - Boundaries: E-014 counter 3 and 3.
@@ -671,8 +691,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T051** · State: tap and overtimes, saved at once (RF-044, RF-048, RF-049, RF-051, RF-056, RF-058, RF-059, RF-060, RF-082, RF-085, E-025)
-  - Layer and files: state · `src/state/match-session-store.ts` (`tapCell`, `addOvertime`, `removeLastOvertime`), tests with the in-memory database and a throwing double.
-  - Done when: each action saves before publishing and publishes new warnings and view; questions leave the grid unchanged in D2; removing an overtime prunes the history; a failed save publishes nothing and sets `saveFailed`.
+  - Layer and files: state · `src/state/match-session-marks.ts` (slice of the session store: `tapCell(cell)`, `addOvertime()`, `removeLastOvertime()`), tests split as `match-session-store.tap.test.ts` and `match-session-store.overtimes.test.ts`, with the in-memory database and a throwing double.
+  - Done when: `tapCell` asks the domain's `tapCell`, computes the changes with `cellChanges`, saves them with `saveCellChanges`, and only then publishes the grid, the warnings (`evaluateWarnings`) and the view, and pushes `undoEntryFor(before, after)` to the history; the questions (`askSubOrStarter`, `chooseReplacedStarter`, `confirmRemoveStarter`) and `unchanged` leave the grid, the history and the database as they were in D2; `addOvertime` and `removeLastOvertime` go through the domain functions of the same names and the repository, push no undo entry, and `removeLastOvertime` runs `pruneHistory`; a failed save publishes nothing, pushes nothing and sets `saveFailed`, which the next successful change clears.
   - Scenarios:
     - Happy path: tap empty with 4 X → X saved and published.
     - Boundaries: tap with 5 X in the window → no change (question, D3); 5 X in P6 → circled X.
@@ -680,25 +700,25 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Odd data: tap on a cell of an entry no longer in the call-up → nothing.
     - Sequences: many taps in a row → database equals store after each.
     - Interruptions: E-025 → Ana's P1 stays empty, P1 has 3 X, `saveFailed`, no undo entry.
-    - Mistakes: removing an overtime with marks without confirming → nothing removed (the confirmation lives in the interface).
+    - Mistakes: `removeLastOvertime` on an overtime with marks removes it and its marks at once, because the confirmation lives in the interface (T055); `removeLastOvertime` with no overtime → nothing saved, nothing published.
   - Pending: nothing.
 
-- [ ] **T052** · State: undo of mark changes (RF-057, RF-082, RF-086, E-019, E-026, E-031)
-  - Layer and files: state · `src/state/match-session-store.ts` (`undo`, history), tests.
-  - Done when: each mark change pushes one entry; `undo` uses `undoLast`, saves and publishes; overtimes, call-up and format changes never push; structural changes prune; the history survives every action of the open session and is emptied only by `closeMatch` (and is empty in a new store); a failed save keeps the history.
+- [ ] **T052** · State: undo of mark changes (RF-055, RF-057, RF-082, RF-086, E-019, E-031)
+  - Layer and files: state · `src/state/match-session-undo.ts` (slice of the session store: `undo()`), tests in `match-session-store.undo.test.ts` (and `match-session-store.undo-structure.test.ts` if it passes 250 lines).
+  - Done when: each mark change pushes one entry; `undo` uses `undoLast`, saves its `changes` with `saveCellChanges` and publishes the grid, the warnings, the history and the view; with nothing left to undo it saves and publishes nothing; overtimes and call-up changes never push (format changes arrive in D3); structural changes prune; the history survives every action of the open session and is emptied only by `closeMatch` (and is empty in a new store); a failed save keeps the history and the grid, and sets `saveFailed`.
   - Scenarios:
     - Happy path: three marks, three undos → grid as before.
-    - Boundaries: undo with an empty history does nothing.
+    - Boundaries: undo with an empty history does nothing; undo never leaves a column with 6 X (RF-055).
     - Outside the rules: not applicable.
-    - Odd data: E-026 with the real database (the removal made with `removeFromCallUp`, as the call-up screen does).
+    - Odd data: the D2 counterpart of E-026 with the real database: mark Eva in P2, remove Eva with `removeFromCallUp` (as the call-up screen does), undo → that entry is discarded and the same press reverts the mark made before it (RF-086). E-026 itself needs the starter replacement, which the store gets in D3, so it moved to T062 (review of 2026-11-12).
     - Sequences: E-031; mark, add overtime, undo → overtime still there, mark gone; mark, add and remove a player through the call-up actions, undo → the mark is gone (the session was never closed).
     - Interruptions: E-019: marks in P1–P3 and an overtime, new store on the same database → same marks and overtime, nothing to undo; mark, `closeMatch`, `openMatch` of the same match → nothing to undo (RF-057).
     - Mistakes: undo pressed more times than actions.
   - Pending: nothing.
 
 - [ ] **T053** · UI: grid layout as pure size functions, with the tablet height budget (RF-076, RF-078, RF-079, RF-080, RF-081)
-  - Layer and files: UI · `src/ui/grid/grid-layout.ts`, test.
-  - Done when: for 375 × 667, 667 × 375, 768 × 1024 and 1024 × 768 the cell width is ≥ 44 pt, 4 and 6 periods fit at 375 pt, 8 periods fit in landscape and on tablet, 12 rows fit on tablet in both orientations with the worst-case banners and legend of `plan.md`, with more than 12 players on a tablet every period still fits across and vertical scroll is set when the rows do not fit (RF-081, D49), overtimes that do not fit set horizontal scroll, and the grid buttons go in the header only on tablets.
+  - Layer and files: UI · `src/ui/grid/grid-layout.ts`, tests split as `grid-layout.phone.test.ts` and `grid-layout.tablet.test.ts`, each with `it.each` tables under one literal title carrying their RF IDs. These titles say "fit", which the focused-test check of T024 no longer confuses with `fit(`.
+  - Done when: `grid-layout.ts` takes the window size and the measured heights of the banners, the legend and the header row, and returns the cell width `max(44, ⌊(available width − player column) / period columns⌋)`, the row height `max(44, min(56, rows space / rows))`, whether each scroll is needed and whether the grid buttons go in the header; for 375 × 667, 667 × 375, 768 × 1024 and 1024 × 768 the cell width is ≥ 44 pt, 4 and 6 periods fit at 375 pt, 8 periods fit in landscape and on tablet, 12 rows fit on tablet in both orientations with the worst-case banners and legend of `plan.md`, with more than 12 players on a tablet every period still fits across and vertical scroll is set when the rows do not fit (RF-081, D49), overtimes that do not fit set horizontal scroll, and the grid buttons go in the header only on tablets.
   - Scenarios:
     - Happy path: 6 periods at 375 pt → no horizontal scroll.
     - Boundaries: 8 periods at 375 pt → scroll with 44 pt cells; 1024 × 768 with every banner → 12 rows of 44 pt fit.
@@ -710,8 +730,8 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T054** · UI: grid component with fixed player column, headers, cells, counter and cell labels (RF-042, RF-043, RF-070, RF-071, RF-077, E-014, E-020)
-  - Layer and files: UI · `src/ui/grid/match-grid.tsx`, `player-column.tsx`, `column-header.tsx`, `grid-cell.tsx`, `src/i18n/es.json` (`grid.header.*`, `grid.counter`, `grid.cell.empty`, `grid.cell.starter`, `grid.cell.sub`), tests.
-  - Done when: the grid draws only `MatchView`; one row per entry with number, name and «J n · D n»; headers «P1»… and «PR1»…; three distinct cell states, each with its accessible label from `grid.cell.*` with the player's name and the column header («Ana, P2: casilla vacía», «Ana, P2: X, titular», «Ana, P2: X con círculo, entró de cambio»); the player column is outside the horizontal `ScrollView`.
+  - Layer and files: UI · `src/ui/grid/match-grid.tsx`, `player-column.tsx`, `column-header.tsx`, `grid-cell.tsx`, `src/i18n/es.json` (`grid.header.period`, `grid.header.overtime`, `grid.counter`, `grid.cell.empty`, `grid.cell.starter`, `grid.cell.sub`), tests next to each component.
+  - Done when: the grid draws only `MatchView`; a vertical `ScrollView` holds the player column and a horizontal `ScrollView` with the header row and the cells (RF-077); sizes come from `grid-layout.ts` with `useWindowDimensions` and the heights measured with `onLayout`, and are recomputed on rotation; each cell is pressable and passes its `cell` back through an `onTapCell` prop; one row per entry with number, name and «J n · D n»; headers «P1»… and «PR1»…; three distinct cell states, each with its accessible label from `grid.cell.*` with the player's name and the column header («Ana, P2: casilla vacía», «Ana, P2: X, titular», «Ana, P2: X con círculo, entró de cambio»); the player column is outside the horizontal `ScrollView`.
   - Scenarios:
     - Happy path: 6 periods + 1 overtime, 10 players → 10 rows, 7 columns.
     - Boundaries: E-014 counter «J 3 · D 3»; an overtime cell's label uses «PR1».
@@ -723,15 +743,15 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Pending: nothing.
 
 - [ ] **T055** · UI: match screen with tap, undo, overtimes, save error and the Undo history across the match's own screens (RF-044, RF-049, RF-056, RF-057, RF-058, RF-059, RF-085, E-025)
-  - Layer and files: app and UI · `src/app/matches/[matchId]/index.tsx`, `src/i18n/es.json` (`grid.undo`, `grid.addOvertime`, `grid.removeOvertime`, `confirm.removeOvertime.*`), tests in `tests/app/` (with `renderRouter` from `expo-router/testing-library` for the navigation scenarios).
-  - Done when: tapping cells calls the store; «Deshacer» is disabled with nothing to undo; «Añadir prórroga» adds a column; «Quitar prórroga» only for the last one, with a confirmation that closes only with its buttons when it has marks; a failed save shows `error.saveFailed`; `closeMatch` runs only when the match route is popped (going back to the team or a match list), never when the call-up or new-player route is pushed on top (D48).
+  - Layer and files: app and UI · `src/app/matches/[matchId]/index.tsx` (composes the grid, the toolbar and the banners, so the screen file stays under 250 lines and no function passes 60), `src/ui/grid/grid-toolbar.tsx` (the three buttons), `src/i18n/es.json` (`grid.undo`, `grid.addOvertime`, `grid.removeOvertime`, `confirm.removeOvertime.title`, `confirm.removeOvertime.message`, `confirm.removeOvertime.confirm`), tests in `tests/app/` split by subject (marks and undo, overtimes, navigation), with `renderRouter` from `expo-router/testing-library` for the navigation scenarios.
+  - Done when: tapping cells calls the session's `tapCell`; «Deshacer», «Añadir prórroga» and «Quitar prórroga» go in the navigation header on tablets and in a toolbar under the grid on phones, as `grid-layout.ts` decides (T053); «Deshacer» calls `undo` and is disabled when `view.canUndo` is false; «Añadir prórroga» adds a column; «Quitar prórroga» only for the last one, with a confirmation that closes only with its buttons when it has marks; a failed save shows `error.saveFailed`; `closeMatch` runs only when the match route is popped (going back to the team or a match list), never when the call-up or new-player route is pushed on top (D48).
   - Scenarios:
     - Happy path: mark five starters in P1.
     - Boundaries: «Quitar prórroga» without marks → no dialog.
     - Outside the rules: not applicable.
     - Odd data: match with 13 players → banner.
     - Sequences: mark, add overtime, undo, undo.
-    - Interruptions: mark a cell, push the call-up route and go back → «Deshacer» removes that mark; the same through the new-player route; mark a cell, go back to the team screen and open the match again → «Deshacer» is disabled (RF-057).
+    - Interruptions: mark a cell, push the call-up route and go back → «Deshacer» removes that mark; the same through the new-player route; mark a cell, go back to the team screen and open the match again (in the test, `testRouter.push("/matches/1")`) → «Deshacer» is disabled (RF-057). [DOUBT] In the app, D2 has no way to open a saved match again: the team's match list is in D3 (T067–T071); see the doubt at T056.
     - Mistakes: cancel removing an overtime with marks → stays with its marks; tapping outside that dialog, or pressing Android Back (`onRequestClose`) while it is open, does nothing and leaves the overtime with its marks (RF-059).
   - Pending: nothing.
 
@@ -739,7 +759,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Layer and files: e2e · `e2e/us3-planning.yaml`, `e2e/us3-interruption.yaml` (`stopApp`, `launchApp`).
   - Done when: both flows pass on both platforms; output in `review.md`.
   - Scenarios: US3 acceptance criteria 1–5 and 7: mark, remove and undo; add and remove overtimes; mark a cell, open the call-up screen, go back to the grid and press «Deshacer» → the mark is gone; mark a cell, go back to the team, open the match again → «Deshacer» has nothing to undo; E-019 close and reopen. Criterion 6 (save failure) is covered by T051 and T055, and criterion 8 by T053 and T057.
-  - Pending: nothing.
+  - Pending: [DOUBT] "open the match again" and E-019 need a way back to a saved match, and D2 has none: a match is reached only right after «Guardar», and the team's match list (RF-075) is in D3. Option A (recommended): bring forward into D2, before T055, the team's match list only, keeping the task IDs: `compareMatches` (T067), `listTeamMatches` (part of T068), the team list of `matches-store.ts` (part of T069) and the matches section of the team screen (part of T071); the list of every match (RF-074) stays in D3. Without it, the coach cannot get back to the grid after leaving it or after the app closes, which is what D2 promises. Option B: keep D2 as it is; Maestro reopens the match with `openLink: planificadorperiodos://matches/1` after `launchApp` with `clearState`, and the D2 checkpoint says that a match can only be planned right after creating it.
 
 - [ ] **T057** · Device check of the grid layout on phone and tablet (RF-076, RF-077, RF-078, RF-079, RF-080, RF-081)
   - Layer and files: `review.md` (device check with screenshots).
@@ -747,13 +767,13 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Scenarios: 4, 6 and 8 periods, 0 and 2 overtimes, 9, 12 and 13 players, each device and orientation.
   - Pending: nothing.
 
-**US3 checkpoint:** Fernando plans a match: marks and removes X, undoes several times, also after opening the call-up and coming back, adds and removes overtimes, closes the app and finds everything as it was, on phone and tablet in both orientations.
+**US3 checkpoint:** Fernando plans a match: marks and removes X, undoes several times, also after opening the call-up and coming back, adds and removes overtimes, closes the app and finds everything as it was, on phone and tablet in both orientations. [DOUBT] Finding the match again after leaving it needs the team's match list (see T056).
 
 ## US4 · See the rule warnings
 
 - [ ] **T058** · State: warnings and legend in the match view (RF-006, RF-060, RF-061, RF-062, RF-063, RF-064, RF-065, RF-066, RF-067, RF-072, RF-087, E-001, E-027)
-  - Layer and files: state · `src/state/match-view.ts` (`isLightRed`, `isInRed`, `headerMark`, `ruleImpossible`, `legend`), tests.
-  - Done when: the view takes every colour and mark from `Warnings` and the legend from `legendItems`; a grid with no warning has nothing set.
+  - Layer and files: state · `src/state/match-view.ts` (`CellView.isLightRed`, `RowView.isInRed`, `ColumnView.headerMark`, `MatchView.ruleImpossible`, `MatchView.legend`), tests in `match-view.warnings.test.ts`.
+  - Done when: the view takes every colour and mark from `Warnings` (`lightRedCells`, `playersInRed`, `periodWarnings`, `ruleImpossible`) and the legend from `legendItems`; a grid with no warning has nothing set. The examples are grids passed straight to `buildMatchView`, because grids with a circled X in the rule window (E-002, E-027) cannot be built through D2's store actions; one `it.each` table per file, with one literal title carrying its RF and E IDs.
   - Scenarios:
     - Happy path: E-001 → Juan's P4 and P5 cells `isLightRed`.
     - Boundaries: E-027 → legend light red, «!», «≠», not player in red.
@@ -766,7 +786,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 - [ ] **T059** · UI: warnings on the grid, colours and legend (RF-006, RF-060, RF-061, RF-062, RF-063, RF-064, RF-065, RF-066, RF-067, RF-072, RF-087, E-001, E-002, E-003, E-004, E-007, E-027)
   - Layer and files: UI · `src/ui/theme/warning-colors.ts`, `src/ui/grid/*` (colours and header marks), `src/ui/warnings/rule-impossible-banner.tsx`, `src/ui/warnings/warning-legend.tsx`, `src/i18n/es.json` (`warning.*`, `grid.header.incompleteMark`, `grid.header.inconsistentMark`), tests.
-  - Done when: light red cells, players in red, «!» and «≠» in headers, the general warning above the grid and the legend under it render only from `MatchView`; nothing is coloured by default.
+  - Done when: light red cells, players in red, «!» and «≠» in headers, the general warning (`warning.ruleImpossible`) above the grid and the legend under it (`warning.lightRedCell`, `warning.playerInRed`, `warning.incompletePeriod`, `warning.inconsistentPeriod`) render only from `MatchView`, with the colours of `warning-colors.ts`; their heights reach `grid-layout.ts` through `onLayout` (T054); nothing is coloured by default. Component tests use `MatchView` fixtures, so E-002 and E-027 can be drawn although D2 cannot mark a circled X in the window.
   - Scenarios:
     - Happy path: E-001 → P4 and P5 light red, «!» on P1–P5.
     - Boundaries: E-003 → red player, P5 light red and the general warning.
@@ -777,9 +797,9 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: E-002 → «≠» on P3, not «!»; E-027 legend without the player in red.
   - Pending: nothing.
 
-- [ ] **T060** · Maestro US4 journey and performance on the 5th-gen iPad (RF-060, RF-062, RF-063, RF-064, RF-065, RF-067, RF-087, E-001, E-003, E-005, E-006, E-007, E-008, E-009, E-027)
+- [ ] **T060** · Maestro US4 journey and performance on the 5th-gen iPad (RF-060, RF-062, RF-063, RF-064, RF-065, RF-067, RF-087, E-001, E-003, E-005, E-006, E-007, E-008, E-009)
   - Layer and files: e2e · `e2e/us4-warnings.yaml`; measurement in `review.md`.
-  - Done when: the flow reproduces the US4 acceptance criteria and E-001, E-003, E-005–E-009 and E-027 on both platforms; on the iPad, a release build repaints under 100 ms after a tap with 12 players and 8 periods.
+  - Done when: the flow reproduces the US4 acceptance criteria and E-001, E-003 and E-005–E-009 on both platforms; on the iPad, a release build repaints under 100 ms after a tap with 12 players and 8 periods. E-027 (the situation of E-002, with a circled X in P3) cannot be marked in D2, which has no question and no long-press menu yet, so its journey moved to T066 (review of 2026-11-12); criterion 5 (legend) is checked here with the light red cell, «!» and the player in red.
   - Scenarios: the five US4 acceptance criteria.
   - Pending: nothing.
 
@@ -787,14 +807,14 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 - [ ] **T061** · D2 close: verification, Codex and Security review, D2 section of `summary.md`, PR
   - Layer and files: `review.md`, `codex-review.md`, `summary.md`.
-  - Done when: `verify.sh` green with the mutation run time recorded, Maestro output recorded, no blocking finding, the PR "001 D2: teams, matches, grid, warnings" is merged by Fernando after using the app in a match.
-  - Pending: the Planner reviews D3 with the lessons of D2 before it starts.
+  - Done when: `verify.sh` green with the mutation run time recorded (local, and on CI the full and the incremental runs, with whether the cache was restored); Maestro output recorded; the surviving mutants of `src/domain/undo.ts` listed in `review.md` from the Stryker HTML report, each classified as equivalent or as defence only (reachable only with a history that does not match the grid, `plan.md` "Test strategy"), and any survivor in a D2 domain file killed or explained; Security has reviewed the D2 dependencies, the backup plugin, the data layer and the navigation; no blocking finding; the D2 section of `summary.md` explains what was done with real code; the PR "001 D2: teams, matches, grid, warnings" is merged by Fernando after using the app in a match.
+  - Pending: the Planner reviews D3 with the lessons of D2 before it starts (including the slice files of the session store, `plan.md` "State").
 
 # D3 · Rest of v1 (US5–US7)
 
 ## US5 · Record subs during the match
 
-- [ ] **T062** · State: questions and answers in the session (RF-045, RF-046, RF-047, RF-050, RF-051, RF-054, RF-057, E-011, E-013)
+- [ ] **T062** · State: questions and answers in the session (RF-045, RF-046, RF-047, RF-050, RF-051, RF-054, RF-057, RF-086, E-011, E-013, E-026)
   - Layer and files: state · `src/state/match-session-store.ts` (`pending`, `answerSub`, `answerStarter`, `chooseReplaced`, `confirmRemove`, `cancelQuestion`), `src/state/match-view.ts` (`replaceableStarters`), tests.
   - Done when: each domain question is stored as `pending`; each answer saves and publishes; `cancelQuestion` (the one action behind «Cancelar», tapping outside and Android Back) leaves the grid as it was at any step; a replacement is one undo entry.
   - Scenarios:
@@ -802,7 +822,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Boundaries: starter → choose Eva → both cells saved together.
     - Outside the rules: not applicable.
     - Odd data: a tap on another cell while a question is pending is ignored.
-    - Sequences: replacement then undo → both cells restored in one press.
+    - Sequences: replacement then undo → both cells restored in one press; E-026 with the real database (moved here from T052 on 2026-11-12): replace Eva by Ana in P2, remove Eva with `removeFromCallUp`, undo → Ana's P2 empty, P2 with 4 X, Eva not back.
     - Interruptions: closing with a pending question → nothing saved for it.
     - Mistakes: cancel while choosing the replaced X → no change (RF-045).
   - Pending: nothing.
@@ -846,10 +866,10 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: long press on an empty cell → no mark, no menu; «Cancelar», tapping outside the menu or Android Back → cell unchanged, no undo entry; the menu never shows «Cancelar» as one of its options.
   - Pending: nothing.
 
-- [ ] **T066** · Maestro US5 journey, E-026 through the call-up screen, and device check on phone and tablet (RF-045, RF-046, RF-047, RF-048, RF-050, RF-051, RF-052, RF-053, RF-054, RF-055, RF-057, RF-066, RF-076, RF-077, RF-078, RF-079, RF-080, RF-081, RF-086, E-011, E-012, E-013, E-026)
+- [ ] **T066** · Maestro US5 journey, E-026 through the call-up screen, E-027, and device check on phone and tablet (RF-045, RF-046, RF-047, RF-048, RF-050, RF-051, RF-052, RF-053, RF-054, RF-055, RF-057, RF-066, RF-076, RF-077, RF-078, RF-079, RF-080, RF-081, RF-086, RF-087, E-011, E-012, E-013, E-026, E-027)
   - Layer and files: e2e · `e2e/us5-subs.yaml`, `e2e/us5-undo-after-call-up.yaml`; device check in `review.md`.
   - Done when: the flows cover the US5 acceptance criteria 1–6 on both platforms, and E-026 as written: starter replacement of Eva by Ana in P2, Eva removed in the call-up screen, back to the grid, «Deshacer» → Ana's P2 empty, P2 with 4 X, Eva not back; Fernando checks the dialogs and menu on phone and tablet in both orientations.
-  - Scenarios: the six US5 acceptance criteria, E-011–E-013 and E-026.
+  - Scenarios: the six US5 acceptance criteria, E-011–E-013 and E-026; E-027 (moved here from T060 on 2026-11-12): build E-002 with a sub in P3 and check that the legend explains the light red cell, «!» and «≠», and not the player in red.
   - Pending: nothing.
 
 **US5 checkpoint:** Fernando records subs and starter replacements during a period, uses the long-press menu and never reaches a sixth X.
