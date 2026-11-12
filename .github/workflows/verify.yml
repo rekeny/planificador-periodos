@@ -15,7 +15,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       GITLEAKS_VERSION: "8.30.1"
       # SHA-256 of the Linux binaries, checked against the published checksums files.
@@ -57,8 +57,8 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: reports/stryker-incremental.json
-          key: stryker-${{ runner.os }}-${{ github.sha }}
-          restore-keys: stryker-${{ runner.os }}-
+          key: stryker-${{ runner.os }}-${{ hashFiles('tests/support/**', 'jest*.config.js', 'stryker.config.json', 'package-lock.json') }}-${{ github.sha }}
+          restore-keys: stryker-${{ runner.os }}-${{ hashFiles('tests/support/**', 'jest*.config.js', 'stryker.config.json', 'package-lock.json') }}-
 
       - run: scripts/verify.sh
         env:
@@ -66,8 +66,8 @@ jobs:
           STRYKER_FORCE: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
 
       - name: Save the mutation testing cache
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/cache/save@v6
         with:
           path: reports/stryker-incremental.json
-          key: stryker-${{ runner.os }}-${{ github.sha }}
+          key: stryker-${{ runner.os }}-${{ hashFiles('tests/support/**', 'jest*.config.js', 'stryker.config.json', 'package-lock.json') }}-${{ github.sha }}
