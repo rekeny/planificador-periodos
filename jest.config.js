@@ -22,6 +22,7 @@ const domainThreshold = {
 /** @type {import('jest').Config} */
 module.exports = {
   preset: "jest-expo",
+  setupFiles: ["<rootDir>/tests/setup/fast-check.ts"],
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
   testPathIgnorePatterns: [
     "/node_modules/",
@@ -31,6 +32,7 @@ module.exports = {
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
     "!src/**/*.test.{ts,tsx}",
+    "!tests/**",
     "!src/**/*.d.ts",
   ],
   coverageReporters: ["text-summary", "lcov"],

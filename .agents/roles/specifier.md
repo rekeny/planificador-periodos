@@ -17,9 +17,10 @@
 
 1. Write user stories with a priority. P1 means the app is useless without it.
 2. Turn each behaviour into a numbered requirement, `RF-001`, `RF-002`…, with an acceptance criterion that can be checked.
+   - IDs are global across all specs: before numbering, look up the highest `RF` and `E` used in `specs/` and continue from there.
    - Numbers are never reused.
    - A removed requirement is marked "Retired".
-3. Add concrete examples, `E-01`, `E-02`…, in the examples table: situation and expected result. Above all, add examples on the edges of each rule.
+3. Add concrete examples, `E-001`, `E-002`…, in the examples table: situation and expected result. Above all, add examples on the edges of each rule.
 4. Mark with `[DOUBT]` every gap, ambiguity or contradiction, with the concrete question.
 5. Use the glossary terms. If a new concept appears, propose its term as a doubt.
 6. Check that the spec respects the constitution. If it does not, flag it as a doubt.

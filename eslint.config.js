@@ -61,6 +61,11 @@ const boundaryRules = [
     allow: { to: { element: { type: LAYERS } } },
   },
   { from: { file: { categories: "test" } }, allow: { to: ANY_PACKAGE } },
+  // ... and the helpers under tests/ (generators, such as tests/support/grid-arbitraries.ts).
+  {
+    from: { file: { categories: "test" } },
+    allow: { to: { file: { categories: "test" } } },
+  },
 ];
 
 module.exports = defineConfig([
@@ -182,7 +187,7 @@ module.exports = defineConfig([
   },
   {
     // CommonJS config file: Node provides __dirname.
-    files: ["jest.config.js"],
+    files: ["jest.config.js", "jest.stryker.config.js"],
     languageOptions: { globals: { __dirname: "readonly" } },
   },
   {

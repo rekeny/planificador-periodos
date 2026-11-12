@@ -6,7 +6,7 @@ Legend: `[ ]` pending · `[x]` done. Each task is one commit, `T0NN RF-0NN: desc
 
 ## US1 · <Title>
 
-- [ ] **T001** · <Description> (RF-001, E-01)
+- [ ] **T001** · <Description> (RF-001, E-001)
   - Layer and files:
   - Done when:
   - Scenarios:

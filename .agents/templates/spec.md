@@ -39,9 +39,9 @@ Acceptance criteria:
 
 <!-- The ID goes in the first column: scripts/check-traceability.mjs reads it. -->
 
-| ID   | Situation | Expected result | Requirements |
-| ---- | --------- | --------------- | ------------ |
-| E-01 | …         | …               | RF-001       |
+| ID    | Situation | Expected result | Requirements |
+| ----- | --------- | --------------- | ------------ |
+| E-001 | …         | …               | RF-001       |
 
 ## Doubts
 

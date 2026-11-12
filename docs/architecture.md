@@ -105,24 +105,50 @@ The interface never computes rules.
 
 The app is in Spanish, so the first column shows the words the user sees.
 
-| In the app (Spanish)                        | Meaning                                     | In the code                    |
-| ------------------------------------------- | ------------------------------------------- | ------------------------------ |
-| Equipo                                      | Team                                        | `Team`                         |
-| Jugador, dorsal, activo                     | Player, shirt number, active                | `Player`, `number`, `isActive` |
-| Partido, convocatoria                       | Match, call-up (players picked for a match) | `Match`, `CallUp`              |
-| Variante (4, 6 u 8 periodos)                | Format (4, 6 or 8 periods)                  | `Format`                       |
-| Periodo, prórroga                           | Period, overtime                            | `Period`, `Overtime`           |
-| Tramo con regla                             | Window of periods with a rule               | `RuleWindow`                   |
-| Marca: titular (X) o cambio (X con círculo) | Mark: starter (X) or substitute (circled X) | `Mark`: `starter` or `sub`     |
-| Jugado, descansado                          | Played, rested                              | `played`, `rested`             |
-| Aviso                                       | Warning                                     | `Warning`                      |
+| In the app (Spanish)                        | Meaning                                                         | In the code                                                       |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Equipo                                      | Team                                                            | `Team`                                                            |
+| Jugador, dorsal, activo                     | Player, shirt number, active                                    | `Player`, `number`, `isActive`                                    |
+| Partido, convocatoria                       | Match, call-up (players picked for a match)                     | `Match`, `CallUp`                                                 |
+| Variante (4, 6 u 8 periodos)                | Format (4, 6 or 8 periods)                                      | `Format`                                                          |
+| Periodo, prórroga                           | Period, overtime                                                | `Period`, `Overtime`                                              |
+| Tramo con regla                             | Window of periods with a rule                                   | `RuleWindow`                                                      |
+| Marca: titular (X) o cambio (X con círculo) | Mark: starter (X) or substitute (circled X)                     | `Mark`: `starter` or `sub`                                        |
+| Jugado, descansado                          | Played, rested                                                  | `played`, `rested`                                                |
+| Aviso                                       | Warning                                                         | `Warning`                                                         |
+| —                                           | The data of a format: periods, rule window, call-up range       | `FormatRules`, `FORMAT_RULES`                                     |
+| Periodo libre                               | A period after the rule window, or an overtime                  | `isRuleWindowColumn(...) === false`                               |
+| Cuadrícula                                  | Players in rows, periods and overtimes in columns               | `MatchGrid`                                                       |
+| —                                           | A period or overtime column of the grid, and its key            | `Column`, `ColumnKey`                                             |
+| Casilla, casillas vacías                    | One player in one column; a cell with no mark                   | `Cell`, `CellKey`, `CellState` `"empty"`                          |
+| —                                           | A player's line in a match's call-up, with name and number kept | `CallUpEntry`, `CallUpEntryId`                                    |
+| Casilla en rojo claro                       | Cell that should not be marked                                  | `lightRedCells`                                                   |
+| Jugador en rojo                             | Player breaking a minimum of the rule window                    | `playersInRed`                                                    |
+| Contador                                    | Played and rested over the whole match                          | `PlayerCounter`                                                   |
+| Categoría                                   | Free-text category of a team                                    | `category`                                                        |
+| Variante por defecto                        | Format of a team's new matches                                  | `defaultFormat`                                                   |
+| Local, visitante                            | Names of the two sides                                          | `homeName`, `awayName`                                            |
+| Resultado final                             | Optional points of each side                                    | `homeScore`, `awayScore`                                          |
+| Notas                                       | Free text of a match                                            | `notes`                                                           |
+| Desactivado                                 | Player not offered in new call-ups                              | `isActive: false`                                                 |
+| Periodo incompleto                          | Rule-window period with fewer than 5 X                          | `PeriodWarning` `"incomplete"`                                    |
+| Periodo incoherente                         | Period with a sub and fewer than 5 X                            | `PeriodWarning` `"inconsistent"`                                  |
+| Regla imposible de cumplir                  | No filling of the rule window meets everyone's minimums         | `isRuleImpossible`, `ruleImpossible`                              |
+| Rango de convocatoria                       | Allowed number of players in the call-up                        | `callUpMin`, `callUpMax`, `CallUpRangeWarning`                    |
+| Dorsal repetido                             | Two active players of a team with the same number               | `duplicateNumbers`                                                |
+| Descansos posibles                          | A player's empty cells in the rule window                       | `possibleRests`                                                   |
+| —                                           | Every warning of a grid at once                                 | `Warnings`                                                        |
+| Leyenda                                     | List under the general warning explaining the visible marks     | `LegendItem`, `legendItems`                                       |
+| Titular en lugar de otro                    | Starter replacing someone else's X                              | `replaceStarter`                                                  |
+| Deshacer                                    | Revert the last mark change                                     | `undoLast`, `UndoEntry`, `CellChange`                             |
+| —                                           | What state publishes for a screen to draw                       | `MatchView`, `RowView`, `ColumnView`, `CellView`, `MatchListItem` |
 
 A new concept is added here before it is used in the code.
 
 ## Tests
 
 - **Where:** next to the file they test, such as `rule-window.test.ts`. Tests of the screens in `src/app/` go in `tests/app/`, because Expo Router would treat any file in `src/app/` as a route.
-- **Name:** starts with the IDs it covers, such as `it('RF-018 E-01: highlights P4 and P5 when the player has 3 X in the window', …)`. That is how traceability works.
+- **Name:** starts with the IDs it covers, such as `it('RF-018 E-001: highlights P4 and P5 when the player has 3 X in the window', …)`. That is how traceability works.
 - **Thresholds:** 90 % coverage in `src/domain/` and at least 80 % of mutants killed by Stryker.
 
 | Level                  | Tool                         | What for                                                                   |
@@ -146,14 +172,14 @@ A new concept is added here before it is used in the code.
 
 Each requirement is followed from the spec to the commit with the same identifier. `scripts/check-traceability.mjs` fails if a requirement or an example has no test.
 
-| Where               | How it appears                                                                   |
-| ------------------- | -------------------------------------------------------------------------------- |
-| `spec.md`           | `- **RF-018** · Cell that should not be marked shows light red`                  |
-| `spec.md`, examples | `\| E-01 \| Juan with X in P1, P2 and P3 \| P4 and P5 in light red \| RF-018 \|` |
-| `tasks.md`          | `- [ ] **T012** · Evaluate red cells (RF-018, E-01, E-02)`                       |
-| Test                | `it('RF-018 E-01: highlights P4 and P5 …')`                                      |
-| Commit              | `T012 RF-018: highlight periods in light red`                                    |
-| `review.md`         | Findings and verification output of T012                                         |
+| Where               | How it appears                                                                    |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `spec.md`           | `- **RF-018** · Cell that should not be marked shows light red`                   |
+| `spec.md`, examples | `\| E-001 \| Juan with X in P1, P2 and P3 \| P4 and P5 in light red \| RF-018 \|` |
+| `tasks.md`          | `- [ ] **T012** · Evaluate red cells (RF-018, E-001, E-002)`                      |
+| Test                | `it('RF-018 E-001: highlights P4 and P5 …')`                                      |
+| Commit              | `T012 RF-018: highlight periods in light red`                                     |
+| `review.md`         | Findings and verification output of T012                                          |
 
 The script checks the IDs of the tasks ticked as done and, when the spec status is "Closed", all of its IDs.
 

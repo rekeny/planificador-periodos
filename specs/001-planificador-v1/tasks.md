@@ -12,7 +12,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## Setup
 
-- [ ] **T001** · Traceability script: three-digit global IDs, duplicate IDs across specs detected, spec "In progress"
+- [x] **T001** · Traceability script: three-digit global IDs, duplicate IDs across specs detected, spec "In progress"
   - Layer and files: tooling · `scripts/check-traceability.mjs`, `tests/scripts/check-traceability.test.ts`, `specs/001-planificador-v1/spec.md` (status "In progress").
   - Done when: the script reads `RF-\d{3}` and `E-\d{3}`, fails with a clear message when one ID is defined in two `spec.md` files, still ignores "retired" lines for coverage but counts them for duplicates; the spec status is "In progress"; the test runs the script against fixtures created at run time and `verify.sh` is green.
   - Scenarios:
@@ -25,7 +25,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: an ID only in a comment or a `describe` does not count; fixture file contents never count, because the fixtures live in a temporary folder and the test names carry no IDs.
   - Pending: nothing.
 
-- [ ] **T002** · Documents, templates and roles quote three-digit IDs; numbering rule for the Specifier
+- [x] **T002** · Documents, templates and roles quote three-digit IDs; numbering rule for the Specifier
   - Layer and files: docs · `docs/architecture.md` (Tests "Name", Traceability table), `.agents/templates/spec.md`, `.agents/templates/tasks.md`, `.agents/roles/specifier.md` (three-digit examples, and the rule "look up the highest `RF` and `E` used in `specs/` before numbering; IDs are global and never reused"), `.agents/roles/test-designer.md`.
   - Done when: every `E-01`-style example in those files reads `E-001`; the specifier role has the numbering rule; a search for a two-digit example ID (`E-\d{2}\b`) in `docs/architecture.md`, `.agents/` and `AGENTS.md` finds nothing (the ADRs keep the old IDs where they describe the old format); `verify.sh` is green.
   - Scenarios:
@@ -40,7 +40,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## Formats (US4 base)
 
-- [ ] **T003** · Glossary terms, formats as data, columns and rule window (RF-001, RF-002, RF-003, RF-004, RF-005, RF-006)
+- [x] **T003** · Glossary terms, formats as data, columns and rule window (RF-001, RF-002, RF-003, RF-004, RF-005, RF-006, RF-042, RF-055)
   - Layer and files: domain and docs · `docs/architecture.md` (glossary, the table "Glossary additions" of `plan.md`), `src/domain/format.ts`, `src/domain/column.ts`, tests next to them.
   - Done when: the glossary has every new term; `FORMAT_RULES` holds the table of RF-002–RF-005 as data, `FORMATS` is exactly `[4, 6, 8]`, `gridColumns` gives periods then overtimes, `isRuleWindowColumn` is true only for P1–P3, P1–P5 and P1–P6 respectively; tests green.
   - Scenarios:
@@ -55,7 +55,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US3 · Plan the periods (domain)
 
-- [ ] **T004** · Squad types, call-up entries, grid model, cell states and player order (RF-016, RF-019, RF-042, RF-043, E-020)
+- [x] **T004** · Squad types, call-up entries, grid model, cell states and player order (RF-016, RF-019, RF-042, RF-043, E-020)
   - Layer and files: domain · `src/domain/squad.ts`, `src/domain/player-order.ts`, `src/domain/grid.ts`, tests.
   - Done when: `Team`, `Player`, `Match`, `CallUpEntry` and `MatchGrid` follow `plan.md`; `comparePlayers` sorts by numeric value, then "0" before "00", then by name in Spanish order; rows and cells are keyed by call-up entry; `cellState` always returns exactly one of three states; `cellExists`, `starterCount` and `hasSub` work per column.
   - Scenarios:
@@ -68,7 +68,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: "07" is not a valid number, but sorting never throws; two entries of the same player in different stays have different keys.
   - Pending: nothing.
 
-- [ ] **T005** · Tap on a cell (RF-044, RF-045, RF-048, RF-049, RF-050, RF-051, RF-055, E-011, E-012, E-013)
+- [x] **T005** · Tap on a cell (RF-044, RF-045, RF-048, RF-049, RF-050, RF-051, RF-055, E-011, E-012, E-013)
   - Layer and files: domain · `src/domain/marking.ts` (`tapCell`), test.
   - Done when: every row of the RF-044–RF-051 table returns the expected `MarkingResult`, and no tap returns a grid with 6 X in a column.
   - Scenarios:
@@ -81,7 +81,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: tap Eva's X in P3 with a sub (E-013) → `confirmRemoveStarter`, grid untouched.
   - Pending: nothing.
 
-- [ ] **T006** · Player counter (RF-007, RF-008, RF-009, RF-070, RF-071, RF-072, E-014)
+- [x] **T006** · Player counter (RF-007, RF-008, RF-009, RF-070, RF-071, RF-072, E-014)
   - Layer and files: domain · `src/domain/counter.ts`, test.
   - Done when: `playerCounter` counts X as played and empty as rested over every column, overtimes included, and circled X as neither.
   - Scenarios:
@@ -94,7 +94,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: one circled X in 6 periods → played + rested = 5 (RF-071).
   - Pending: nothing.
 
-- [ ] **T007** · Overtimes: add, remove the last one, detect its marks (RF-058, RF-059)
+- [x] **T007** · Overtimes: add, remove the last one, detect its marks (RF-058, RF-059)
   - Layer and files: domain · `src/domain/overtime.ts`, test.
   - Done when: `addOvertime` adds one empty column after the last one; `lastOvertimeHasMarks` and `removeLastOvertime` work only on the last overtime and remove its marks.
   - Scenarios:
@@ -109,7 +109,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US5 · Record subs (domain)
 
-- [ ] **T008** · Answers: sub, starter replacement, remove anyway (RF-046, RF-047, RF-054, RF-055, E-013)
+- [x] **T008** · Answers: sub, starter replacement, remove anyway (RF-046, RF-047, RF-054, RF-055, E-013)
   - Layer and files: domain · `src/domain/marking.ts` (`markSub`, `replaceableStarters`, `replaceStarter`, `removeMark`), test.
   - Done when: "sub" marks a circled X and keeps 5 X; "starter" puts an X in the tapped cell and empties the chosen X in one step; "remove anyway" empties the X and leaves every circled X as it is.
   - Scenarios:
@@ -122,7 +122,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: the replaced cell becomes empty, never a circled X.
   - Pending: nothing.
 
-- [ ] **T009** · Long-press menu (RF-052, RF-053, RF-054)
+- [x] **T009** · Long-press menu (RF-052, RF-053, RF-054)
   - Layer and files: domain · `src/domain/cell-menu.ts`, test.
   - Done when: `canOpenCellMenu` is false on empty cells; each choice gives the result of RF-052 and RF-053; choosing the current state returns `unchanged`.
   - Scenarios:
@@ -137,7 +137,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US4 · See the rule warnings (domain)
 
-- [ ] **T010** · Rule window: possible rests, light red cells, player in red (RF-002, RF-003, RF-004, RF-007, RF-008, RF-009, RF-062, RF-063, RF-064, RF-072, E-001, E-002, E-003, E-004, E-005, E-008, E-009, E-010)
+- [x] **T010** · Rule window: possible rests, light red cells, player in red (RF-002, RF-003, RF-004, RF-007, RF-008, RF-009, RF-062, RF-063, RF-064, RF-072, E-001, E-002, E-003, E-004, E-005, E-008, E-009, E-010)
   - Layer and files: domain · `src/domain/rule-window.ts`, test.
   - Done when: E-001–E-005 and E-008–E-010 give exactly the light red cells and players in red of the spec, in the three formats.
   - Scenarios:
@@ -150,7 +150,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a circled X in the window counts as neither played nor rest (E-002, E-010).
   - Pending: nothing.
 
-- [ ] **T011** · Rule impossible to meet, by bounded flow (RF-003, RF-004, RF-010, RF-067, E-003, E-004, E-006, E-007, E-015, E-030)
+- [x] **T011** · Rule impossible to meet, by bounded flow (RF-003, RF-004, RF-010, RF-067, E-003, E-004, E-006, E-007, E-015, E-030)
   - Layer and files: domain · `src/domain/bounded-flow.ts`, `src/domain/rule-feasibility.ts`, tests.
   - Done when: `isRuleImpossible` is true for E-003, E-004, E-006, E-015 and E-030 and false for E-007; `bounded-flow.ts` passes its own tests on small networks with lower bounds; the algorithm follows `plan.md`.
   - Scenarios:
@@ -163,7 +163,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: circled X cells are never used as free cells.
   - Pending: nothing.
 
-- [ ] **T012** · Incomplete and inconsistent periods (RF-065, RF-066, E-002, E-007, E-010, E-013)
+- [x] **T012** · Incomplete and inconsistent periods (RF-065, RF-066, E-002, E-007, E-010, E-013)
   - Layer and files: domain · `src/domain/period-warnings.ts`, test.
   - Done when: `periodWarning` returns "inconsistent" for any column with a circled X and fewer than 5 X, otherwise "incomplete" for window columns with fewer than 5 X, otherwise `null`.
   - Scenarios:
@@ -176,7 +176,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: 5 X and a sub → none; E-002 and E-010 → the period with the sub is inconsistent, not incomplete.
   - Pending: nothing.
 
-- [ ] **T013** · All warnings in one result, call-up range and legend items (RF-005, RF-010, RF-060, RF-061, RF-068, RF-072, RF-087, E-015, E-027, E-030)
+- [x] **T013** · All warnings in one result, call-up range and legend items (RF-005, RF-010, RF-060, RF-061, RF-068, RF-072, RF-087, E-015, E-027, E-030)
   - Layer and files: domain · `src/domain/call-up-range.ts`, `src/domain/warnings.ts`, `src/domain/legend.ts`, tests.
   - Done when: `evaluateWarnings` combines T010–T012 and the call-up range; `legendItems` returns only the kinds present, in a fixed order, and nothing when no mark is present; a complete 8-period window with 12 players, each with 2 or 3 X and no sub, reports nothing.
   - Scenarios:
@@ -189,7 +189,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: marks in free periods never add light red cells or players in red (RF-072).
   - Pending: nothing.
 
-- [ ] **T014** · Performance budget and mutation-run settings (RF-060)
+- [x] **T014** · Performance budget and mutation-run settings (RF-060)
   - Layer and files: domain tests and tooling · `src/domain/warnings.budget.test.ts`, `tests/setup/fast-check.ts`, `tests/setup/fast-check-mutation.ts`, `jest.config.js` (`setupFiles`), `jest.stryker.config.js`, `stryker.config.json` (`jest.configFile`, `timeoutMS`), `eslint.config.js` (Node globals for the new config file).
   - Done when: 500 calls of `evaluateWarnings` on the worst planned grid take under 2.5 s in Jest with coverage; Stryker runs only `src/domain/**/*.test.ts`, without `*.budget.test.ts`, with 100 fast-check runs; normal Jest runs use 1,000; `FORCE_MUTATION=1 npm run verify` is green and its duration is written in the task's commit message body.
   - Scenarios:
@@ -204,7 +204,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US2, US6 and US7 · Call-up, format and squad rules (domain)
 
-- [ ] **T015** · Call-up rules: initial call-up, players to add, name and number snapshot, removal with marks (RF-019, RF-023, RF-030, RF-032, RF-033, RF-034, RF-042, E-017, E-018)
+- [x] **T015** · Call-up rules: initial call-up, players to add, name and number snapshot, removal with marks (RF-019, RF-023, RF-030, RF-032, RF-033, RF-034, RF-042, E-017, E-018)
   - Layer and files: domain · `src/domain/call-up.ts`, test.
   - Done when: `initialCallUp` takes only active players, sorted; `playersToAdd` offers only active players not in the call-up; `callUpEntryFor` copies name and number; `removeFromCallUp` removes the row and its marks; `entryHasMarks` decides the confirmation.
   - Scenarios:
@@ -217,7 +217,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: removing Ana with marks (E-017) → `entryHasMarks` true; after removal no cell of Ana remains.
   - Pending: nothing.
 
-- [ ] **T016** · Format change (RF-038, RF-040, RF-041, RF-055, E-016)
+- [x] **T016** · Format change (RF-038, RF-040, RF-041, RF-055, E-016)
   - Layer and files: domain · `src/domain/format-change.ts`, test.
   - Done when: `changeFormat` keeps marks of the periods that still exist, drops the rest, keeps overtimes with their marks after the new last period, in any direction; the same format returns the same grid.
   - Scenarios:
@@ -230,7 +230,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: overtime marks never lost on a format change.
   - Pending: nothing.
 
-- [ ] **T017** · Duplicate-number warning (RF-017, RF-069)
+- [x] **T017** · Duplicate-number warning (RF-017, RF-069)
   - Layer and files: domain · `src/domain/duplicate-numbers.ts`, test.
   - Done when: `duplicateNumbers` returns each number shared by two or more active players, once, and never rejects a player.
   - Scenarios:
@@ -245,7 +245,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US3 · Undo (domain)
 
-- [ ] **T018** · Undo history: cell changes, pruning and revert with skipped cells (RF-055, RF-057, RF-086, E-026, E-031)
+- [x] **T018** · Undo history: cell changes, pruning and revert with skipped cells (RF-055, RF-057, RF-086, E-026, E-031)
   - Layer and files: domain · `src/domain/undo.ts`, test.
   - Done when: `cellChanges` and `undoEntryFor` list exactly the cells whose state differs; `pruneHistory` drops missing cells and empty entries; `undoLast` reverts the last entry with a surviving cell, discards the entries with none on the same press, and never produces 6 X.
   - Scenarios:
@@ -260,7 +260,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## Examples, properties and delivery close
 
-- [ ] **T019** · Spec examples table through the public domain functions (E-001, E-002, E-003, E-004, E-005, E-006, E-007, E-008, E-009, E-010, E-011, E-012, E-013, E-014, E-015, E-016, E-017, E-018, E-020, E-026, E-027, E-030, E-031)
+- [x] **T019** · Spec examples table through the public domain functions (E-001, E-002, E-003, E-004, E-005, E-006, E-007, E-008, E-009, E-010, E-011, E-012, E-013, E-014, E-015, E-016, E-017, E-018, E-020, E-026, E-027, E-030, E-031)
   - Layer and files: domain tests · `src/domain/spec-examples.test.ts`, one `it.each` table, so the examples of the spec can be read in one place (the per-file tests of T004–T018 stay).
   - Done when: every row passes; for the examples that state the whole grid (E-001, E-002, E-005, E-007–E-010, E-015, E-030), the row also asserts that no other warning is shown.
   - Scenarios:
@@ -273,7 +273,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: E-013 remove anyway; E-007's row has no subs and P5 and P6 empty, exactly as the spec states, so "only «!» on P5" does not depend on how the test fills the grid.
   - Pending: nothing.
 
-- [ ] **T020** · Properties on random grids: warnings deterministic and justified, counter identity (RF-060, RF-061, RF-070, RF-071, RF-072)
+- [x] **T020** · Properties on random grids: warnings deterministic and justified, counter identity (RF-060, RF-061, RF-070, RF-071, RF-072)
   - Layer and files: domain tests · `src/domain/grid.properties.test.ts`, `tests/support/grid-arbitraries.ts` (random grids of the three formats, 0 to 15 players and 0 to 3 overtimes; it lives in `tests/` because files in `src/domain/` that are not tests may not import fast-check).
   - Done when: the grid properties of `plan.md` hold for 1,000 random cases each in normal runs: `evaluateWarnings` is deterministic and every warning it reports is justified, and played + rested + circled X equals the number of columns for every player; the separate example of a complete 8-period window with 12 players and no sub reports nothing.
   - Scenarios:
@@ -286,7 +286,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: no warning ever points at a free period or an overtime (RF-072).
   - Pending: nothing.
 
-- [ ] **T021** · Properties on random sequences of actions: 5-X limit, only the acted cells change, Undo never writes into re-created rows or columns (RF-054, RF-055, RF-057, RF-086)
+- [x] **T021** · Properties on random sequences of actions: 5-X limit, only the acted cells change, Undo never writes into re-created rows or columns (RF-054, RF-055, RF-057, RF-086)
   - Layer and files: domain tests · `src/domain/actions.properties.test.ts`, `tests/support/grid-arbitraries.ts` (adds the action generator: taps, menu choices, answers, undos, overtimes, format changes and call-up changes).
   - Done when: the action properties of `plan.md` hold for 1,000 random sequences each in normal runs.
   - Scenarios:
@@ -299,7 +299,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a tap or menu choice never changes any cell other than the tapped one, or the two of a replacement (RF-054).
   - Pending: nothing.
 
-- [ ] **T022** · Brute-force oracle for "rule impossible to meet" on realistic grids of the three formats (RF-003, RF-004, RF-067)
+- [x] **T022** · Brute-force oracle for "rule impossible to meet" on realistic grids of the three formats (RF-003, RF-004, RF-067)
   - Layer and files: domain tests · `src/domain/rule-feasibility.oracle.test.ts`.
   - Done when: `isRuleImpossible` agrees with brute force on the mixed and the possible-by-construction generators of `plan.md` (formats 4, 6 and 8; call-ups from the format minimum to 13; at most 4 X missing in the window); a fixed-seed test shows at least 20 % of each outcome in the mixed generator.
   - Scenarios:
