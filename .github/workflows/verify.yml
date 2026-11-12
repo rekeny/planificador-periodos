@@ -24,11 +24,11 @@ jobs:
       OSV_SCANNER_SHA256: "fb7dab19a8bd9bbe5c3189f09d4b7ee1820c9553a23bac202648a56efd2f6ee8"
       SEMGREP_VERSION: "1.185.0"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # gitleaks scans the whole history; verify.sh diffs against origin/main
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -54,7 +54,7 @@ jobs:
       # run only tests the mutants whose code or tests changed. On main the run is full (force) and
       # rebuilds the file; pull requests start from the latest one saved.
       - name: Restore the mutation testing cache
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: reports/stryker-incremental.json
           key: stryker-${{ runner.os }}-${{ hashFiles('tests/support/**', 'jest*.config.js', 'stryker.config.json', 'package-lock.json') }}-${{ github.sha }}
@@ -67,7 +67,7 @@ jobs:
 
       - name: Save the mutation testing cache
         if: ${{ !cancelled() }}
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: reports/stryker-incremental.json
           key: stryker-${{ runner.os }}-${{ hashFiles('tests/support/**', 'jest*.config.js', 'stryker.config.json', 'package-lock.json') }}-${{ github.sha }}
