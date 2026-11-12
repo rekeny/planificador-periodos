@@ -79,6 +79,7 @@ module.exports = defineConfig([
       "reports/",
       ".stryker-tmp/",
       ".expo/",
+      "src/data/migrations/",
     ],
   },
   {
