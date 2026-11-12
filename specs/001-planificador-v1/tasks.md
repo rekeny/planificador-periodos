@@ -312,10 +312,10 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: brute force never fills a circled X cell, and never counts a filling with 6 X in a period.
   - Pending: nothing.
 
-- [ ] **T023** · D1 close: verification with mutation testing, Codex and Security review, D1 section of `summary.md`, PR
+- [x] **T023** · D1 close: verification with mutation testing, Codex and Security review, D1 section of `summary.md`, PR
   - Layer and files: `specs/001-planificador-v1/review.md`, `codex-review.md`, `summary.md`.
   - Done when: `verify.sh` green with Stryker ≥ 80 % and domain coverage ≥ 90 %, and the mutation run time recorded in `review.md`; no blocking finding; the D1 summary explains the engine with real code; the PR "001 D1: rules engine" is merged by Fernando.
-  - Pending: the Planner reviews D2 with the lessons of D1 before it starts.
+  - Pending: nothing. The PR #4 is merged.
 
 **D1 checkpoint:** every rule of the regulations exists as a pure, tested function; every domain example of the spec passes; the app looks the same as before.
 
