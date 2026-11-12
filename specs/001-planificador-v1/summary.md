@@ -94,11 +94,11 @@ npm run verify
 
 It runs types, lint, formatting, all tests with coverage, traceability, Expo Doctor, mutation testing and the scanners. To read the examples: open `src/domain/spec-examples.test.ts`.
 
-Measured: Stryker kills 93.89 % of mutants (threshold 80 %) and domain coverage is above 99 %. The whole `verify` with mutation testing takes about 5 minutes on a Mac with 8 cores, but 25 minutes on GitHub Actions (22 min 32 s of it is Stryker, 2 vCPU, 685 mutants). That is above the 20 minutes of the plan, so it is recorded as a pending deviation in `plan.md`.
+Measured: Stryker kills 93.89 % of mutants (threshold 80 %) and domain coverage is above 99 %. The whole `verify` with mutation testing takes about 5 minutes on a Mac with 8 cores, but 25 minutes on GitHub Actions (22 min 32 s of it is Stryker, 2 vCPU, 685 mutants). That is above the 20 minutes of the plan, so CI now runs Stryker in incremental mode with a cached file (deviation approved on 2026-11-12): locally the second run takes 39 seconds instead of 5 minutes.
 
 ### Pending
 
 - Fernando reviews and merges the PR "001 D1: rules engine" (T023).
 - Before D2, the Planner reviews D2's tasks with these lessons: a task's "Done when" line can be shorter than the plan (D1-01); the traceability script only reads literal test titles, so tables use a literal title with the IDs; `verify.sh`'s focused-test check matches the word "fit" anywhere in a test file, which is too loose.
-- Decide the CI mutation time (fallback of the plan: Stryker incremental mode with a cached file) before D2.
+- Check on GitHub that the incremental cache works: the first run of the PR is still slow (it saves the cache), the next ones should be short.
 - Some `undo.ts` mutants survived (the guard against a sixth X cannot be reached by real app actions; it is only a defence, covered by tests with a history that does not match the grid).

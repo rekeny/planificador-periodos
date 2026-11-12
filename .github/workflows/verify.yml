@@ -50,4 +50,24 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           pipx install "semgrep==${SEMGREP_VERSION}"
 
+      # Mutation testing is the slow step. The incremental file keeps the result of every mutant, so a
+      # run only tests the mutants whose code or tests changed. On main the run is full (force) and
+      # rebuilds the file; pull requests start from the latest one saved.
+      - name: Restore the mutation testing cache
+        uses: actions/cache/restore@v6
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-${{ runner.os }}-${{ github.sha }}
+          restore-keys: stryker-${{ runner.os }}-
+
       - run: scripts/verify.sh
+        env:
+          STRYKER_INCREMENTAL: "1"
+          STRYKER_FORCE: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
+
+      - name: Save the mutation testing cache
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-${{ runner.os }}-${{ github.sha }}

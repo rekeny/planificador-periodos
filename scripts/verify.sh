@@ -65,7 +65,14 @@ npx expo-doctor@1.21.6
 
 if domain_has_code && { [ "${FORCE_MUTATION:-0}" = "1" ] || domain_changed; }; then
   step "Mutation testing"
-  npx stryker run
+  # CI sets STRYKER_INCREMENTAL=1: only mutants whose code or tests changed are run again,
+  # using the file cached between runs. STRYKER_FORCE=1 reruns every mutant and rebuilds the file.
+  stryker_args=()
+  if [ "${STRYKER_INCREMENTAL:-0}" = "1" ]; then
+    stryker_args+=(--incremental --incrementalFile reports/stryker-incremental.json)
+    if [ "${STRYKER_FORCE:-0}" = "1" ]; then stryker_args+=(--force); fi
+  fi
+  npx stryker run ${stryker_args[@]+"${stryker_args[@]}"}
 else
   step "Mutation testing (skipped: no domain changes)"
 fi
