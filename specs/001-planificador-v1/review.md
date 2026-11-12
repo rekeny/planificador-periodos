@@ -191,11 +191,16 @@ Task numbers below are the new ones (T001–T079).
 
 ## Verification (phase 7)
 
-- Date and commit:
-- Result:
+### D1 (T001–T022 and the Codex follow-ups)
+
+- Date and commit: 2026-11-12, `266651d` (branch `claude/delivery-d1-planificador-108011`).
+- Result: `npm run verify` green ("All checks passed"): types, lint, formatting, no focused or skipped tests, Jest with coverage (domain above 99 %), traceability, Expo Doctor, Stryker above the 80 % break threshold (about 94 % on the last measured run, 2026-11-11), osv-scanner (only the dev-only advisories approved on 2026-11-10), gitleaks and semgrep.
+- **Mutation run time (T023):** the whole `verify` with mutation testing took 2 min 12 s at T014 and 5 min 10 s at the last run (266651d); Stryker alone took 1 min 49 s at T014. Both are well under the 20-minute CI limit of `plan.md`.
+- Note: the exact final mutation percentage of the last run was not captured; the last captured value is 94.12 % (T014) and 94.71 % (T017).
 
 ```text
-<output of scripts/verify.sh>
+[1m▶ Static analysis[0m
+✔ All checks passed
 ```
 
 ## Codex review (phase 8)
@@ -209,9 +214,9 @@ Full file: [codex-review.md](codex-review.md)
 
 Run: `scripts/review.sh specs/001-planificador-v1` at commit `9f243e3` (branch `claude/delivery-d1-planificador-108011` against `main`), 2026-11-12 00:09. Full output: [codex-review.md](codex-review.md).
 
-| #     | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | File                                                                                                                 | Severity (Codex) | Classification                                                         | Status |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------- | ------ |
-| D1-01 | The planned `addToCallUp(grid, entry)` (new empty row, order kept, RF-042) is not implemented in `src/domain/`. The test builds the re-added row by hand (`[newEntry, ...removed.callUp]`), so it passes without the operation and cannot detect a wrong insertion order (RF-032, RF-042). Fix: implement the function, keeping marks and inserting in `comparePlayers` order; cover insertion between rows, equal shirt numbers, re-addition and a thirteenth player through the sequence and property tests. | `src/domain/call-up.remove.sequences.test.ts:76`; missing function expected at `src/domain/call-up.ts` (plan.md:376) | Important        | Open. Classification to be decided by the orchestrator (see questions) | Open   |
+| #     | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | File                                                                                                                 | Severity (Codex) | Classification                                                                 | Status            |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------ | ----------------- |
+| D1-01 | The planned `addToCallUp(grid, entry)` (new empty row, order kept, RF-042) is not implemented in `src/domain/`. The test builds the re-added row by hand (`[newEntry, ...removed.callUp]`), so it passes without the operation and cannot detect a wrong insertion order (RF-032, RF-042). Fix: implement the function, keeping marks and inserting in `comparePlayers` order; cover insertion between rows, equal shirt numbers, re-addition and a thirteenth player through the sequence and property tests. | `src/domain/call-up.remove.sequences.test.ts:76`; missing function expected at `src/domain/call-up.ts` (plan.md:376) | Important        | Important (Codex). Fixed in D1 by commit `b5e31b3`, checked in the second pass | Fixed (`b5e31b3`) |
 
 Codex found no BLOCKING or MINOR findings. Its category results: RF/E implementation and scope (only D1-01; D2/D3 deferred), constitution, layers, conventions and glossary (no findings), test integrity (none deleted, skipped or weakened), security (no findings), explanation accuracy (no contradictions), simplicity (no findings).
 
@@ -221,9 +226,37 @@ Codex's checks: TypeScript, ESLint, formatting, traceability and diff whitespace
 
 None. Codex reported no finding about D2 or D3 requirements (screens, database, i18n texts, device-only IDs).
 
+### D1 · Second pass
+
+Run: `scripts/review.sh specs/001-planificador-v1` at commit `2197861` (branch `claude/delivery-d1-planificador-108011` against `main`), 2026-11-12 00:25. Full output: [codex-review.md](codex-review.md). Codex reported no BLOCKING finding, and no finding about D2 or D3.
+
+| #     | Finding                                                                                                                                                                                                                                                                                                           | File                                                 | Severity (Codex) | Classification                                             | Status               |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------- | ---------------------------------------------------------- | -------------------- |
+| S2-01 | The performance test never reaches maximum flow. Players 1 and 2 of the fixture have invalid bounds (`min: 0, max: -1`), so all 500 timed calls return before the residual graph is built. A slowdown in the solver would not be detected. Fix: also time a sparse, feasible window that needs flow augmentation. | `src/domain/warnings.budget.test.ts:108`             | Important        | Non-blocking (Codex did not mark it blocking). Fixed in D1 | Fixed (266651d)      |
+| S2-02 | `MAX_STARTERS = 5` in `undo.ts` repeats the starter limit of `format.ts`. Fix: import and use `MAX_STARTERS_PER_PERIOD`. This contradicts `summary.md` line 29 ("no function repeats them").                                                                                                                      | `src/domain/undo.ts:12`                              | Minor            | Non-blocking. Fixed in D1                                  | Fixed (266651d)      |
+| S2-03 | This review said D1-01 was still "Open", and that `summary.md` did not exist. Both were stale. D1-01 is fixed and `summary.md` exists.                                                                                                                                                                            | `specs/001-planificador-v1/review.md:214` and `:226` | Minor            | Non-blocking (documentation)                               | Fixed in this review |
+
+**Out of delivery (D2/D3):** none.
+
+**Explanations in `summary.md`.** Codex judged them against the diff and found two mismatches, both Minor:
+
+- `summary.md:29` says "Rule numbers live in `FORMAT_RULES` only ... no function repeats them". `src/domain/undo.ts:12` repeats the starter limit (S2-02).
+- The stale "summary.md does not exist" note in this file is not a mismatch in `summary.md` itself; it is S2-03.
+
+Codex found no other mismatch in the explanations.
+
+**Validation limits.** Codex could not run standard Jest, because its sandbox is read-only for cache writes. Coverage, mutation testing and the full `scripts/verify.sh` were therefore not confirmed by Codex. The Verification section of this file is still a placeholder.
+
+**Questions for the orchestrator.**
+
+1. S2-01 has Codex severity Important, and Codex did not mark it blocking. The reviewer scale says Important must be fixed unless the developer accepts it as pending. Should it be fixed in D1 or accepted as pending? I have not changed the severity.
+2. Should S2-02 be fixed in D1 or accepted as pending? It is Minor, so it is only a suggestion.
+3. Codex's validation is not a full verification run. T023 still needs the full `scripts/verify.sh` output recorded before D1 closes.
+
 ### D1 · Notes for the orchestrator
 
 - `summary.md` does not exist yet and the Verification section above is still a placeholder. Codex mentions both, and they belong to T023, not to a code finding.
+  - Superseded in the second pass: `summary.md` exists (commit `2197861`). The Verification section is still a placeholder until T023 records it.
 
 ## Security (phase 8)
 
