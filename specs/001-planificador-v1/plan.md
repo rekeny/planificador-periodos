@@ -57,6 +57,16 @@ All of them are recorded in the spec; the plan only follows them.
 13. **Tablet with more than 12 players:** every period still fits across and the grid scrolls vertically (RF-081, D49).
 14. **Format change in the match details:** saved at once when confirmed, outside «Guardar» (RF-039, RF-082, D50; see "US6").
 
+### Explanation before running · D2 (2026-11-12)
+
+- **What:** D2 makes the app usable in a match. You create teams and players, create a match with its call-up, mark the grid period by period (with overtimes and Undo), and see every warning and the legend. Each tap is saved at once in a database on the device, which is kept out of backups. Substitutions, the long-press menu and editing matches stay in D3.
+- **How:** T024–T061 in this order: (1) install the data stack and harden the focused-test check; (2) the backup exclusion and the database in `src/data/` (schema, migrations, repositories, in-memory test database); (3) the stores and the view model in `src/state/`; (4) the screens in `src/app/` and `src/ui/` for US1–US4; (5) Maestro journeys, the D2 close, Security audit, Codex review and PR.
+- **Why:** data first, so each screen sits on a tested layer; the view model is built in `state`, so screens only draw. Dependencies (SQLite for storage, Drizzle for typed queries and migrations, Zustand for stores, better-sqlite3 so Jest uses real SQLite) are listed in "New dependencies" with their reasons and installed with `npx expo install`. Discarded: Drizzle 1.0 RC (its Expo guide targets it, but it is not stable) and a Babel plugin for migrations.
+- **To learn:** SQLite foreign keys and transactions, Drizzle schemas and migrations, Zustand stores, Expo Router screen tests, Maestro.
+- **To check it:** `npm run verify`; on a device, create a team, players and a match, mark periods, undo, close the app and reopen it. Maestro journeys green.
+- **Review lessons applied:** every "Done when" lists everything the plan assigns (D1-01); tables use one literal title with the IDs; the focused-test regex is replaced by a script with its own test; the 8 surviving `undo.ts` mutants are documented, not treated (unreachable guard); new files stay under 250 lines.
+- **Pending (needs your answer):** how to reopen a saved match in D2 (the reviewer recommends bringing the team's match list forward), Stryker local mode, the CI cache key, and extending the 250-line limit to `tests/`. The reviewer's other findings (D2-A-02 to D2-A-17) are fixed by the Planner after your answers.
+
 ## Constitution check
 
 | Principle                              | Met? | How                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
