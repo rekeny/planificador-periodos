@@ -850,6 +850,10 @@ Added to `docs/architecture.md` before the code uses them (spec, "Terms"). Exist
 
 ## Deviations
 
-| Date | What changes from the plan | Reason | Approved by |
-| ---- | -------------------------- | ------ | ----------- |
-| —    | None yet                   | —      | —           |
+| Date       | What changes from the plan                                                                                                                                | Reason                                                                                                                                                  | Approved by              |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| 2026-11-12 | T003 also covers RF-042 (`columnKey`) and RF-055 (`MAX_STARTERS_PER_PERIOD`)                                                                              | The tests of `column.ts` and `format.ts` carry those IDs; the plan's file table already links them                                                      | Fernando, with the D1 PR |
+| 2026-11-12 | T019 has three files, `spec-examples.test.ts`, `spec-examples.marking.test.ts` and `spec-examples.match-data.test.ts`, still one `it.each` table per file | The 250-line ESLint limit applies to tests; one table of 23 rows did not fit                                                                            | Fernando, with the D1 PR |
+| 2026-11-12 | ESLint `boundaries` lets test code import `tests/support/` (T020)                                                                                         | T020 and T021 share generators in `tests/support/`, as the plan says; the rule forbade it. Non-test files in `src/domain/` still cannot import `tests/` | Fernando, with the D1 PR |
+| 2026-11-12 | T015 also delivers `addToCallUp` (commit `b5e31b3`)                                                                                                       | Planned in "Types" but not in T015's "Done when"; Codex finding D1-01                                                                                   | Fernando, with the D1 PR |
+| 2026-11-12 | **Pending approval:** the mutation run took 22 min 32 s on GitHub Actions (2 vCPU, 685 mutants), above the 20 minutes of "Mutation testing"               | Fallback in the plan: Stryker incremental mode with its file cached between CI runs; to decide before D2                                                | Pending                  |

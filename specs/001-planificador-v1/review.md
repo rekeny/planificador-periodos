@@ -194,9 +194,9 @@ Task numbers below are the new ones (T001–T079).
 ### D1 (T001–T022 and the Codex follow-ups)
 
 - Date and commit: 2026-11-12, `266651d` (branch `claude/delivery-d1-planificador-108011`).
-- Result: `npm run verify` green ("All checks passed"): types, lint, formatting, no focused or skipped tests, Jest with coverage (domain above 99 %), traceability, Expo Doctor, Stryker above the 80 % break threshold (about 94 % on the last measured run, 2026-11-11), osv-scanner (only the dev-only advisories approved on 2026-11-10), gitleaks and semgrep.
-- **Mutation run time (T023):** the whole `verify` with mutation testing took 2 min 12 s at T014 and 5 min 10 s at the last run (266651d); Stryker alone took 1 min 49 s at T014. Both are well under the 20-minute CI limit of `plan.md`.
-- Note: the exact final mutation percentage of the last run was not captured; the last captured value is 94.12 % (T014) and 94.71 % (T017).
+- Result: `npm run verify` green on the machine and on GitHub Actions (PR 4) ("All checks passed"): types, lint, formatting, no focused or skipped tests, Jest with coverage (domain above 99 %), traceability, Expo Doctor, Stryker above the 80 % break threshold (about 94 % on the last measured run, 2026-11-11), osv-scanner (only the dev-only advisories approved on 2026-11-10), gitleaks and semgrep.
+- **Mutation run time (T023):** locally, the whole `verify` with mutation testing took 2 min 12 s at T014 and 5 min 10 s at the last run (266651d), on about 8 cores. On GitHub Actions it is much longer, see below.
+- **On GitHub Actions (run 43177620495, 2026-11-12):** the `verify` job took 25 min 5 s; Stryker alone took 22 min 32 s (685 mutants, 2 test-runner processes), final mutation score **93.89 %** (380 killed, 35 timed out, 27 survived, 243 compile errors). This is **above the 20 minutes** that `plan.md` sets for CI: recorded in "Deviations" of `plan.md` as pending Fernando's decision (fallback: Stryker incremental mode with a cached file, before D2).
 
 ```text
 [1m▶ Static analysis[0m
@@ -247,16 +247,11 @@ Codex found no other mismatch in the explanations.
 
 **Validation limits.** Codex could not run standard Jest, because its sandbox is read-only for cache writes. Coverage, mutation testing and the full `scripts/verify.sh` were therefore not confirmed by Codex. The Verification section of this file is still a placeholder.
 
-**Questions for the orchestrator.**
-
-1. S2-01 has Codex severity Important, and Codex did not mark it blocking. The reviewer scale says Important must be fixed unless the developer accepts it as pending. Should it be fixed in D1 or accepted as pending? I have not changed the severity.
-2. Should S2-02 be fixed in D1 or accepted as pending? It is Minor, so it is only a suggestion.
-3. Codex's validation is not a full verification run. T023 still needs the full `scripts/verify.sh` output recorded before D1 closes.
+**Decisions (2026-11-12).** S2-01 and S2-02 were fixed in D1 (commit `266651d`), not accepted as pending. The full `scripts/verify.sh` output is recorded in the Verification section above and was confirmed on GitHub Actions.
 
 ### D1 · Notes for the orchestrator
 
-- `summary.md` does not exist yet and the Verification section above is still a placeholder. Codex mentions both, and they belong to T023, not to a code finding.
-  - Superseded in the second pass: `summary.md` exists (commit `2197861`). The Verification section is still a placeholder until T023 records it.
+- `summary.md` exists (commit `2197861`) and the Verification section is filled in.
 
 ## Security (phase 8)
 
