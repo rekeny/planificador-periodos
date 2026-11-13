@@ -477,7 +477,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a name of only spaces is blank. a team name of only spaces is `nameRequired`, and a missing category (`null`) is never an error.
   - Pending: nothing.
 
-- [ ] **T031** · Data: team and player repositories (RF-013, RF-014, RF-016, RF-017, RF-085)
+- [x] **T031** · Data: team and player repositories (RF-013, RF-014, RF-016, RF-017, RF-085)
   - Layer and files: data · `src/data/records.ts` (`TeamRecord`, `PlayerRecord`), `src/data/team-repository.ts`, `src/data/player-repository.ts`, `team-repository.test.ts` and `player-repository.test.ts` with `tests/support/test-database.ts`.
   - Done when: `createTeam`, `updateTeam`, `listTeams` and `getTeam` create, edit, list and read teams; `createPlayer` and `listPlayers` create players and list them for one team only; duplicates are saved; records carry the format as a number and lists come in database order (sorting is the state layer's, review P-01); repositories take the database as an argument typed as `AppDatabase` (T028), use only Drizzle's synchronous API with parameters, and read new IDs with `.returning()`; `src/data/` imports only types from the domain; a failing write throws and leaves nothing written.
   - Scenarios:
