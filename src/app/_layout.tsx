@@ -34,6 +34,9 @@ export default function RootLayout(): ReactElement | null {
         if (route.name === "teams/[teamId]/edit") {
           return { title: t("common.edit"), presentation: "modal" };
         }
+        if (route.name === "teams/[teamId]/players/new") {
+          return { title: t("players.new"), presentation: "modal" };
+        }
         return { title: t("teams.title") };
       }}
     />

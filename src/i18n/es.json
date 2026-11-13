@@ -12,6 +12,16 @@
       "name": "Nombre",
       "category": "Categoría",
       "defaultFormat": "Variante por defecto"
+    },
+    "players": "Jugadores"
+  },
+  "players": {
+    "new": "Nuevo jugador"
+  },
+  "player": {
+    "field": {
+      "name": "Nombre",
+      "number": "Dorsal"
     }
   },
   "common": {
@@ -25,7 +35,11 @@
     "option": "{{count}} periodos"
   },
   "validation": {
-    "nameRequired": "Escribe un nombre."
+    "nameRequired": "Escribe un nombre.",
+    "numberInvalid": "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda."
+  },
+  "warning": {
+    "duplicateNumber": "Hay jugadores con el mismo dorsal: {{numbers}}."
   },
   "error": {
     "saveFailed": "No se ha podido guardar el cambio. Inténtalo de nuevo."

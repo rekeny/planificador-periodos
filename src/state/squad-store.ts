@@ -98,8 +98,7 @@ function openTeam(db: AppDatabase, set: Set, id: number): void {
 
 // The format is not normalised by the domain: it is a choice among 4, 6 and 8 made in the form.
 function saveTeam(
-  db: AppDatabase,
-  set: Set,
+  { db, set, get }: { db: AppDatabase; set: Set; get: Get },
   input: TeamInput,
   write: (values: TeamValues) => TeamRecord | undefined,
 ): SaveResult {
@@ -108,8 +107,19 @@ function saveTeam(
     return checked;
   }
   try {
-    if (write({ ...checked.value, defaultFormat: input.defaultFormat })) {
-      set({ teams: sortedTeams(db) });
+    const saved = write({
+      ...checked.value,
+      defaultFormat: input.defaultFormat,
+    });
+    if (saved) {
+      // The open team shows the new data at once (the team screen's header).
+      const open = get().team;
+      set({
+        teams: sortedTeams(db),
+        ...(open !== null && open.id === saved.id
+          ? { team: toTeam(saved) }
+          : {}),
+      });
       return SAVED;
     }
     return SAVE_FAILED;
@@ -151,9 +161,9 @@ export function createSquadStore(db: AppDatabase): SquadStore {
     },
     openTeam: (id) => openTeam(db, set, id),
     createTeam: (input) =>
-      saveTeam(db, set, input, (values) => createTeam(db, values)),
+      saveTeam({ db, set, get }, input, (values) => createTeam(db, values)),
     updateTeam: (id, input) =>
-      saveTeam(db, set, input, (values) => updateTeam(db, id, values)),
+      saveTeam({ db, set, get }, input, (values) => updateTeam(db, id, values)),
     addPlayer: (input) => addPlayer(db, set, get, input),
   }));
 }

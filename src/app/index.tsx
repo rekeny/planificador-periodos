@@ -45,7 +45,11 @@ export default function TeamListScreen(): ReactElement {
       ListFooterComponent={newTeam}
       keyExtractor={(team) => String(team.id)}
       renderItem={({ item }) => (
-        <View style={styles.row}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push(`/teams/${item.id}`)}
+          style={styles.row}
+        >
           <Text numberOfLines={1} style={styles.name}>
             {item.name}
           </Text>
@@ -54,7 +58,7 @@ export default function TeamListScreen(): ReactElement {
               {item.category}
             </Text>
           ) : null}
-        </View>
+        </Pressable>
       )}
     />
   );
