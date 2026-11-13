@@ -366,7 +366,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
   - Mutation cache: this task changes `tests/support/`: the next CI run with domain changes is full (rule 5), and T030 runs the full local run (rule 4).
   - Pending: nothing.
 
-- [ ] **T085** · The focused-test check of `verify.sh` only matches real calls
+- [x] **T085** · The focused-test check of `verify.sh` only matches real calls
   - Layer and files: tooling · `scripts/check-focused-tests.sh` (new, executable, mode `100755` in git), `scripts/verify.sh` (calls it in the step "Focused or skipped tests"), `tests/scripts/check-focused-tests.test.ts`.
   - Done when:
     - **What is wrong today.** `verify.sh` runs `grep -rEn '\b(it|test|describe)(\.[A-Za-z]+)*\.(only|skip)\b|\b(xit|xtest|xdescribe|fit|ftest|fdescribe)\b' src tests 2>/dev/null`. Its second half matches the words `fit`, `xit`… anywhere on a line, also inside test titles, strings and comments, so a title such as "RF-079: 4 and 6 periods fit at 375 pt" (T053) fails `verify.sh`; its first half also matches `it.skip`-like text inside strings; and `2>/dev/null` with `if grep` turns a missing folder into "nothing found".

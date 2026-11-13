@@ -43,8 +43,11 @@ step "Format"
 npx prettier --check .
 
 step "Focused or skipped tests"
-if grep -rEn --include='*.test.ts' --include='*.test.tsx' \
-  '\b(it|test|describe)(\.[A-Za-z]+)*\.(only|skip)\b|\b(xit|xtest|xdescribe|fit|ftest|fdescribe)\b' src tests 2>/dev/null; then
+if [ ! -x scripts/check-focused-tests.sh ]; then
+  echo "scripts/check-focused-tests.sh is missing or not executable." >&2
+  exit 1
+fi
+if ! scripts/check-focused-tests.sh; then
   echo "Remove .only, .skip, x-prefixed and f-prefixed tests before finishing." >&2
   exit 1
 fi
