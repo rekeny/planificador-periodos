@@ -799,7 +799,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: `removeLastOvertime` on an overtime with marks removes it and its marks at once, because the confirmation lives in the interface (T055); `removeLastOvertime` with no overtime → nothing saved, nothing published. Also: a failed tap followed by `undo` reverts the action before it, not the failed one (no entry was pushed).
   - Pending: nothing.
 
-- [ ] **T052** · State: undo of mark changes (RF-055, RF-057, RF-082, RF-086, E-019, E-031)
+- [x] **T052** · State: undo of mark changes (RF-055, RF-057, RF-082, RF-086, E-019, E-031)
   - Layer and files: state · `src/state/match-session-undo.ts` (slice of the session store: `undo()`), tests in `match-session-store.undo.test.ts` (and `match-session-store.undo-structure.test.ts` if it passes 250 lines).
   - Done when: each mark change pushes one entry; `undo` uses `undoLast`, saves its `changes` with `saveCellChanges` and publishes the grid, the warnings, the history and the view; with nothing left to undo it saves and publishes nothing; overtimes and call-up changes never push (format changes arrive in D3); structural changes prune; the history survives every action of the open session and is emptied only by `closeMatch` (and is empty in a new store); a failed save keeps the history and the grid, and sets `saveFailed`.
   - Scenarios:
@@ -811,7 +811,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: E-031; mark, add overtime, undo → overtime still there, mark gone; mark, add and remove a player through the call-up actions, undo → the mark is gone (the session was never closed).
     - Interruptions: E-019: marks in P1–P3 and an overtime, new store on the same database → same marks and overtime, nothing to undo; mark, `closeMatch`, `openMatch` of the same match → nothing to undo (RF-057). Also: `undo` with a failing save → the history and the grid stay and `saveFailed` is true; the next successful change clears it; E-019 as above.
     - Mistakes: undo pressed more times than actions. Also: after a failed tap (E-025) `undo` reverts the previous action, not nothing and not the failed one.
-  - Pending: nothing.
+  - Pending: nothing. `publish` of `match-session-marks.ts` is now exported so the undo slice reuses it. Device checks: none (state only).
 
 - [ ] **T053** · UI: grid layout as pure size functions, with the tablet height budget (RF-076, RF-078, RF-079, RF-080, RF-081)
   - Layer and files: UI · `src/ui/grid/grid-layout.ts`, tests split as `grid-layout.phone.test.ts` and `grid-layout.tablet.test.ts`; every `it.each` table has its own literal title carrying the RF IDs of that table (one literal title per table, never one title shared by two tables). These titles say "fit", which the focused-test check of T085 no longer confuses with `fit(`; no helper in these tests is named `fit`, `xit` or the like, because a call of it at the start of a line would be flagged.

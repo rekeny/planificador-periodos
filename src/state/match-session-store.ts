@@ -8,6 +8,7 @@ import type { UndoEntry } from "@/domain/undo";
 import { evaluateWarnings, type Warnings } from "@/domain/warnings";
 import { createCallUpActions } from "@/state/match-session-call-up";
 import { createMarksActions } from "@/state/match-session-marks";
+import { createUndoActions } from "@/state/match-session-undo";
 import { gridFromRecords } from "@/state/match-session-grid";
 import { buildMatchView, type MatchView } from "@/state/match-view";
 import type { SaveResult } from "@/state/save-result";
@@ -27,6 +28,7 @@ export interface MatchSessionState {
   tapCell(cell: Cell): SaveResult; //                 RF-044, RF-048, RF-049, RF-051
   addOvertime(): SaveResult; //                       RF-058
   removeLastOvertime(): SaveResult; //                RF-059
+  undo(): SaveResult; //                              RF-055, RF-057, RF-086
 }
 
 export type MatchSessionStore = StoreApi<MatchSessionState>;
@@ -69,6 +71,7 @@ export function createMatchSessionStore(db: AppDatabase): MatchSessionStore {
     ...EMPTY,
     ...createCallUpActions({ db, get, set, teamId: () => teamId }),
     ...createMarksActions({ db, get, set, teamId: () => teamId }),
+    ...createUndoActions({ db, get, set, teamId: () => teamId }),
     openMatch(id) {
       try {
         const loaded = load(db, id);

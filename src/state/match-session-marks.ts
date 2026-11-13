@@ -30,7 +30,7 @@ type Actions = Pick<
 >;
 
 /** Warnings and view are recomputed from the saved grid (RF-060); the caller decides the history. */
-function publish(
+export function publish(
   host: CallUpHost,
   current: OpenMatch,
   grid: MatchGrid,
