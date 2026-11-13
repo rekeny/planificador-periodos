@@ -38,6 +38,11 @@ const CHROME = [
 ];
 const BANNER = /^Convocatoria fuera del rango/;
 const COUNT = /convocados$/;
+// What the grid of T083 and the buttons of T055 add to the match screen: column headers, counters,
+// the X of a mark and the three grid buttons. `rowsShown` leaves them out, so it still reads only
+// the call-up rows ("4 Ana 7 Bea").
+const GRID_TEXT = /^(PR?\d+|J \d+ · D \d+|X)$/;
+const GRID_BUTTONS = ["Deshacer", "Añadir prórroga", "Quitar prórroga"];
 
 export type Session = ReturnType<typeof sessionWithBench>;
 
@@ -83,7 +88,11 @@ export function rowsShown(): string {
   return screenTexts()
     .filter(
       (text) =>
-        !CHROME.includes(text) && !BANNER.test(text) && !COUNT.test(text),
+        !CHROME.includes(text) &&
+        !GRID_BUTTONS.includes(text) &&
+        !GRID_TEXT.test(text) &&
+        !BANNER.test(text) &&
+        !COUNT.test(text),
     )
     .join(" ");
 }

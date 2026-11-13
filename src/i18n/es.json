@@ -51,7 +51,10 @@
       "starter": "{{name}}, {{period}}: X, titular",
       "sub": "{{name}}, {{period}}: X con círculo, entró de cambio"
     },
-    "counter": "J {{played}} · D {{rested}}"
+    "counter": "J {{played}} · D {{rested}}",
+    "undo": "Deshacer",
+    "addOvertime": "Añadir prórroga",
+    "removeOvertime": "Quitar prórroga"
   },
   "common": {
     "save": "Guardar",
@@ -89,6 +92,11 @@
       "title": "¿Quitar a {{name}} de la convocatoria?",
       "message": "Tiene marcas en este partido y se borrarán.",
       "confirm": "Quitar"
+    },
+    "removeOvertime": {
+      "title": "¿Quitar la prórroga {{number}}?",
+      "message": "Tiene marcas y se borrarán.",
+      "confirm": "Quitar prórroga"
     }
   }
 }

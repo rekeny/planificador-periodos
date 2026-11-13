@@ -1,19 +1,45 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useEffect, useLayoutEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { useStore } from "zustand";
 
 import { getMatchSessionStore } from "@/state/app-stores";
 import { parseMatchId } from "@/state/route-params";
+import { buttonsInHeader } from "@/ui/grid/grid-layout";
+import { GridButtons } from "@/ui/grid/grid-toolbar";
+import { MatchGrid } from "@/ui/grid/match-grid";
+import { useMatchActions } from "@/ui/grid/use-match-actions";
 import { NotFound } from "@/ui/not-found";
+import { SaveErrorBanner } from "@/ui/save-error-banner";
 import { CallUpRangeBanner } from "@/ui/warnings/call-up-range-banner";
 
-// First version of the match screen: the call-up and its warning (the grid arrives later).
-export default function MatchScreen(): ReactElement {
+function CallUpButton({ id }: { readonly id: number }): ReactElement {
   const { t } = useTranslation();
   const router = useRouter();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push(`/matches/${id}/call-up`)}
+      style={styles.action}
+    >
+      <Text style={styles.actionText}>{t("callUp.title")}</Text>
+    </Pressable>
+  );
+}
+
+// The match screen: the grid with its buttons, the call-up entry and the warnings. It reads the
+// session's view and calls its actions; the rules stay in the domain.
+export default function MatchScreen(): ReactElement {
+  const navigation = useNavigation();
+  const { width, height } = useWindowDimensions();
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const id = parseMatchId(matchId);
   const store = getMatchSessionStore();
@@ -26,28 +52,33 @@ export default function MatchScreen(): ReactElement {
   useEffect(() => () => store.getState().closeMatch(), [store]);
   const status = useStore(store, (state) => state.status);
   const view = useStore(store, (state) => state.view);
+  const saveFailed = useStore(store, (state) => state.saveFailed);
+  const { buttons, dialog } = useMatchActions(view, () => store.getState());
+  const showing = id !== null && status === "open" && view !== null;
+  const inHeader = buttonsInHeader(width, height);
 
-  if (id === null || status !== "open" || view === null) return <NotFound />;
+  // The header is native, so its buttons are set again whenever what they show changes.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight:
+        showing && inHeader ? () => <GridButtons {...buttons} /> : undefined,
+    });
+  });
+
+  if (!showing) return <NotFound />;
 
   return (
-    <ScrollView style={styles.screen}>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => router.push(`/matches/${id}/call-up`)}
-        style={styles.action}
-      >
-        <Text style={styles.actionText}>{t("callUp.title")}</Text>
-      </Pressable>
+    <View style={styles.screen}>
+      <CallUpButton id={id} />
       <CallUpRangeBanner warning={view.callUpRange} />
-      {view.rows.map((row) => (
-        <View key={row.entryId} style={styles.row}>
-          <Text style={styles.number}>{row.number}</Text>
-          <Text numberOfLines={1} style={styles.name}>
-            {row.name}
-          </Text>
-        </View>
-      ))}
-    </ScrollView>
+      <MatchGrid
+        view={view}
+        onTapCell={(cell) => void store.getState().tapCell(cell)}
+      />
+      {inHeader ? null : <GridButtons {...buttons} />}
+      {dialog}
+      {saveFailed ? <SaveErrorBanner /> : null}
+    </View>
   );
 }
 
@@ -61,12 +92,4 @@ const styles = StyleSheet.create({
     backgroundColor: "#1d4ed8",
   },
   actionText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  number: { fontSize: 18, fontWeight: "700", minWidth: 32 },
-  name: { flex: 1, fontSize: 18 },
 });

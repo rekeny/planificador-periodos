@@ -30,6 +30,14 @@ export type GridLayout = {
   buttonsInHeader: boolean;
 };
 
+/** Tablets (shortest side from 600) keep the buttons in the header; phones use a toolbar. */
+export function buttonsInHeader(
+  windowWidth: number,
+  windowHeight: number,
+): boolean {
+  return Math.min(windowWidth, windowHeight) >= TABLET_MIN_SHORT_SIDE;
+}
+
 export function gridLayout(input: GridLayoutInput): GridLayout {
   const columns = input.periods + input.overtimes;
   const columnsSpace = input.windowWidth - input.playerColumnWidth;
@@ -56,7 +64,6 @@ export function gridLayout(input: GridLayoutInput): GridLayout {
     rowHeight,
     horizontalScroll: fittingWidth < MIN_CELL_WIDTH,
     verticalScroll: input.players * rowHeight > rowsSpace,
-    buttonsInHeader:
-      Math.min(input.windowWidth, input.windowHeight) >= TABLET_MIN_SHORT_SIDE,
+    buttonsInHeader: buttonsInHeader(input.windowWidth, input.windowHeight),
   };
 }
