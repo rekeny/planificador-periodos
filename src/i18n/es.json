@@ -41,6 +41,17 @@
       "number": "Dorsal"
     }
   },
+  "grid": {
+    "header": {
+      "period": "P{{number}}",
+      "overtime": "PR{{number}}"
+    },
+    "cell": {
+      "empty": "{{name}}, {{period}}: casilla vacía",
+      "starter": "{{name}}, {{period}}: X, titular",
+      "sub": "{{name}}, {{period}}: X con círculo, entró de cambio"
+    }
+  },
   "common": {
     "save": "Guardar",
     "edit": "Editar",

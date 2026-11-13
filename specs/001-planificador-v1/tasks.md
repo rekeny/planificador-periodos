@@ -826,7 +826,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: the cell width and the row height are never below 44. Also: on a phone the grid buttons are in the toolbar under the grid, in both orientations (667 × 375 included), and on the tablet sizes in the header.
   - Pending: for Fernando's review: the scenario "3 overtimes on a tablet → horizontal scroll" cannot happen with the plan's player column of about 100 pt (8 periods + 3 overtimes = 11 columns × 44 + 100 = 584 ≤ 768, and 13 columns would still fit), so the tests use a wider `playerColumnWidth` (180) for that case; the scroll rule itself is unchanged. The device check of the real player column width belongs to T057.
 
-- [ ] **T054** · UI: column headers and grid cells with their three states and accessible labels (RF-042, RF-043)
+- [x] **T054** · UI: column headers and grid cells with their three states and accessible labels (RF-042, RF-043)
   - Layer and files: UI · `src/ui/grid/column-header.tsx`, `src/ui/grid/grid-cell.tsx`, `src/i18n/es.json` (`grid.header.period`, `grid.header.overtime`, `grid.cell.empty`, `grid.cell.starter`, `grid.cell.sub`), tests next to each component. The grid that assembles them is T083 (split on 2026-11-12, review D2-A-06).
   - Done when: `column-header.tsx` draws «P1»… and «PR1»… from a `ColumnView`; `grid-cell.tsx` draws a `CellView` in one of three distinct states, each with its accessible label from `grid.cell.*` with the player's name and the column header («Ana, P2: casilla vacía», «Ana, P2: X, titular», «Ana, P2: X con círculo, entró de cambio»); each cell is pressable, at least 44 pt (sizes come as props), and passes its `cell` back through an `onTapCell` prop.
   - Scenarios:
@@ -837,7 +837,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: re-render after a change shows the new state and the new label.
     - Interruptions: not applicable.
     - Mistakes: a cell is never shown with two states, and its label always matches the state shown; a tap calls `onTapCell` once with that cell. Also: pressing a cell of each state calls `onTapCell` once with that cell and never any other callback.
-  - Pending: nothing.
+  - Pending: the «X» glyph is a module constant `MARK` in `grid-cell.tsx` (not an es.json key), since it is the same in every language and the lint rule only checks JSX literals. The look on a real device (circle size, 44 pt touch) is for Fernando to check once T083 assembles the grid.
 
 - [ ] **T083** · UI: the grid with the fixed player column, counters and sizes (RF-042, RF-070, RF-071, RF-076, RF-077, E-014, E-020)
   - Layer and files: UI · `src/ui/grid/match-grid.tsx`, `src/ui/grid/player-column.tsx`, `src/i18n/es.json` (`grid.counter`), tests next to each component. Taken out of T054 on 2026-11-12 (review D2-A-06).
