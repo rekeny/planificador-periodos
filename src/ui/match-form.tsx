@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, TextInput } from "react-native";
 import { useStore } from "zustand";
@@ -16,12 +16,15 @@ interface MatchFormProps {
   // The format comes from outside so the details screen can reuse the form with its own match.
   readonly format: Format;
   readonly onFormatChange: (format: Format) => void;
+  // What each screen adds below the fields: the new match adds its call-up and «Guardar».
+  readonly children?: ReactNode;
 }
 
 export function MatchForm({
   draft,
   format,
   onFormatChange,
+  children,
 }: MatchFormProps): ReactElement {
   const { t } = useTranslation();
   const state = useStore(draft, (current) => current);
@@ -59,6 +62,7 @@ export function MatchForm({
         multiline
         style={styles.input}
       />
+      {children}
     </ScrollView>
   );
 }

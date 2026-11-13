@@ -66,6 +66,7 @@
   },
   "callUp": {
     "title": "Convocatoria",
+    "count": "{{count}} convocados",
     "add": "Añadir a la convocatoria",
     "remove": "Quitar de la convocatoria",
     "createPlayer": "Crear jugador nuevo",
