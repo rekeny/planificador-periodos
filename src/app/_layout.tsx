@@ -27,11 +27,15 @@ export default function RootLayout(): ReactElement | null {
   // Options by route name here, at layout level: the new-team form is a modal with its own title.
   return (
     <Stack
-      screenOptions={({ route }) =>
-        route.name === "teams/new"
-          ? { title: t("teams.new"), presentation: "modal" }
-          : { title: t("teams.title") }
-      }
+      screenOptions={({ route }) => {
+        if (route.name === "teams/new") {
+          return { title: t("teams.new"), presentation: "modal" };
+        }
+        if (route.name === "teams/[teamId]/edit") {
+          return { title: t("common.edit"), presentation: "modal" };
+        }
+        return { title: t("teams.title") };
+      }}
     />
   );
 }

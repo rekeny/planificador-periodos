@@ -15,7 +15,11 @@
     }
   },
   "common": {
-    "save": "Guardar"
+    "save": "Guardar",
+    "edit": "Editar"
+  },
+  "notFound": {
+    "message": "No se ha encontrado: puede que se haya borrado."
   },
   "format": {
     "option": "{{count}} periodos"
