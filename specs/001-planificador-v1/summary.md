@@ -102,3 +102,214 @@ Measured: Stryker kills 93.89 % of mutants (threshold 80 %) and domain coverage 
 - Before D2, the Planner reviews D2's tasks with these lessons: a task's "Done when" line can be shorter than the plan (D1-01); the traceability script only reads literal test titles, so tables use a literal title with the IDs; `verify.sh`'s focused-test check matches the word "fit" anywhere in a test file, which is too loose.
 - Check on GitHub that the incremental cache works: the first run of the PR is still slow (it saves the cache), the next ones should be short.
 - Some `undo.ts` mutants survived (the guard against a sixth X cannot be reached by real app actions; it is only a defence, covered by tests with a history that does not match the grid).
+
+## D2 · Teams, players, match and grid (`src/data/`, `src/state/`, `src/ui/`, `src/app/`)
+
+### What was done and what changes for the user
+
+D1 was the rules engine with no screens. D2 puts the app on top of it. With the code of this branch the coach can:
+
+- **Teams and players:** see the list of teams (sorted in Spanish order), create and edit a team (name, category, default format), open it, add players and see them sorted by number. Two players with the same number show a warning banner, but are never blocked.
+- **A match with a call-up:** from a team, press «Nuevo partido», pick format, home and away names, date and time (native pickers), the scores and notes, tick who is called up (the screen says «12 convocados» and warns if the number is out of range), and save. The match opens on its grid.
+- **The grid:** one row per player, one column per period, tap a cell to mark it (empty, X, circled X as the domain decides). The player column stays fixed while the periods scroll sideways. On a tablet the buttons are in the header, on a phone below the grid.
+- **Overtimes and Undo:** add and remove overtimes (a question first if the last one has marks) and undo the last actions, also after going to the call-up screen and coming back.
+- **Call-up changes during the match:** add a player, remove one (a question first if the player has marks) or create a new player straight from the match.
+- **All the warnings and the legend:** light red cells, players in red, «!» and «≠» in the period headers, the "rule impossible" banner and the legend. The screen only draws what the state layer computed from the domain.
+- **Everything saved at every tap.** Each mark, overtime, undo and call-up change is written to the SQLite database first and shown only after it was stored. If the write fails, the screen does not change and shows an error banner.
+- **Kept out of backups.** Android builds write two rule files that exclude every backup domain; iOS launch code marks the database folder as excluded from iCloud and computer backups (RF-088).
+
+**Not in D2 (all D3):** substitutions and the long-press menu, the questions «sub or starter?» and «who leaves?», the list of a team's matches, editing or deleting a match, changing the format of a match, and squad upkeep. A tap that needs a question does nothing yet.
+
+**Important:** none of this was run on a device, a simulator or Maestro. What is proven is the Jest tests (2,694) and the local `verify`. CI has not run on this branch yet.
+
+### How: files and new pieces
+
+| Area                     | Files                                                                                                                                                                                                          | Requirements                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Native config            | `plugins/with-backup-exclusion.js`, `app.json`                                                                                                                                                                 | RF-088, E-028                                            |
+| Data: schema and open    | `src/data/schema.ts`, `migrations/` (generated), `database.ts`, `database-types.ts`, `scripts/bundle-migrations.mjs`, `drizzle.config.ts`                                                                      | RF-011, RF-082                                           |
+| Data: repositories       | `team-repository.ts`, `player-repository.ts`, `match-repository.ts`, `call-up-repository.ts`, `grid-repository.ts`, `records.ts`                                                                               | RF-014, RF-019, RF-032 to RF-035, RF-056, RF-058, RF-085 |
+| Domain (small additions) | `squad-validation.ts`, `team-order.ts`, `match-input.ts`, `match-date.ts`                                                                                                                                      | RF-013 to RF-015, RF-025 to RF-027                       |
+| State: squad and match   | `squad-store.ts`, `new-match-draft.ts`, `new-match-save.ts`, `route-params.ts`, `save-result.ts`, `format-options.ts`, `database-ready.ts`, `app-stores.ts`                                                    | RF-011 to RF-035, RF-085                                 |
+| State: open match        | `match-session-store.ts` plus slices `match-session-call-up.ts`, `match-session-marks.ts`, `match-session-undo.ts`; `match-session-grid.ts`, `match-view.ts`, `match-view-grid.ts`, `match-view-warnings.ts`   | RF-044 to RF-059, RF-060 to RF-067, RF-087               |
+| Screens (routes)         | `src/app/_layout.tsx`, `index.tsx`, `teams/new.tsx`, `teams/[teamId]/{index,edit}.tsx`, `teams/[teamId]/players/new.tsx`, `teams/[teamId]/matches/new.tsx`, `matches/[matchId]/{index,call-up,new-player}.tsx` | US1 to US4                                               |
+| UI: forms and dialogs    | `team-form.tsx`, `player-form.tsx`, `match-form.tsx`, `score-fields.tsx`, `date-time-field.tsx`, `call-up-selector.tsx`, `choice-dialog.tsx`, `not-found.tsx`, `save-error-banner.tsx`                         | RF-012 to RF-035, RF-083                                 |
+| UI: grid and warnings    | `src/ui/grid/` (`grid-layout.ts`, `match-grid.tsx`, `grid-cell.tsx`, `column-header.tsx`, `player-column.tsx`, `grid-toolbar.tsx`), `src/ui/warnings/`                                                         | RF-076 to RF-081, RF-060 to RF-067, RF-087               |
+| Texts                    | `src/i18n/es.json` (all new texts)                                                                                                                                                                             | RF-012                                                   |
+| Tooling                  | `scripts/check-focused-tests.sh`, `tests/scripts/`, `tests/support/` (in-memory database, flow helpers), `e2e/*.yaml` (six Maestro flows), ESLint `max-lines` for tests                                        | rules of D2                                              |
+
+New dependencies (T024, audited by Security): `expo-sqlite`, `drizzle-orm`, `zustand`; for development `drizzle-kit`, `better-sqlite3` and its types. `expo` and `expo-dev-client` moved to the SDK 58 patch versions that Expo Doctor asked for.
+
+### Why: decisions made
+
+- **Data first, screens last.** Order of the work: database, repositories, state, then screens. Each layer was tested before the next existed, so a screen never had to guess what the layer below does.
+- **The view model lives in the state layer.** `buildMatchView` turns the grid and the warnings into a plain object (columns, cells, counters, colours, `canUndo`). The screens only read it. This is rule 8 in practice: no rule is computed in the interface.
+- **The session store is built from slices.** `match-session-store.ts` joins three files (call-up, marks, undo). Each slice gets a small `host` object and the store stays under the 60-line and 250-line limits. D3 will add questions to the same slices.
+- **Save first, publish after.** Every action writes to SQLite and only then updates what the screen shows; a thrown write becomes `saveFailed` and changes nothing else (RF-085).
+- **Create-once guard.** The new-match draft remembers its saved result, so a second tap on «Guardar» cannot create a second match. A failed save is not remembered, so the retry works.
+- **Ids in routes, never names.** Routes carry only a number (`/matches/1`), parsed by `parseMatchId`; an odd value shows the not-found screen. Names never go in a URL (Security checked it).
+- **Trimming lives only in the domain.** `validateTeamInput`, `validatePlayerInput` and `validateMatchInput` return the cleaned value; the state layer saves only that (Fernando's answer of 2026-11-12).
+- **Foreign-key columns are NOT NULL.** The plan was silent; it protects integrity. **Deviation awaiting Fernando's approval.**
+- **One-file `DateTimePicker`.** The `@expo/ui` drop-in gives native pickers on both platforms, so there is one `date-time-field.tsx` instead of two platform files. **Deviation awaiting Fernando's approval.** The Android picker is always drawn open; a dialog on press is the alternative if it looks bad.
+- **The 250-line limit also covers tests.** ESLint `max-lines` now checks `tests/`, `scripts/` and `plugins/` (T080), so big test helpers were split.
+- **A script for focused tests.** `scripts/check-focused-tests.sh` looks for `it.only`, `xit` and similar at the start of a line, so a test title with the word "fit" no longer fails it (D1 lesson).
+- **Incremental Stryker locally.** `STRYKER_INCREMENTAL=1 npm run verify` reuses the last mutation results. Because Stryker does not see `tests/support/`, a full run is forced in T030, T037, T061 and whenever those helpers or Jest or Stryker configs change.
+- **ADR-005 and the osv exception.** ADR-005 adds `better-sqlite3`, `@expo/ui` and `expo-splash-screen` to the stack table. `osv-scanner.toml` ignores one advisory (GHSA-67mh-4wv8-2f99) in an old esbuild that only `drizzle-kit` pulls in: it is the CORS of esbuild's dev server, never used, never in the app; it expires on 2027-02-10.
+
+### To learn
+
+Real code, from the repository.
+
+**A Zustand vanilla store, split in slices** (`src/state/match-session-undo.ts`). `zustand/vanilla` has no React in it, so the state layer stays free of `react-native`. A slice is a file that builds some of the store's actions from a `host` (`db`, `get`, `set`), not from the whole store.
+
+```ts
+const result = undoLast(current.grid, history);
+try {
+  saveCellChanges(host.db, current.matchId, result.changes);
+} catch {
+  // The entry stays in the history: a failed undo does not lose it.
+  return failed(host);
+}
+return publish(host, current, result.grid, result.history);
+```
+
+The order is the rule: the domain computes, the database saves, and only then the screen's data changes.
+
+**Drizzle synchronous transactions** (`src/data/grid-repository.ts`). expo-sqlite is synchronous, so `db.transaction` takes a plain function. If it throws, everything it wrote is rolled back. `tx` is itself a database, so helpers that expect one accept it.
+
+```ts
+db.transaction((tx) => {
+  assertEntriesBelongToMatch(
+    tx,
+    matchId,
+    last.map((change) => change.cell.entryId),
+  );
+  for (const { cell, state } of last) {
+    /* delete the row when the state is "empty", otherwise upsert it */
+  }
+});
+```
+
+The foreign key alone would accept an entry of another match, so ownership is checked before the first write.
+
+**The database folder is the same everywhere** (`plugins/with-backup-exclusion.js`). A config plugin edits the files `prebuild` generates, so `android/` and `ios/` are never touched by hand. The iOS block runs before React Native starts. It marks a _folder_, and expo-sqlite's default folder is `documentDirectory + "SQLite"`, which is why `openDatabaseSync(name)` is called with no `directory` (a test asserts it).
+
+```js
+application.$["android:dataExtractionRules"] = `@xml/${RULES_NAME}`;
+// ...and in the Swift it injects:
+//   values.isExcludedFromBackup = true
+//   try databaseFolder.setResourceValues(values)
+```
+
+**Expo Router: open once, close on unmount** (`src/app/matches/[matchId]/index.tsx`). A `useState` initializer runs once, before the first render, so the screen never shows another match. The cleanup of an effect runs only when the screen is popped, not when another route is pushed over it. That is why Undo survives a trip to the call-up screen (T084).
+
+```tsx
+useState(() => {
+  if (id !== null) store.getState().openMatch(id);
+});
+useEffect(() => () => store.getState().closeMatch(), [store]);
+```
+
+**A pure layout function** (`src/ui/grid/grid-layout.ts`). Sizes and scroll flags come from numbers in and numbers out, so they are tested without a screen. `Math.max` and `Math.min` clamp a value between a minimum and a maximum.
+
+```ts
+const rowHeight = Math.max(
+  MIN_ROW_HEIGHT,
+  Math.min(MAX_ROW_HEIGHT, spacePerRow),
+);
+// ...
+horizontalScroll: fittingWidth < MIN_CELL_WIDTH,
+verticalScroll: input.players * rowHeight > rowsSpace,
+```
+
+**An in-memory database for tests** (`tests/support/test-database.ts`). Tests use `better-sqlite3` in memory and run the _real_ migration SQL, so the tests see the same tables as the app. Foreign keys are turned on before migrating, as the app does.
+
+```ts
+const sqlite = new Database(":memory:");
+sqlite.pragma("foreign_keys = ON");
+const db = drizzle(sqlite, { schema });
+migrateTestDatabase(db);
+return db;
+```
+
+**fast-check through a store** (`src/state/match-session-store.undo.properties.test.ts`). Random sequences of taps, overtimes and undos run on the real store and database. After every step the test checks that no column has more than five X and that the database holds exactly the grid the screen shows.
+
+```ts
+expect(mostStarters(after)).toBeLessThanOrEqual(5);
+expect(savedGrid(db, matchId)).toEqual(after);
+expect(state.saveFailed).toBe(false);
+```
+
+**A check that does not cry wolf** (`scripts/check-focused-tests.sh`). Two anchored patterns: one for a call at the start of a line, one for a focused function used as a value. A bare search for "fit" would match the title "4 periods fit at 375 pt".
+
+```bash
+PATTERN_CALL='^[[:space:]]*((it|test|describe)(\.[A-Za-z]+)*\.(only|skip)|x(it|test|describe)|f(it|test|describe))(\.[A-Za-z]+)*(<[^>]*>)?[[:space:]]*[(`]'
+```
+
+**Screen tests ask like a user** (`tests/app/new-match.form.test.tsx`). React Native Testing Library finds elements by role and visible Spanish name, as a screen reader would, and `findBy...` waits for async renders.
+
+```tsx
+screen.getByRole("radio", { name: `${periods} periodos` });
+await screen.findByRole("button", { name: "Nuevo jugador" });
+```
+
+### To check it
+
+On the Mac, in the repository:
+
+```bash
+npm run verify                              # everything, as CI does
+STRYKER_INCREMENTAL=1 npm run verify        # same, reusing mutation results (about 1 min)
+STRYKER_INCREMENTAL=1 STRYKER_FORCE=1 npm run verify   # full local run (about 6 min)
+npx jest src/state/match-session-store      # only the session store
+```
+
+Measured on 2026-11-13 (verifier, local, not CI): 197 suites and 2,694 tests green; `src/domain/` coverage 100 % lines and 96.63 % branches; Stryker kills 94.78 % of mutants (threshold 80 %); full run 6 min 14 s, incremental run 1 min 9 s; `npm audit`, `osv-scanner`, gitleaks and semgrep clean.
+
+#### How to run Maestro (T061)
+
+Maestro drives the real app from outside, for what Jest cannot prove (native pickers, `maxLength`, closing and reopening the app).
+
+1. Install Maestro version 2.7.0 or later. It is **not** an npm package: use the official installer from maestro.dev.
+2. Build a Release app (not the dev client, so no developer menu is in the way): `npx expo run:ios --configuration Release` or `npx expo run:android --variant release`. Keep one simulator or emulator open.
+3. Run the six flows, one after another:
+
+```bash
+maestro test e2e/us1-teams-and-players.yaml
+maestro test e2e/us1-form-interruption.yaml
+maestro test e2e/us2-match-and-call-up.yaml
+maestro test e2e/us3-planning.yaml
+maestro test e2e/us3-interruption.yaml
+maestro test e2e/us4-warnings.yaml
+```
+
+4. Paste each output in `review.md`. The flows were written without running them, so expect to fix some steps (risks are in the Pending lines of T036, T048, T056 and T060). `us4-warnings.yaml` is written for a tablet screen.
+
+#### Device checklist (Fernando)
+
+- **T057, grid layout:** iPhone, 5th-gen iPad and an Android phone, portrait and landscape: 6 periods and 10 players on a 375 pt phone fits with no sideways scroll; 8 periods scrolls sideways with cells of at least 44 pt; 12 players with every banner and the legend fit on the iPad in landscape; 13 players scroll down; the player column never moves sideways; rotate with marks on the grid.
+- **Colours by eye:** light red cells and players in red are visible on the three devices (Maestro only reads text).
+- **iOS backup exclusion:** on the simulator, `xattr -l` on the app's `Documents/SQLite` folder must show `com.apple.metadata:com_apple_backup_excludeItem`.
+- **Android backup (E-028):** `npx expo prebuild --platform android --clean`, check the two attributes in the manifest, then on an emulator `adb shell bmgr backupnow`; a new phone must receive no data.
+- **iPad 5th gen, 100 ms repaint:** the slow-motion measurement in T060: a tap must repaint the grid and its warnings within 100 ms.
+- **Modals and Android Back:** the new-team, new-player and new-match modals; Back must not close a confirmation dialog.
+
+### Pending
+
+Known D2 limits (stated in the spec and tasks, not bugs to fix now):
+
+- A tap on an empty cell of a period that already has five X in the rule window, or on an X in a period with a sub, does nothing yet (the questions are D3).
+- A saved match cannot be reopened from the interface in D2: only by the deep link `planificadorperiodos://matches/1`. After Back from the grid there is no way back to it until the team's match list (T071, D3).
+- A team with no players shows an empty list with no text.
+- A failed read reuses the empty and not-found states, with no new text.
+
+Not done or not verified:
+
+- **The six Maestro flows were written but NOT run.** T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked.
+- **CI has not run yet** on this branch. The first full Stryker run on CI (about 25 minutes) and the incremental runs, with whether the cache was restored, are still to be recorded in `review.md`. A note: `tests/support/` is part of the cache key, so changes there force a full run.
+- **Two deviations need Fernando's approval** in `plan.md` "Deviations": FK columns NOT NULL, and the one-file `DateTimePicker`.
+- **The spec's Spanish texts table lacks the row `grid.addOvertime`** («Añadir prórroga»). It is in `es.json`; the Specifier should add the row.
+- **Security:** SEC-D2-1 (important, before the first release): `app.json` has no `android.blockedPermissions`, and the manifest asks for permissions the app does not use. SEC-D2-3 (minor): if the database fails to open, the splash screen stays up forever with no message; this needs Fernando's decision (what should the coach see?). The other minor findings (SEC-D2-2, 4, 5, 6) are in `review.md`.
+- **Mutation survivors:** the 8 in `undo.ts` are classified (equivalent or defence only). The other 19 (`bounded-flow.ts` 9, `marking.ts` 5, `rule-feasibility.ts` 2, one each in `column.ts`, `overtime.ts`, `player-order.ts`) are probably the D1 set but are not yet classified one by one. `team-order.ts` gets no mutants (finding M1).
+- **The Codex review (`scripts/review.sh`) is not recorded yet,** and Codex also checks that these explanations match what was done.
+- **Before D3 starts,** the Planner reviews D3's tasks with the lessons of D2, including the slice files of the session store.
