@@ -50,7 +50,8 @@
       "empty": "{{name}}, {{period}}: casilla vacía",
       "starter": "{{name}}, {{period}}: X, titular",
       "sub": "{{name}}, {{period}}: X con círculo, entró de cambio"
-    }
+    },
+    "counter": "J {{played}} · D {{rested}}"
   },
   "common": {
     "save": "Guardar",

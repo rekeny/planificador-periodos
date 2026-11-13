@@ -839,7 +839,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a cell is never shown with two states, and its label always matches the state shown; a tap calls `onTapCell` once with that cell. Also: pressing a cell of each state calls `onTapCell` once with that cell and never any other callback.
   - Pending: the «X» glyph is a module constant `MARK` in `grid-cell.tsx` (not an es.json key), since it is the same in every language and the lint rule only checks JSX literals. The look on a real device (circle size, 44 pt touch) is for Fernando to check once T083 assembles the grid.
 
-- [ ] **T083** · UI: the grid with the fixed player column, counters and sizes (RF-042, RF-070, RF-071, RF-076, RF-077, E-014, E-020)
+- [x] **T083** · UI: the grid with the fixed player column, counters and sizes (RF-042, RF-070, RF-071, RF-076, RF-077, E-014, E-020)
   - Layer and files: UI · `src/ui/grid/match-grid.tsx`, `src/ui/grid/player-column.tsx`, `src/i18n/es.json` (`grid.counter`), tests next to each component. Taken out of T054 on 2026-11-12 (review D2-A-06).
   - Done when: the grid draws only `MatchView`; a vertical `ScrollView` holds the player column and a horizontal `ScrollView` with the header row (T054's headers) and the cells (T054's cells); the player column is outside the horizontal `ScrollView` (RF-077); one row per entry with number, name (cut with an ellipsis) and «J n · D n» below; sizes come from `grid-layout.ts` (T053) with `useWindowDimensions` and the heights measured with `onLayout`, and are recomputed on rotation (RF-076); whether the window is a tablet is decided only by `grid-layout.ts` (`TABLET_MIN_SHORT_SIDE`), never by the component or by `Platform`.
   - Scenarios:
@@ -850,7 +850,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: a new window size (rotation) → the sizes are recomputed. Also: a change of a cell in the view → its counter changes at once.
     - Interruptions: rendering the same view twice (unmount, mount) gives the same tree; nothing is kept in the component between mounts.
     - Mistakes: the player column never sits inside the horizontal `ScrollView`. Also: the header row scrolls with the cells (it is inside the horizontal `ScrollView`); the grid imports only types from the domain and draws only `MatchView` (it computes no rule).
-  - Pending: nothing.
+  - Pending: the look on a real device is for Fernando to check: the 100 pt player column, the header row (44 pt) lining up with the spacer, and the rows on a phone and a tablet. Colours and rule highlights come in T058 and T059.
 
 - [ ] **T055** · UI: match screen with tap, overtimes, toolbar and save error (RF-044, RF-049, RF-056, RF-058, RF-059, RF-085, E-025)
   - Layer and files: app and UI · `src/app/matches/[matchId]/index.tsx` (composes the grid of T083, the toolbar and the banners, so the screen file stays under 250 lines and no function passes 60), `src/ui/grid/grid-toolbar.tsx` (the three buttons), `src/i18n/es.json` (`grid.undo`, `grid.addOvertime`, `grid.removeOvertime`, `confirm.removeOvertime.title`, `confirm.removeOvertime.message`, `confirm.removeOvertime.confirm`), tests in `tests/app/` split by subject (marks, overtimes). The Undo history across the match's routes is T084 (split on 2026-11-12, review D2-A-06).
