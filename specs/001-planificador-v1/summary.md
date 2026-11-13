@@ -153,6 +153,19 @@ New dependencies (T024, audited by Security): `expo-sqlite`, `drizzle-orm`, `zus
 - **One-file `DateTimePicker`.** The `@expo/ui` drop-in gives native pickers on both platforms, so there is one `date-time-field.tsx` instead of two platform files. **Deviation awaiting Fernando's approval.** The Android picker is always drawn open; a dialog on press is the alternative if it looks bad.
 - **The 250-line limit also covers tests.** ESLint `max-lines` now checks `tests/`, `scripts/` and `plugins/` (T080), so big test helpers were split.
 - **A script for focused tests.** `scripts/check-focused-tests.sh` looks for `it.only`, `xit` and similar at the start of a line, so a test title with the word "fit" no longer fails it (D1 lesson).
+- **Codex finding F1: an invalidated draft.** When the new-match draft was reset for a team that no longer loaded, it quietly kept the old data. Now `reset` first empties the draft, never throws, and returns a boolean (`reset(teamId): boolean`); the route reads that `false` and shows the not-found screen. Lesson: a reset that can fail must leave a safe empty state first and say so, instead of leaving stale data behind.
+- **Codex finding F4: a screen that reloads on focus.** The team screen stays mounted under the match, so players created there did not show on Back. It now calls `openTeam` inside `useFocusEffect` (and once before the first render), so it reloads every time it comes back into view.
+- **Codex finding F3: no fallible read after a commit.** If a read fails after the write was saved, the coach sees "save failed" for something that was saved. The rule is: read first, commit, publish from memory. Real code from `src/state/squad-store.ts`:
+
+  ```ts
+  // The list is read first: once the write is committed no read is left that could fail (RF-085).
+  before = sortedTeams(db);
+  saved = write({ ...checked.value, defaultFormat: input.defaultFormat });
+  ```
+
+  After the write, the new list is built from `before` and the saved team, never from a new database read. The call-up and marks slices of the session store follow the same rule.
+
+- **Codex finding F2: the grid sized from its measured viewport.** The grid used the window size, which is wrong when headers or the safe area take space. Now `MatchGrid` wraps its scroll in a `flex:1` view with the test id `grid-viewport`, and its `onLayout` gives the real width and height to the pure function `viewportLayout` in `src/ui/grid/grid-layout.ts`. Window sizing stays only as the fallback before the first measurement.
 - **Incremental Stryker locally.** `STRYKER_INCREMENTAL=1 npm run verify` reuses the last mutation results. Because Stryker does not see `tests/support/`, a full run is forced in T030, T037, T061 and whenever those helpers or Jest or Stryker configs change.
 - **ADR-005 and the osv exception.** ADR-005 adds `better-sqlite3`, `@expo/ui` and `expo-splash-screen` to the stack table. `osv-scanner.toml` ignores one advisory (GHSA-67mh-4wv8-2f99) in an old esbuild that only `drizzle-kit` pulls in: it is the CORS of esbuild's dev server, never used, never in the app; it expires on 2027-02-10.
 
@@ -264,7 +277,7 @@ STRYKER_INCREMENTAL=1 STRYKER_FORCE=1 npm run verify   # full local run (about 6
 npx jest src/state/match-session-store      # only the session store
 ```
 
-Measured on 2026-11-13 (verifier, local, not CI): 197 suites and 2,694 tests green; `src/domain/` coverage 100 % lines and 96.63 % branches; Stryker kills 94.78 % of mutants (threshold 80 %); full run 6 min 14 s, incremental run 1 min 9 s; `npm audit`, `osv-scanner`, gitleaks and semgrep clean.
+Measured on 2026-11-13 (verifier, local, not CI): about 2,777 Jest tests green after the four Codex fixes (2,694 at the first measurement); `src/domain/` coverage 100 % lines and 96.63 % branches; Stryker kills 94.78 % of mutants (threshold 80 %); full run 6 min 14 s, incremental run 1 min 9 s; `npm audit`, `osv-scanner`, gitleaks and semgrep clean.
 
 #### How to run Maestro (T061)
 
@@ -305,10 +318,10 @@ Known D2 limits (stated in the spec and tasks, not bugs to fix now):
 
 Not done or not verified:
 
-- **The six Maestro flows were written but NOT run.** T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked.
+- **The six Maestro flows were written but NOT run.** T036, T048, T056 and T060 are unticked in `tasks.md` (flows written, not run) until their Maestro runs are recorded: those four tasks are NOT done (Codex F5). T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked too.
 - **CI has not run yet** on this branch. The first full Stryker run on CI (about 25 minutes) and the incremental runs, with whether the cache was restored, are still to be recorded in `review.md`. A note: `tests/support/` is part of the cache key, so changes there force a full run.
 - **Two deviations need Fernando's approval** in `plan.md` "Deviations": FK columns NOT NULL, and the one-file `DateTimePicker`.
 - **Security:** SEC-D2-1 (important, before the first release): `app.json` has no `android.blockedPermissions`, and the manifest asks for permissions the app does not use. SEC-D2-3 (minor): if the database fails to open, the splash screen stays up forever with no message; this needs Fernando's decision (what should the coach see?). The other minor findings (SEC-D2-2, 4, 5, 6) are in `review.md`.
 - **Mutation survivors:** the 8 in `undo.ts` are classified (equivalent or defence only). The other 19 (`bounded-flow.ts` 9, `marking.ts` 5, `rule-feasibility.ts` 2, one each in `column.ts`, `overtime.ts`, `player-order.ts`) are probably the D1 set but are not yet classified one by one. `team-order.ts` gets no mutants (finding M1).
-- **The Codex review (`scripts/review.sh`) is not recorded yet,** and Codex also checks that these explanations match what was done.
+- **Codex review:** it ran once and found 4 blocking findings (F1 to F4), all fixed in phase 6 (commits 802e63c, f2001a7, ae302f3, 9502f00), plus F5 (the four unticked tasks above) and F6 (a stale claim was removed). Codex re-run: see `review.md`. Codex also checks that these explanations match what was done.
 - **Before D3 starts,** the Planner reviews D3's tasks with the lessons of D2, including the slice files of the session store.
