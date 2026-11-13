@@ -44,7 +44,9 @@
   "grid": {
     "header": {
       "period": "P{{number}}",
-      "overtime": "PR{{number}}"
+      "overtime": "PR{{number}}",
+      "incompleteMark": "!",
+      "inconsistentMark": "≠"
     },
     "cell": {
       "empty": "{{name}}, {{period}}: casilla vacía",
@@ -73,6 +75,11 @@
     "numberInvalid": "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda."
   },
   "warning": {
+    "incompletePeriod": "Periodo incompleto: tiene menos de 5 titulares.",
+    "inconsistentPeriod": "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?",
+    "lightRedCell": "Si la marcas, no descansará el mínimo del tramo.",
+    "playerInRed": "No cumple la regla del tramo.",
+    "ruleImpossible": "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos.",
     "duplicateNumber": "Hay jugadores con el mismo dorsal: {{numbers}}.",
     "callUpRange": "Convocatoria fuera del rango: con {{format}} periodos deben ser de {{min}} a 12 jugadores, y hay {{count}}."
   },

@@ -921,7 +921,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a header both incomplete and inconsistent gives only «≠». Also: E-002 gives «≠» on P3 and «!» on the others; an empty free period or overtime has no mark.
   - Pending: the colours and the legend are drawn in T059; nothing else.
 
-- [ ] **T059** · UI: warnings on the grid, colours and legend (RF-006, RF-060, RF-061, RF-062, RF-063, RF-064, RF-065, RF-066, RF-067, RF-072, RF-087, E-001, E-002, E-003, E-004, E-007, E-027)
+- [x] **T059** · UI: warnings on the grid, colours and legend (RF-006, RF-060, RF-061, RF-062, RF-063, RF-064, RF-065, RF-066, RF-067, RF-072, RF-087, E-001, E-002, E-003, E-004, E-007, E-027)
   - Layer and files: UI · `src/ui/theme/warning-colors.ts`, `src/ui/grid/*` (colours and header marks), `src/ui/warnings/rule-impossible-banner.tsx`, `src/ui/warnings/warning-legend.tsx`, `src/i18n/es.json` (`warning.*`, `grid.header.incompleteMark`, `grid.header.inconsistentMark`), tests.
   - Done when: light red cells, players in red, «!» and «≠» in headers, the general warning (`warning.ruleImpossible`) above the grid and the legend under it (`warning.lightRedCell`, `warning.playerInRed`, `warning.incompletePeriod`, `warning.inconsistentPeriod`) render only from `MatchView`, with the colours of `warning-colors.ts` (the tests check the style colour of each light red cell and red player, because Maestro checks only text, T060); their heights reach `grid-layout.ts` through `onLayout` (T083); nothing is coloured by default. Component tests use `MatchView` fixtures, so E-002 and E-027 can be drawn although D2 cannot mark a circled X in the window.
   - Scenarios:
@@ -932,7 +932,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: the last light red cell disappears → its legend line disappears. Also: a screen test in `tests/app/` with the real stores and the in-memory database: tap Juan's P1, P2 and P3 → P4 and P5 turn light red (E-001, RF-060) and tapping his X in P3 again removes the colour.
     - Interruptions: warnings shown again after reopening. Also: a screen test: unmount the tree and render `/matches/1` again with new stores → the same colours, marks and legend.
     - Mistakes: E-002 → «≠» on P3, not «!»; E-027 legend without the player in red. Also: a header both incomplete and inconsistent shows only «≠»; the legend never explains the player in red when only a light red cell exists.
-  - Pending: nothing.
+  - Pending: the colours (`#fecaca` light red, `#b91c1c` red) and the look of the banners and the legend are for Fernando to check by eye on the three devices (T057). The legend and general-warning keys `warning.*` and `grid.header.*Mark` were added to `es.json`. `tests/support/call-up-screen.ts` now also filters the warning texts, «!» and «≠» (accepted by the orchestrator, because a match with no marks already draws them).
 
 - [ ] **T060** · Maestro US4 journey and performance on the 5th-gen iPad (RF-060, RF-062, RF-063, RF-064, RF-065, RF-067, RF-087, E-001, E-003, E-005, E-006, E-007, E-008, E-009)
   - Layer and files: e2e · `e2e/us4-warnings.yaml`; measurement in `review.md`.

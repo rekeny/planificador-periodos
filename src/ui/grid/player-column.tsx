@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 
 import type { RowView } from "@/state/match-view";
+import { RED } from "@/ui/theme/warning-colors";
 
 export interface PlayerColumnProps {
   readonly rows: readonly RowView[];
@@ -21,7 +22,11 @@ export function PlayerColumn({
         <View key={row.entryId} style={[styles.row, { height: rowHeight }]}>
           <View style={styles.identity}>
             <Text style={styles.number}>{row.number}</Text>
-            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+            <Text
+              style={[styles.name, row.isInRed ? styles.red : null]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {row.name}
             </Text>
           </View>
@@ -42,5 +47,6 @@ const styles = StyleSheet.create({
   identity: { flexDirection: "row", alignItems: "center", gap: 6 },
   number: { fontSize: 16, fontWeight: "700" },
   name: { fontSize: 14, flexShrink: 1 },
+  red: { color: RED },
   counter: { fontSize: 12 },
 });

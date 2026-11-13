@@ -19,6 +19,25 @@ export function useColumnTitle(column: Column): string {
   return t(key, { number: column.number });
 }
 
+// Only «≠» when a header is both incomplete and inconsistent: the state already gives one kind (RF-066).
+function HeaderMark({
+  column,
+}: {
+  readonly column: ColumnView;
+}): ReactElement | null {
+  const { t } = useTranslation();
+  if (column.headerMark === null) return null;
+  return (
+    <Text testID={`column-mark-${column.key}`} style={styles.mark}>
+      {t(
+        column.headerMark === "incomplete"
+          ? "grid.header.incompleteMark"
+          : "grid.header.inconsistentMark",
+      )}
+    </Text>
+  );
+}
+
 export function ColumnHeader({
   column,
   cellWidth,
@@ -28,11 +47,13 @@ export function ColumnHeader({
   return (
     <View style={[styles.header, { width: cellWidth, height }]}>
       <Text style={styles.text}>{title}</Text>
+      <HeaderMark column={column} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: { alignItems: "center", justifyContent: "center" },
+  mark: { fontSize: 14, fontWeight: "700" },
   text: { fontSize: 16, fontWeight: "600" },
 });

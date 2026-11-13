@@ -35,13 +35,19 @@ const CHROME = [
   "Crear jugador nuevo",
   ADD_EMPTY,
   SAVE_FAILED,
+  // The warnings of the grid (T059): a match with no mark already shows «!» and a legend line.
+  "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos.",
+  "Si la marcas, no descansará el mínimo del tramo.",
+  "No cumple la regla del tramo.",
+  "Periodo incompleto: tiene menos de 5 titulares.",
+  "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?",
 ];
 const BANNER = /^Convocatoria fuera del rango/;
 const COUNT = /convocados$/;
 // What the grid of T083 and the buttons of T055 add to the match screen: column headers, counters,
 // the X of a mark and the three grid buttons. `rowsShown` leaves them out, so it still reads only
 // the call-up rows ("4 Ana 7 Bea").
-const GRID_TEXT = /^(PR?\d+|J \d+ · D \d+|X)$/;
+const GRID_TEXT = /^(PR?\d+|J \d+ · D \d+|X|!|≠)$/;
 const GRID_BUTTONS = ["Deshacer", "Añadir prórroga", "Quitar prórroga"];
 
 export type Session = ReturnType<typeof sessionWithBench>;

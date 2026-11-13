@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { Cell } from "@/domain/grid";
 import type { CellView } from "@/state/match-view-grid";
+import { LIGHT_RED } from "@/ui/theme/warning-colors";
 import { useColumnTitle } from "./column-header";
 
 export interface GridCellProps {
@@ -35,7 +36,11 @@ export function GridCell({
         period,
       })}
       onPress={() => onTapCell(cell.cell)}
-      style={[styles.cell, { width: cellWidth, height: rowHeight }]}
+      style={[
+        styles.cell,
+        { width: cellWidth, height: rowHeight },
+        cell.isLightRed ? styles.lightRed : null,
+      ]}
     >
       {cell.state === "empty" ? null : (
         <View style={cell.state === "sub" ? styles.circle : undefined}>
@@ -48,6 +53,7 @@ export function GridCell({
 
 const styles = StyleSheet.create({
   cell: { alignItems: "center", justifyContent: "center" },
+  lightRed: { backgroundColor: LIGHT_RED },
   circle: {
     width: 32,
     height: 32,

@@ -8,10 +8,12 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type LayoutChangeEvent,
 } from "react-native";
 import { useStore } from "zustand";
 
 import { getMatchSessionStore } from "@/state/app-stores";
+import type { MatchView } from "@/state/match-view";
 import { parseMatchId } from "@/state/route-params";
 import { buttonsInHeader } from "@/ui/grid/grid-layout";
 import { GridButtons } from "@/ui/grid/grid-toolbar";
@@ -20,6 +22,8 @@ import { useMatchActions } from "@/ui/grid/use-match-actions";
 import { NotFound } from "@/ui/not-found";
 import { SaveErrorBanner } from "@/ui/save-error-banner";
 import { CallUpRangeBanner } from "@/ui/warnings/call-up-range-banner";
+import { RuleImpossibleBanner } from "@/ui/warnings/rule-impossible-banner";
+import { WarningLegend } from "@/ui/warnings/warning-legend";
 
 function CallUpButton({ id }: { readonly id: number }): ReactElement {
   const { t } = useTranslation();
@@ -32,6 +36,40 @@ function CallUpButton({ id }: { readonly id: number }): ReactElement {
     >
       <Text style={styles.actionText}>{t("callUp.title")}</Text>
     </Pressable>
+  );
+}
+
+const heightOf = (event: LayoutChangeEvent): number =>
+  event.nativeEvent.layout.height;
+
+// The banners and the legend above the grid; their heights go to the grid's layout (T083).
+function useWarningHeights(view: MatchView | null) {
+  const [banners, setBanners] = useState(0);
+  const [legend, setLegend] = useState(0);
+  const hasBanners =
+    view !== null && (view.ruleImpossible || view.callUpRange !== null);
+  return {
+    // A view that is gone reports no more heights, so they are zeroed here instead.
+    bannersHeight: hasBanners ? banners : 0,
+    legendHeight: view !== null && view.legend.length > 0 ? legend : 0,
+    onBannersLayout: (event: LayoutChangeEvent) => setBanners(heightOf(event)),
+    onLegendLayout: (event: LayoutChangeEvent) => setLegend(heightOf(event)),
+  };
+}
+
+function WarningBanners({
+  view,
+  onLayout,
+}: {
+  readonly view: MatchView;
+  readonly onLayout: (event: LayoutChangeEvent) => void;
+}): ReactElement | null {
+  if (!view.ruleImpossible && view.callUpRange === null) return null;
+  return (
+    <View testID="warning-banners" onLayout={onLayout}>
+      <RuleImpossibleBanner ruleImpossible={view.ruleImpossible} />
+      <CallUpRangeBanner warning={view.callUpRange} />
+    </View>
   );
 }
 
@@ -54,6 +92,7 @@ export default function MatchScreen(): ReactElement {
   const view = useStore(store, (state) => state.view);
   const saveFailed = useStore(store, (state) => state.saveFailed);
   const { buttons, dialog } = useMatchActions(view, () => store.getState());
+  const heights = useWarningHeights(view);
   const showing = id !== null && status === "open" && view !== null;
   const inHeader = buttonsInHeader(width, height);
 
@@ -70,9 +109,12 @@ export default function MatchScreen(): ReactElement {
   return (
     <View style={styles.screen}>
       <CallUpButton id={id} />
-      <CallUpRangeBanner warning={view.callUpRange} />
+      <WarningBanners view={view} onLayout={heights.onBannersLayout} />
+      <WarningLegend items={view.legend} onLayout={heights.onLegendLayout} />
       <MatchGrid
         view={view}
+        bannersHeight={heights.bannersHeight}
+        legendHeight={heights.legendHeight}
         onTapCell={(cell) => void store.getState().tapCell(cell)}
       />
       {inHeader ? null : <GridButtons {...buttons} />}
