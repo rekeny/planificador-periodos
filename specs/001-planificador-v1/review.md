@@ -457,3 +457,39 @@ The `catch {}` swallows both `createDirectory` and `setResourceValues` errors. J
 - **Important:** one (SEC-T026-1), a small hardening of the `catch` inside the same task.
 - **Minor:** four (SEC-T026-2 to SEC-T026-5).
 - Can T026 be committed? Yes, once the Implementer replaces the empty `catch {}` with the fixed-message handling and its test, and `scripts/verify.sh` is green. The Android part meets principle 5 as it is. The Security files changed by this audit are `docs/security.md` and this section.
+
+## D2 verification (2026-11-13)
+
+- **Scope:** verifier run for D2 close (T061) on branch `001-planificador-v1-d2`, HEAD `8ff01b8`, clean working tree before the run. Nothing was changed, committed or fixed; T057 and T061 remain unticked.
+- **Mutation time (D2 rule 4):** the full local run `STRYKER_INCREMENTAL=1 STRYKER_FORCE=1 npm run verify` passed (exit 0) in **6 min 13.8 s** total; Stryker itself took 5 min 20 s (804 mutants, 24 files, 1,161 tests). The incremental run `STRYKER_INCREMENTAL=1 npm run verify`, right after it, passed (exit 0) in **1 min 8.8 s** total; Stryker took 17 s and reused the file. On CI, the first full run after T024, T080, T028 and T029 is still to be recorded (see T061 Done-when).
+- **Steps of the full run (all green):** types, lint (`--max-warnings 0`), format, focused or skipped tests (none), Jest with coverage (197 suites, 2,694 tests, all passed), traceability, `drizzle-kit check` ("Everything's fine"), Expo Doctor (20/20), Stryker, `npm audit`, `osv-scanner` (no issues), gitleaks (no leaks in 115 commits), semgrep ("No issues found").
+- **Coverage:** global Jest coverage statements 98.78 %, branches 96.32 %, lines 98.93 %. `src/domain/` (24 non-test files, from `coverage/lcov.info`): lines 316/316 = **100.00 %**, branches 172/178 = **96.63 %**. Threshold 90 % met.
+- **Mutation score:** `src/domain/` **94.78 %** (467 killed, 23 timed out, 27 survived, 0 no coverage), above the 80 % threshold. Per file, the D2 domain files are: `squad-validation.ts` 100 % (0 survivors), `match-input.ts` 100 % (0), `match-date.ts` 100 % (0). `team-order.ts` has no mutants generated ("n/a", 2 errors): see minor finding M1.
+- **Traceability (`node scripts/check-traceability.mjs`):** "Traceability OK (2 specs checked)". My own check, with the same name rules, confirms it for D2: all 86 RF/E IDs on the 43 ticked D2 task lines have a Jest test name, and none is covered only by a Maestro flow. The Maestro-written IDs (E-001, E-003, E-005 … E-032 and the RF-010 … RF-087 listed in `e2e/`) all also have Jest tests. Of the 120 IDs in `spec.md`, 109 have a Jest test name; the 11 without one (RF-015, RF-018, RF-020, RF-021, RF-022, RF-024, RF-028, RF-029, RF-039, RF-074, RF-075) all belong to D3 (T067–T078). **No ID of US1–US4 lacks a test.**
+- **Undo survivors (`src/domain/undo.ts`, 8 from the Stryker HTML report; the JSON report is not written, so the list comes from the clear-text output):**
+  - L32:45 `/^(P|OT)/` → `/(P|OT)/`: **equivalent**; a column key always starts with `P` or `OT`.
+  - L97:8 `...entry.filter(non-X)` → `...entry`, and L97:33 → `filter(() => true)`: **equivalent**; the starter list is then applied again at the end of the entry, so every X still gets its second chance after the non-X changes. Only the order of `changes` can differ.
+  - L98:8 and L98:33 (the starter list widened to all changes): **equivalent**; the duplicated non-X changes are no-ops by the line-112 guard.
+  - L105:7 `cellState(...) !== "starter"` → `true`: **equivalent**; when the cell is already a starter, the line-112 guard skips it anyway.
+  - L112:9 `if (cellState(...) === change.state) continue;` → `if (false) continue;`: **defence only**; it fires only with a history that does not match the grid (a cell already in the state it would take). Real actions cannot build that history (`pruneHistory`), as `plan.md` "Test strategy" documents.
+  - L123:20 loop start `history.length - 1` → `history.length + 1`: **equivalent**; the extra index reads `undefined`, is treated as an empty entry and skipped.
+  - No undo survivor is left unclassified.
+- **Other domain survivors (19, in files not in the documented `undo.ts` list):** `bounded-flow.ts` 9, `marking.ts` 5, `rule-feasibility.ts` 2, `column.ts` 1, `overtime.ts` 1, `player-order.ts` 1. Their total (27) equals the count of the D1 CI run (review.md, D1 verification: 27 survived), so they are probably the same set, but no section records them one by one. See M2.
+- **Repo checks:** `git ls-files ios android` is empty; `/ios` and `/android` are in `.gitignore`. No `console.` in `src/`. No `fetch(`, `XMLHttpRequest`, `WebSocket` or `EventSource` in `src/`. No `eslint-disable`, `@ts-ignore` or `@ts-expect-error` in the code (they appear only in docs, the review and coverage output). No `.only` or `.skip` in the tests, except the fixture strings of `tests/scripts/check-focused-tests-patterns.test.ts`, which the check script tests on purpose. Every `src/` file is within 250 counted lines: ESLint `max-lines` (skipping blank and comment lines) passed in the full run; the largest counted file is about 248 lines.
+- **Deviations (`plan.md` "Deviations"):** 22 rows in D2. Their status: 20 are approved by Fernando (D1 PR, or chat of 2026-11-12 and 2026-11-13); **2 are still without approval**, recorded as "Implementer's choice, for Fernando's review": (a) 2026-11-13, "FK columns are NOT NULL"; (b) 2026-11-13, "T082 uses the SDK 58 drop-in `DateTimePicker` of @expo/ui in one file instead of two platform files". No row says "pending approval" literally.
+- **Maestro (not run):** the verifier did not run the Maestro flows; they need a Release build on the simulator or emulator. The T036, T048 and T056 flows, and the other flows in `e2e/`, are still not run. T061 requires them run before the close.
+
+### Findings
+
+- **Blocking (for the T061 close, not for verify):**
+  - B1: the Maestro flows listed in T061 (`us1-teams-and-players`, `us1-form-interruption`, `us2-match-and-call-up`, `us3-planning`, `us3-interruption`, `us4-warnings`) have not been run. Output must be recorded before T061 is ticked.
+  - B2: the Codex review (`scripts/review.sh`) and the Security review of D2 are not in this section.
+- **Important:**
+  - I1: two D2 deviations have no approval from Fernando (FK columns NOT NULL; T082 single-file `DateTimePicker`). Approval must be recorded in `plan.md` "Deviations".
+  - I2: the 19 non-`undo.ts` survivors are not listed per file in any review section, so the rule "a survivor not previously known is a finding" cannot be checked row by row. The Reviewer should list them with their classification.
+- **Minor:**
+  - M1: `team-order.ts` gets no mutants ("n/a", 2 errors). Stryker reports no survivors there, but the file has no tested mutants; confirm the reason is the compile errors.
+  - M2: the traceability script checks only that each ID appears in some test name; the Maestro-only rule of D2 rule 7 is checked by hand here, not by the script.
+  - M3: the D2 close is verified locally only; the CI runs after T024, T080, T028 and T029 (full) and the incremental ones are still to be recorded.
+
+**Result:** verify green (full and incremental). No blocking finding from the machine checks; B1 and B2 are gates still open for T061.
