@@ -1,0 +1,312 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth tap, Undo pressed again and again, overtimes, and removing a player or an overtime that has marks"
+---
+# Journey of US3 on a clean install (T056). Written WITHOUT running it: Maestro is not installed
+# here (developer decision of 2026-11-13), so the first real run will need adjustments, like the
+# swipes of the US1 flows. Nothing here uses the network.
+# Device size assumed: a phone in portrait (shortest side under 600 points, such as an iPhone 15 or
+# a Pixel 7). There «Deshacer», «Añadir prórroga» and «Quitar prórroga» sit in a toolbar under the
+# grid. On a tablet they sit in the header with the same texts, so the commands would not change,
+# but that layout is not run here. With 6 periods the grid fits; with an overtime it scrolls.
+# Every cell is a button labelled «Name, P1: casilla vacía» or «Name, P1: X, titular» (T054).
+# The match created first has ID 1, which the deep link at the end opens again.
+- launchApp:
+    clearState: true
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Alevín A"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Ana"
+- tapOn: "Dorsal"
+- inputText: "1"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Bea"
+- tapOn: "Dorsal"
+- inputText: "2"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Carla"
+- tapOn: "Dorsal"
+- inputText: "3"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Dani"
+- tapOn: "Dorsal"
+- inputText: "4"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Eva"
+- tapOn: "Dorsal"
+- inputText: "5"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Fran"
+- tapOn: "Dorsal"
+- inputText: "6"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Fran"
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- assertNotVisible: "Quitar prórroga"
+# RF-042: one column per period, rows sorted by number, no overtime yet.
+- assertVisible: "P1"
+- assertVisible: "P6"
+- assertNotVisible: "PR1"
+- assertVisible:
+    text: "Bea"
+    below: "Ana"
+- assertVisible:
+    text: "Fran"
+    below: "Eva"
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+
+# Five starters in P1 (criterion 1). A sixth tap on an empty cell of the full period does nothing:
+# no X, no circle, no message (RF-055; the question that period would ask arrives in D3).
+- tapOn: "Ana, P1: casilla vacía"
+- assertVisible: "Ana, P1: X, titular"
+- tapOn: "Bea, P1: casilla vacía"
+- assertVisible: "Bea, P1: X, titular"
+- tapOn: "Carla, P1: casilla vacía"
+- assertVisible: "Carla, P1: X, titular"
+- tapOn: "Dani, P1: casilla vacía"
+- assertVisible: "Dani, P1: X, titular"
+- tapOn: "Eva, P1: casilla vacía"
+- assertVisible: "Eva, P1: X, titular"
+- tapOn: "Fran, P1: casilla vacía"
+- assertVisible: "Fran, P1: casilla vacía"
+- assertNotVisible: "Fran, P1: X, titular"
+- assertNotVisible: "Fran, P1: X con círculo, entró de cambio"
+# Criterion 2: tapping an X in a period with no sub removes it.
+- tapOn: "Eva, P1: X, titular"
+- assertVisible: "Eva, P1: casilla vacía"
+
+# Criterion 3 (RF-057): each press of «Deshacer» reverts one action, seven presses for six actions.
+- tapOn: "Deshacer"
+- assertVisible: "Eva, P1: X, titular"
+- tapOn: "Deshacer"
+- assertVisible: "Eva, P1: casilla vacía"
+- assertVisible: "Dani, P1: X, titular"
+- tapOn: "Deshacer"
+- assertVisible: "Dani, P1: casilla vacía"
+- assertVisible: "Carla, P1: X, titular"
+- tapOn: "Deshacer"
+- assertVisible: "Carla, P1: casilla vacía"
+- assertVisible: "Bea, P1: X, titular"
+- tapOn: "Deshacer"
+- assertVisible: "Bea, P1: casilla vacía"
+- assertVisible: "Ana, P1: X, titular"
+- tapOn: "Deshacer"
+- assertVisible: "Ana, P1: casilla vacía"
+- tapOn: "Deshacer"
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+- assertVisible: "Ana, P1: casilla vacía"
+- assertVisible: "Bea, P1: casilla vacía"
+
+# RF-058: a mark and an overtime, then «Deshacer» twice: the mark goes, the overtime stays.
+- tapOn: "Bea, P1: casilla vacía"
+- assertVisible: "Bea, P1: X, titular"
+- tapOn: "Añadir prórroga"
+- assertVisible: "PR1"
+- assertVisible: "Quitar prórroga"
+- tapOn: "Deshacer"
+- tapOn: "Deshacer"
+- assertVisible: "Bea, P1: casilla vacía"
+- assertVisible: "PR1"
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+# RF-059: an overtime with no marks is removed at once, with no question.
+- tapOn: "Quitar prórroga"
+- assertNotVisible: "¿Quitar la prórroga 1?"
+- assertNotVisible: "PR1"
+- assertNotVisible: "Quitar prórroga"
+# Three overtimes: the grid is wider than the screen and scrolls sideways. Only the last one
+# offers «Quitar prórroga» (the button exists once), so removing twice leaves the first.
+- tapOn: "Añadir prórroga"
+- tapOn: "Añadir prórroga"
+- tapOn: "Añadir prórroga"
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- assertVisible: "PR3"
+- tapOn: "Quitar prórroga"
+- assertNotVisible: "PR3"
+- tapOn: "Quitar prórroga"
+- assertNotVisible: "PR2"
+- assertNotVisible: "¿Quitar la prórroga 2?"
+- assertVisible: "PR1"
+# An overtime WITH marks asks first. Tapping outside, or Back on Android, changes nothing.
+- tapOn: "Ana, PR1: casilla vacía"
+- assertVisible: "Ana, PR1: X, titular"
+- tapOn: "Quitar prórroga"
+- assertVisible: "¿Quitar la prórroga 1?"
+- assertVisible: "Tiene marcas y se borrarán."
+- tapOn:
+    point: 5%,5%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- assertVisible: "¿Quitar la prórroga 1?"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Quitar la prórroga 1?"
+- assertVisible: "PR1"
+- assertVisible: "Ana, PR1: X, titular"
+- tapOn: "Quitar prórroga"
+- assertVisible: "¿Quitar la prórroga 1?"
+- tapOn:
+    text: "Quitar prórroga"
+    below: "¿Quitar la prórroga 1?"
+- assertNotVisible: "PR1"
+- assertNotVisible: "Ana, PR1: X, titular"
+- assertNotVisible: "Quitar prórroga"
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+
+# Marks the rules do not like are still accepted: Ana plays P1, P2 and P3 (RF-055 is the only limit;
+# the light red cells of US4 are checked by T059 and T060). Bea has a mark too, to see later that
+# only Ana's marks go away.
+- tapOn: "Ana, P1: casilla vacía"
+- assertVisible: "Ana, P1: X, titular"
+- tapOn: "Ana, P2: casilla vacía"
+- assertVisible: "Ana, P2: X, titular"
+- tapOn: "Ana, P3: casilla vacía"
+- assertVisible: "Ana, P3: X, titular"
+- assertVisible: "Ana, P4: casilla vacía"
+- tapOn: "Bea, P1: casilla vacía"
+- assertVisible: "Bea, P1: X, titular"
+# Criterion 7: the call-up screen is part of the match, so Undo still works after it.
+- tapOn: "Convocatoria"
+- assertVisible: "Añadir a la convocatoria"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 70%, 50%
+- tapOn: "Deshacer"
+- assertVisible: "Bea, P1: casilla vacía"
+- assertVisible: "Ana, P3: X, titular"
+- tapOn: "Bea, P2: casilla vacía"
+- assertVisible: "Bea, P2: X, titular"
+
+# E-017 (RF-034): Ana has three marks. The call-up asks before removing her.
+- tapOn: "Convocatoria"
+- tapOn: "Quitar de la convocatoria"
+- assertVisible: "¿Quitar a Ana de la convocatoria?"
+- assertVisible: "Tiene marcas en este partido y se borrarán."
+- tapOn:
+    point: 5%,5%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- assertVisible: "¿Quitar a Ana de la convocatoria?"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Quitar a Ana de la convocatoria?"
+- assertVisible:
+    text: "Ana"
+    above: "Añadir a la convocatoria"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 70%, 50%
+- assertVisible: "Ana, P1: X, titular"
+- assertVisible: "Ana, P2: X, titular"
+- assertVisible: "Ana, P3: X, titular"
+- tapOn: "Convocatoria"
+- tapOn: "Quitar de la convocatoria"
+- assertVisible: "¿Quitar a Ana de la convocatoria?"
+- tapOn:
+    text: "Quitar"
+    below: "¿Quitar a Ana de la convocatoria?"
+- assertNotVisible: "¿Quitar a Ana de la convocatoria?"
+- assertVisible:
+    text: "Ana"
+    below: "Añadir a la convocatoria"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 70%, 50%
+- assertNotVisible: "Ana, P1: X, titular"
+- assertNotVisible: "Ana, P1: casilla vacía"
+- assertVisible: "Bea, P2: X, titular"
+# RF-086: what Undo had of Ana is discarded; only Bea's mark is left to undo, and Ana stays out.
+- tapOn: "Deshacer"
+- assertVisible: "Bea, P2: casilla vacía"
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+- assertNotVisible: "Ana, P1: casilla vacía"
+
+# RF-057: after going back out of the match, Undo has nothing to undo when it is opened again.
+# D2 has no match list, so the match is opened again with its deep link.
+- tapOn: "Bea, P1: casilla vacía"
+- assertVisible: "Bea, P1: X, titular"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: "Nuevo partido"
+- openLink: planificadorperiodos://matches/1
+- assertVisible: "Bea, P1: X, titular"
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+- tapOn: "Deshacer"
+- assertVisible: "Bea, P1: X, titular"
