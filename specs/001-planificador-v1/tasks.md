@@ -773,7 +773,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: a mark of an entry not in the match is rejected. Also: `removeLastOvertime` with no overtime changes nothing; `saveCellChanges` for a match that does not exist is rejected.
   - Pending: nothing.
 
-- [ ] **T050** · State: grid view with columns, cells and counters (RF-042, RF-043, RF-070, RF-071, E-014, E-020)
+- [x] **T050** · State: grid view with columns, cells and counters (RF-042, RF-043, RF-070, RF-071, E-014, E-020)
   - Layer and files: state · `src/state/match-view-grid.ts` (created here, review D2-A-11: `ColumnView` with `key` and `column`, `CellView` with `key`, `cell` and `state`, `RowView.counter` and `cells`), `src/state/match-view.ts` (calls it; `canUndo`, `canRemoveOvertime`, `lastOvertimeHasMarks`), tests in `match-view.grid.test.ts`.
   - Done when: `buildMatchView` gives one column per period then per overtime (`gridColumns`), one row per entry in E-020 order, one cell per row and column with its state (`cellState`), and the counter of each row (`playerCounter`); `canUndo` is true when the history has an entry; `canRemoveOvertime` is true only with an overtime; `lastOvertimeHasMarks` comes from the domain's `lastOvertimeHasMarks`; it calls only domain functions.
   - Scenarios:

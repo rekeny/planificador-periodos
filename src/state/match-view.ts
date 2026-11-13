@@ -1,10 +1,18 @@
 import { playersToAdd } from "@/domain/call-up";
 import type { CallUpRangeWarning } from "@/domain/call-up-range";
+import { playerCounter, type PlayerCounter } from "@/domain/counter";
 import type { Format } from "@/domain/format";
 import type { CallUpEntryId, MatchGrid } from "@/domain/grid";
+import { lastOvertimeHasMarks } from "@/domain/overtime";
 import type { MatchId, Player } from "@/domain/squad";
 import type { UndoEntry } from "@/domain/undo";
 import type { Warnings } from "@/domain/warnings";
+import {
+  cellViews,
+  columnViews,
+  type CellView,
+  type ColumnView,
+} from "@/state/match-view-grid";
 
 export interface MatchViewSource {
   readonly matchId: MatchId;
@@ -19,12 +27,18 @@ export interface RowView {
   readonly number: string;
   readonly name: string;
   readonly hasMarks: boolean; // decides the removal confirmation (RF-033, RF-034)
+  readonly counter: PlayerCounter; // RF-070, RF-071
+  readonly cells: readonly CellView[]; // in column order (RF-042)
 }
 
 export interface MatchView {
   readonly matchId: MatchId;
   readonly format: Format;
+  readonly columns: readonly ColumnView[]; // periods, then overtimes (RF-042)
   readonly rows: readonly RowView[];
+  readonly canUndo: boolean; // RF-055
+  readonly canRemoveOvertime: boolean; // only with an overtime (RF-059)
+  readonly lastOvertimeHasMarks: boolean; // decides the removal confirmation (RF-059)
   readonly callUpRange: CallUpRangeWarning | null; // RF-068
   readonly playersToAdd: readonly Player[]; // active, not in the call-up, sorted (RF-032)
 }
@@ -37,8 +51,10 @@ export function buildMatchView({
   matchId,
   grid,
   warnings,
+  history,
   teamPlayers,
 }: MatchViewSource): MatchView {
+  const columns = columnViews(grid);
   // Keys look like "12:P3" or "12:OT1": the entry id is what comes before the colon.
   const withMarks = new Set(
     Object.keys(grid.marks).map((key) => Number(key.split(":")[0])),
@@ -46,11 +62,17 @@ export function buildMatchView({
   return {
     matchId,
     format: grid.format,
+    columns,
+    canUndo: history.length > 0,
+    canRemoveOvertime: grid.overtimeCount > 0,
+    lastOvertimeHasMarks: lastOvertimeHasMarks(grid),
     rows: grid.callUp.map((entry) => ({
       entryId: entry.id,
       number: entry.number,
       name: entry.name,
       hasMarks: withMarks.has(entry.id),
+      counter: playerCounter(grid, entry.id),
+      cells: cellViews(grid, entry.id, columns),
     })),
     callUpRange: warnings.callUpRange,
     playersToAdd: playersToAdd(teamPlayers, grid.callUp),
