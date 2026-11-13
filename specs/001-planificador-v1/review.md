@@ -600,3 +600,6 @@ Codex's checks: TypeScript, ESLint, traceability, focused-test checks and 1,166 
 ### Verdict (Codex review · D2)
 
 Not approved for closing. Four BLOCKING findings (F1 to F4) are open and must be resolved, through phase 6, before phase 8 can pass again. F5 (IMPORTANT) needs a fix or the developer's recorded acceptance as pending. F6 (MINOR) is a suggestion.
+
+F1: fixed in 802e63c
+F4: fixed in f2001a7
