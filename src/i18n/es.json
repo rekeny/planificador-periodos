@@ -43,7 +43,8 @@
   },
   "common": {
     "save": "Guardar",
-    "edit": "Editar"
+    "edit": "Editar",
+    "cancel": "Cancelar"
   },
   "notFound": {
     "message": "No se ha encontrado: puede que se haya borrado."

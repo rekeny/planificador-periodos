@@ -690,7 +690,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: «Quitar hora» with no time chosen changes nothing; 1 March is shown as «01/03/2026», never «1/3/2026». Also: dismissing a picker without choosing (Android cancel) keeps the previous value; the form has no text input for the date or the time (RF-083: no editable text field is labelled «Fecha» or «Hora»).
   - Pending: one file, `src/ui/date-time-field.tsx`, with the drop-in `DateTimePicker` of `@expo/ui` (see "Deviations"); both pickers are inline (`presentation="inline"`), so on Android the calendar is always drawn in the form instead of a dialog: the device check of how it looks on both platforms is for Fernando, and a dialog behind a button is the alternative if he dislikes it. Jest cannot render the native pickers, so only their props and callbacks are tested with the double.
 
-- [ ] **T045** · UI: confirmation dialog that closes only with its buttons, also against the Android Back button (RF-034)
+- [x] **T045** · UI: confirmation dialog that closes only with its buttons, also against the Android Back button (RF-034)
   - Layer and files: UI · `src/ui/choice-dialog.tsx` (confirmation mode, on React Native `Modal`; not `Alert`), `src/i18n/es.json` (`common.cancel`), tests.
   - Done when: the dialog shows title, message, the confirm button and «Cancelar» (`common.cancel`); tapping outside does nothing; `onRequestClose`, which React Native's `Modal` calls for the Android Back button, does nothing, so Back neither closes the dialog nor leaves the screen (D44, D46); it is used first by the call-up removal of RF-034.
   - Scenarios:
@@ -701,7 +701,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: open, cancel, open again.
     - Interruptions: rotating with the dialog open keeps it. Also: the dialog unmounted while open (the screen closes) runs no callback.
     - Mistakes: tapping outside does not close it and changes nothing; Android Back (`onRequestClose` fired in the test) leaves it open, runs no callback and does not navigate back.
-  - Pending: nothing.
+  - Pending: the real Android Back button and the look of the dialog on a device are for Fernando to check; the two modes of the plan (question mode, T062+) will extend `ChoiceDialog` with a second `mode`.
 
 - [ ] **T046** · UI: match screen first version and call-up screen (RF-023, RF-032, RF-033, RF-034, RF-035, RF-068, E-017)
   - Layer and files: app and UI · `src/app/matches/[matchId]/index.tsx` (first version, no header title: call-up list, range warning and the «Convocatoria» button; `openMatch` when it mounts and `closeMatch` only in that effect's cleanup, as in `plan.md` "Leaving the match"; in tests it is opened with `renderRouter` at `/matches/1`, because the new-match screen reaches it only in T044), `src/app/matches/[matchId]/call-up.tsx` (pushed on top of the match screen, header `callUp.title`), `src/i18n/es.json` (`callUp.title`, `callUp.add`, `callUp.remove`, `callUp.createPlayer`, `callUp.addEmpty`, `confirm.removeFromCallUp.title`, `confirm.removeFromCallUp.message`, `confirm.removeFromCallUp.confirm`), tests in `tests/app/`.
