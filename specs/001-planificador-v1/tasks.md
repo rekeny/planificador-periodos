@@ -586,7 +586,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: only the home score → `scoreIncomplete`; 1 March is «01/03/2026», never «1/3/2026». Also: «007» and «0» → 7 and 0; «» → `null`; «7a», «-1», «1.5», « 7» and «1000» → `scoreInvalid`; a home name « » → `null` and « Ana CB » → «Ana CB»; notes « » → `null`; a `scoreInvalid` score with the other one empty gives `scoreInvalid` (the incomplete check looks only at valid scores); the quoted examples E-023 («11/11/2026») and E-032 («01/03/2026», «18:30») pass through the public functions.
   - Pending: nothing.
 
-- [ ] **T038** · Data: match repository, create with call-up snapshot and read, and the grid records (RF-019, RF-025, RF-026, RF-030, RF-036, RF-037, RF-084)
+- [x] **T038** · Data: match repository, create with call-up snapshot and read, and the grid records (RF-019, RF-025, RF-026, RF-030, RF-036, RF-037, RF-084)
   - Layer and files: data · `src/data/records.ts` (`MatchRecord`, `CallUpEntryRecord`, `MarkRecord`), `src/data/match-repository.ts` (`createMatch`, `getMatch`), `src/data/grid-repository.ts` (created here with `loadGridRecords`, which T041 needs to open a match; T049 adds the writes), tests.
   - Done when: `createMatch` creates a match and its call-up entries (with the name and number of each player, RF-019) in one transaction; `getMatch` reads the match back unchanged; `loadGridRecords(matchId)` returns the match, its call-up entries and its marks (none yet, or rows written directly by the test); changing the team default does not change existing matches.
   - Scenarios:

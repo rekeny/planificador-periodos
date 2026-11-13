@@ -17,3 +17,33 @@ export interface PlayerRecord {
   readonly number: string;
   readonly isActive: boolean;
 }
+
+export interface MatchRecord {
+  readonly id: number;
+  readonly teamId: number;
+  readonly format: number;
+  readonly date: string;
+  readonly time: string | null;
+  readonly homeName: string | null;
+  readonly awayName: string | null;
+  readonly notes: string | null;
+  readonly homeScore: number | null;
+  readonly awayScore: number | null;
+  readonly overtimeCount: number;
+}
+
+/** One stay of a player in a match's call-up, with the name and number as they were (RF-019). */
+export interface CallUpEntryRecord {
+  readonly id: number;
+  readonly matchId: number;
+  readonly playerId: number;
+  readonly playerName: string;
+  readonly playerNumber: string;
+}
+
+export interface MarkRecord {
+  readonly callUpEntryId: number;
+  readonly columnKind: string;
+  readonly columnNumber: number;
+  readonly mark: string;
+}
