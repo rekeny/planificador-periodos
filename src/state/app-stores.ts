@@ -1,4 +1,5 @@
 import { getDatabase } from "@/data/database";
+import { createMatchSessionStore } from "@/state/match-session-store";
 import { createNewMatchDraft } from "@/state/new-match-draft";
 import { createSquadStore } from "@/state/squad-store";
 
@@ -19,4 +20,14 @@ let newMatchDraft: ReturnType<typeof createNewMatchDraft> | undefined;
 export function getNewMatchDraft(): ReturnType<typeof createNewMatchDraft> {
   newMatchDraft ??= createNewMatchDraft(getDatabase(), () => new Date());
   return newMatchDraft;
+}
+
+let matchSessionStore: ReturnType<typeof createMatchSessionStore> | undefined;
+
+/** The one match session store of the app, built on first use like the other stores. */
+export function getMatchSessionStore(): ReturnType<
+  typeof createMatchSessionStore
+> {
+  matchSessionStore ??= createMatchSessionStore(getDatabase());
+  return matchSessionStore;
 }
