@@ -599,7 +599,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: deselected players are not in the call-up. Also: `loadGridRecords` returns the marks written directly by the test, including an overtime mark, and the overtime count.
   - Pending: nothing.
 
-- [ ] **T039** · Data: call-up repository, add, remove with marks, create a player from the match (RF-019, RF-032, RF-033, RF-034, RF-035, E-017)
+- [x] **T039** · Data: call-up repository, add, remove with marks, create a player from the match (RF-019, RF-032, RF-033, RF-034, RF-035, E-017)
   - Layer and files: data · `src/data/call-up-repository.ts`, tests.
   - Done when: `addToCallUp` stores the snapshot and returns the new entry with its `id`; `removeFromCallUp` deletes the entry and its marks; `createPlayerInMatch` creates the player in the team and in the call-up in one transaction and returns both; a write that breaks the unique index throws, like any failed write, and leaves nothing written.
   - Scenarios:
