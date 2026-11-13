@@ -1,0 +1,103 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-073 RF-082 E-029: a form left half-filled is lost when the app closes or when going back, and what was saved stays"
+---
+# A form that is not saved with «Guardar» is lost when the app closes (RF-082), and the app opens on
+# the list of teams (RF-073). The state is cleared only once, here, to start from nothing.
+- launchApp:
+    clearState: true
+
+# Saved before any interruption: team «Alevín A» with player «Luis» (7).
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Alevín A"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Luis"
+- tapOn: "Dorsal"
+- inputText: "7"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Luis"
+# The app is stopped and opened again WITHOUT clearState: what was saved survives.
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertVisible: "Alevín A"
+
+# Going back from a half-filled new-team form: no question and nothing saved.
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Cadete B"
+- assertVisible: "Cadete B"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+      - back
+# On iOS a modal has no back button: the coach swipes the sheet down. Adjust the start point if the
+# sheet of the simulator opens at another height.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 50%, 12%
+          end: 50%, 95%
+- assertNotVisible: "Guardar"
+- assertNotVisible: "Cadete B"
+- assertVisible: "Alevín A"
+
+# E-029: «Cadete B» typed in the new-team form, the app closes and opens again.
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Cadete B"
+- assertVisible: "Cadete B"
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertNotVisible: "Guardar"
+- assertNotVisible: "Cadete B"
+- assertVisible: "Alevín A"
+
+# The same with a half-filled new-player form: the team gets no new player.
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Ana"
+- tapOn: "Dorsal"
+- inputText: "9"
+- assertVisible: "Ana"
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertNotVisible: "Guardar"
+- tapOn: "Alevín A"
+- assertVisible: "Luis"
+- assertNotVisible: "Ana"
+
+# Going back from a half-filled new-player form: no question and nothing saved.
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Ana"
+- tapOn: "Dorsal"
+- inputText: "9"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 50%, 12%
+          end: 50%, 95%
+- assertNotVisible: "Guardar"
+- assertVisible: "Luis"
+- assertNotVisible: "Ana"

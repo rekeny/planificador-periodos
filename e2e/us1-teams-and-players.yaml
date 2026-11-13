@@ -1,0 +1,146 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and their players, with the order, the field limits, the messages and the duplicate-number warning"
+---
+# Journey of US1 on a clean install. Nothing here uses the network. The airplane-mode check of
+# RF-011 is T079: Maestro cannot switch the network off.
+- launchApp:
+    clearState: true
+- assertVisible: "Todavía no hay equipos. Crea el primero."
+
+# First team: «Cadete B», created first on purpose, so the list must sort it after «Alevín A».
+- tapOn: "Nuevo equipo"
+- assertVisible: "6 periodos"
+- assertVisible: "8 periodos"
+# E-022: a 41st character is not accepted and no message appears. Jest cannot prove it, because
+# changeText does not apply maxLength.
+- tapOn: "Nombre"
+- inputText: "abcdefghijabcdefghijabcdefghijabcdefghijk"
+- assertVisible: "abcdefghijabcdefghijabcdefghijabcdefghij"
+- assertNotVisible: "abcdefghijabcdefghijabcdefghijabcdefghijk"
+- assertNotVisible: "Escribe un nombre."
+- eraseText
+- tapOn: "Categoría"
+- inputText: "klmnopqrstklmnopqrstklmnopqrstklmnopqrstu"
+- assertVisible: "klmnopqrstklmnopqrstklmnopqrstklmnopqrst"
+- assertNotVisible: "klmnopqrstklmnopqrstklmnopqrstklmnopqrstu"
+- assertNotVisible: "Escribe un nombre."
+- eraseText
+# A blank name cannot be saved.
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Escribe un nombre."
+- tapOn: "Nombre"
+- inputText: "Cadete B"
+- hideKeyboard
+- tapOn: "8 periodos"
+- tapOn: "Guardar"
+- assertVisible: "Cadete B"
+
+# Second team, with a category and the default format (6 periods).
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Alevín A"
+- tapOn: "Categoría"
+- inputText: "2015"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Alevín A"
+- assertVisible: "2015"
+# RF-073 RF-014: both teams are listed, «Alevín A» first.
+- assertVisible:
+    text: "Cadete B"
+    below: "Alevín A"
+- assertNotVisible:
+    text: "Alevín A"
+    below: "Cadete B"
+
+# Players of «Alevín A». The first form checks the limits, the number message and the blank name.
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcde"
+- assertVisible: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcd"
+- assertNotVisible: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcde"
+- assertNotVisible: "Escribe un nombre."
+- eraseText
+- tapOn: "Dorsal"
+- inputText: "100"
+- assertVisible: "10"
+- assertNotVisible: "100"
+- eraseText
+- inputText: "07"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda."
+- assertVisible: "Escribe un nombre."
+- tapOn: "Nombre"
+- inputText: "Eva"
+- tapOn: "Dorsal"
+- eraseText
+- inputText: "9"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Eva"
+
+# RF-016: three players added one after the other without leaving the team screen, shown 4, 7, 9.
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Bea"
+- tapOn: "Dorsal"
+- inputText: "4"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Bea"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Carla"
+- tapOn: "Dorsal"
+- inputText: "7"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Carla"
+- assertVisible:
+    text: "Carla"
+    below: "Bea"
+- assertVisible:
+    text: "Eva"
+    below: "Carla"
+- assertNotVisible: "Hay jugadores con el mismo dorsal: 7."
+
+# RF-017 RF-069: a second number 7 is saved and the warning appears. Same number: sorted by name.
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Luis"
+- tapOn: "Dorsal"
+- inputText: "7"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Luis"
+- assertVisible: "Hay jugadores con el mismo dorsal: 7."
+- assertVisible:
+    text: "Luis"
+    below: "Carla"
+
+# Odd numbers: "0" is listed before "00", and both before 4.
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Zoe"
+- tapOn: "Dorsal"
+- inputText: "0"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Zoe"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Ana"
+- tapOn: "Dorsal"
+- inputText: "00"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Ana"
+- assertVisible:
+    text: "Ana"
+    below: "Zoe"
+- assertVisible:
+    text: "Bea"
+    below: "Ana"
