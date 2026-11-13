@@ -1,8 +1,8 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useStore } from "zustand";
 
 import { getMatchSessionStore } from "@/state/app-stores";
@@ -18,6 +18,7 @@ import { CallUpRangeBanner } from "@/ui/warnings/call-up-range-banner";
 // closes it, so a route whose session is not open for its match shows the not-found message.
 export default function CallUpScreen(): ReactElement {
   const { t } = useTranslation();
+  const router = useRouter();
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const id = parseMatchId(matchId);
   const store = getMatchSessionStore();
@@ -47,6 +48,13 @@ export default function CallUpScreen(): ReactElement {
           players={view.playersToAdd}
           onAdd={(playerId) => store.getState().addToCallUp(playerId)}
         />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push(`/matches/${id}/new-player`)}
+          style={styles.create}
+        >
+          <Text style={styles.createText}>{t("callUp.createPlayer")}</Text>
+        </Pressable>
       </ScrollView>
       <ChoiceDialog
         mode="confirm"
@@ -62,4 +70,8 @@ export default function CallUpScreen(): ReactElement {
   );
 }
 
-const styles = StyleSheet.create({ screen: { flex: 1 } });
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  create: { margin: 16, padding: 12 },
+  createText: { fontSize: 16, fontWeight: "600" },
+});

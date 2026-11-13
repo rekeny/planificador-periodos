@@ -45,6 +45,9 @@ export default function RootLayout(): ReactElement | null {
         if (route.name === "matches/[matchId]/call-up") {
           return { title: t("callUp.title") };
         }
+        if (route.name === "matches/[matchId]/new-player") {
+          return { title: t("players.new"), presentation: "modal" };
+        }
         return { title: t("teams.title") };
       }}
     />
