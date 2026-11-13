@@ -603,3 +603,5 @@ Not approved for closing. Four BLOCKING findings (F1 to F4) are open and must be
 
 F1: fixed in 802e63c
 F4: fixed in f2001a7
+
+F3: fixed in ae302f3
