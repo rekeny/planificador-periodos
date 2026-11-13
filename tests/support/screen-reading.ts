@@ -3,6 +3,8 @@
 // props of the host element "RNSScreenStackHeaderConfig"; `headerConfigs()` reads those props.
 import { screen } from "expo-router/testing-library";
 
+import es from "@/i18n/es.json";
+
 interface JsonNode {
   readonly type: string;
   readonly props: Record<string, unknown>;
@@ -37,12 +39,15 @@ function plainText(node: JsonNode | string): string {
   return (node.children ?? []).map(plainText).join("");
 }
 
-/** The text of every Text on the screen, in order, exactly as drawn (empty ones included). */
+/**
+ * The text of every Text on the screen, in order, exactly as drawn (empty ones included), except
+ * the label of the «Nuevo equipo» button (T034): it is on every list and not what these tests read.
+ */
 export function screenTexts(): string[] {
   const texts: string[] = [];
   nodesOf().forEach((root) =>
     walk(root, (element) => {
-      if (element.type === "Text") {
+      if (element.type === "Text" && plainText(element) !== es.teams.new) {
         texts.push(plainText(element));
       }
     }),

@@ -4,6 +4,26 @@
   },
   "teams": {
     "title": "Equipos",
-    "empty": "Todavía no hay equipos. Crea el primero."
+    "empty": "Todavía no hay equipos. Crea el primero.",
+    "new": "Nuevo equipo"
+  },
+  "team": {
+    "field": {
+      "name": "Nombre",
+      "category": "Categoría",
+      "defaultFormat": "Variante por defecto"
+    }
+  },
+  "common": {
+    "save": "Guardar"
+  },
+  "format": {
+    "option": "{{count}} periodos"
+  },
+  "validation": {
+    "nameRequired": "Escribe un nombre."
+  },
+  "error": {
+    "saveFailed": "No se ha podido guardar el cambio. Inténtalo de nuevo."
   }
 }
