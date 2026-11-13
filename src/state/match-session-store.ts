@@ -3,10 +3,11 @@ import type { StoreApi } from "zustand/vanilla";
 import type { AppDatabase } from "@/data/database-types";
 import { loadGridRecords } from "@/data/grid-repository";
 import { listPlayers } from "@/data/player-repository";
-import type { MatchGrid } from "@/domain/grid";
+import type { Cell, MatchGrid } from "@/domain/grid";
 import type { UndoEntry } from "@/domain/undo";
 import { evaluateWarnings, type Warnings } from "@/domain/warnings";
 import { createCallUpActions } from "@/state/match-session-call-up";
+import { createMarksActions } from "@/state/match-session-marks";
 import { gridFromRecords } from "@/state/match-session-grid";
 import { buildMatchView, type MatchView } from "@/state/match-view";
 import type { SaveResult } from "@/state/save-result";
@@ -23,6 +24,9 @@ export interface MatchSessionState {
   addToCallUp(playerId: number): SaveResult; //       RF-032
   removeFromCallUp(entryId: number): SaveResult; //   RF-033, RF-034
   createPlayerInMatch(input: { name: string; number: string }): SaveResult; // RF-035
+  tapCell(cell: Cell): SaveResult; //                 RF-044, RF-048, RF-049, RF-051
+  addOvertime(): SaveResult; //                       RF-058
+  removeLastOvertime(): SaveResult; //                RF-059
 }
 
 export type MatchSessionStore = StoreApi<MatchSessionState>;
@@ -64,6 +68,7 @@ export function createMatchSessionStore(db: AppDatabase): MatchSessionStore {
     status: "closed",
     ...EMPTY,
     ...createCallUpActions({ db, get, set, teamId: () => teamId }),
+    ...createMarksActions({ db, get, set, teamId: () => teamId }),
     openMatch(id) {
       try {
         const loaded = load(db, id);

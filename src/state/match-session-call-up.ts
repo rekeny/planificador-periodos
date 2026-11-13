@@ -65,19 +65,19 @@ function entryOf(record: CallUpEntryRecord) {
 }
 
 /** A write that throws changes nothing in the view; only the flag tells the user (RF-085). */
-function failed(host: CallUpHost): SaveResult {
+export function failed(host: CallUpHost): SaveResult {
   host.set({ saveFailed: true });
   return { kind: "saveFailed" };
 }
 
-interface OpenMatch {
+export interface OpenMatch {
   readonly grid: MatchGrid;
   readonly matchId: number;
   readonly teamId: number;
 }
 
 // The open match, or null when the session is closed (the grid is null then).
-function openMatchOf(host: CallUpHost): OpenMatch | null {
+export function openMatchOf(host: CallUpHost): OpenMatch | null {
   const { grid, view } = host.get();
   const teamId = host.teamId();
   return grid === null || view === null || teamId === undefined

@@ -786,7 +786,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: every cell has exactly one state. Also: `canUndo` is false with an empty history and true with one entry; the counter changes when a cell changes.
   - Pending: nothing.
 
-- [ ] **T051** · State: tap and overtimes, saved at once (RF-044, RF-048, RF-049, RF-051, RF-056, RF-058, RF-059, RF-060, RF-082, RF-085, E-025)
+- [x] **T051** · State: tap and overtimes, saved at once (RF-044, RF-048, RF-049, RF-051, RF-056, RF-058, RF-059, RF-060, RF-082, RF-085, E-025)
   - Layer and files: state · `src/state/match-session-marks.ts` (slice of the session store: `tapCell(cell)`, `addOvertime()`, `removeLastOvertime()`), tests split as `match-session-store.tap.test.ts` and `match-session-store.overtimes.test.ts`, with the in-memory database and a throwing double.
   - Done when: `tapCell` asks the domain's `tapCell`, computes the changes with `cellChanges`, saves them with `saveCellChanges`, and only then publishes the grid, the warnings (`evaluateWarnings`) and the view, and pushes `undoEntryFor(before, after)` to the history; the questions (`askSubOrStarter`, `chooseReplacedStarter`, `confirmRemoveStarter`) and `unchanged` leave the grid, the history and the database as they were in D2; `addOvertime` and `removeLastOvertime` go through the domain functions of the same names and the repository, push no undo entry, and `removeLastOvertime` runs `pruneHistory`; a failed save publishes nothing, pushes nothing and sets `saveFailed`, which the next successful change clears.
   - Scenarios:
@@ -807,6 +807,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Boundaries: undo with an empty history does nothing; undo never leaves a column with 6 X (RF-055). Also: undo with exactly one entry empties the history.
     - Outside the rules: not applicable.
     - Odd data: the D2 counterpart of E-026 with the real database: mark Eva in P2, remove Eva with `removeFromCallUp` (as the call-up screen does), undo → that entry is discarded and the same press reverts the mark made before it (RF-086). E-026 itself needs the starter replacement, which the store gets in D3, so it moved to T062 (review of 2026-11-12).
+    - Property: the T051 property (random taps, `addOvertime`, `removeLastOvertime`) does not include `undo`, which does not exist until this task: this task's property must add `undo` to the random sequences (no period above 5 X; the grid read back from the database equals the published one).
     - Sequences: E-031; mark, add overtime, undo → overtime still there, mark gone; mark, add and remove a player through the call-up actions, undo → the mark is gone (the session was never closed).
     - Interruptions: E-019: marks in P1–P3 and an overtime, new store on the same database → same marks and overtime, nothing to undo; mark, `closeMatch`, `openMatch` of the same match → nothing to undo (RF-057). Also: `undo` with a failing save → the history and the grid stay and `saveFailed` is true; the next successful change clears it; E-019 as above.
     - Mistakes: undo pressed more times than actions. Also: after a failed tap (E-025) `undo` reverts the previous action, not nothing and not the failed one.
