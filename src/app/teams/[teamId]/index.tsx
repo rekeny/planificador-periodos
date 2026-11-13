@@ -1,5 +1,10 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import {
+  Stack,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
+import { useCallback, useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
@@ -10,17 +15,29 @@ import { parseTeamId } from "@/state/route-params";
 import { NotFound } from "@/ui/not-found";
 import { DuplicateNumberBanner } from "@/ui/warnings/duplicate-number-banner";
 
+type Store = ReturnType<typeof getSquadStore>;
+
+// Opened before the first render reads the store, so another team's players never show, and
+// again on every focus: the screen stays mounted under the match, so players created there
+// (and their duplicate-number warning) show on Back (RF-035, RF-069).
+function useOpenTeam(id: number | null, store: Store): void {
+  useState(() => {
+    if (id !== null) store.getState().openTeam(id);
+  });
+  useFocusEffect(
+    useCallback(() => {
+      if (id !== null) store.getState().openTeam(id);
+    }, [id, store]),
+  );
+}
+
 export default function TeamScreen(): ReactElement {
   const { t } = useTranslation();
   const router = useRouter();
   const { teamId } = useLocalSearchParams<{ teamId: string }>();
   const id = parseTeamId(teamId);
   const store = getSquadStore();
-  // Opened once, before the first render reads the store, so another team's players are never
-  // shown. It is a read that is safe to repeat; an effect would need setState.
-  useState(() => {
-    if (id !== null) store.getState().openTeam(id);
-  });
+  useOpenTeam(id, store);
   const team = useStore(store, (state) => state.team);
   const players = useStore(store, (state) => state.players);
   const duplicates = useStore(store, (state) => state.duplicateNumbers);
