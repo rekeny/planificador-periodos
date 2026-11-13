@@ -27,8 +27,11 @@
       "home": "Local",
       "away": "Visitante",
       "score": "Resultado final",
-      "notes": "Notas"
+      "notes": "Notas",
+      "date": "Fecha",
+      "time": "Hora"
     },
+    "clearTime": "Quitar hora",
     "quickHome": "Mi equipo es local",
     "quickAway": "Mi equipo es visitante"
   },

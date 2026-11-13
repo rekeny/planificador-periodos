@@ -1,19 +1,15 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput } from "react-native";
 import { useStore } from "zustand";
 
 import type { Format } from "@/domain/format";
 import type { NewMatchDraft } from "@/state/new-match-draft";
+import { DateTimeField } from "./date-time-field";
 import { FormatPicker } from "./format-picker";
-import { NAME_MAX_LENGTH, NOTES_MAX_LENGTH } from "./input-limits";
+import { NOTES_MAX_LENGTH } from "./input-limits";
 import { ScoreFields } from "./score-fields";
+import { TeamNameFields } from "./team-name-fields";
 
 interface MatchFormProps {
   readonly draft: NewMatchDraft;
@@ -33,36 +29,20 @@ export function MatchForm({
     <ScrollView contentContainerStyle={styles.screen}>
       <Text style={styles.label}>{t("match.field.format")}</Text>
       <FormatPicker value={format} onChange={onFormatChange} />
-      <Text style={styles.label}>{t("match.field.home")}</Text>
-      <TextInput
-        accessibilityLabel={t("match.field.home")}
-        value={state.homeName}
-        onChangeText={state.setHomeName}
-        maxLength={NAME_MAX_LENGTH}
-        style={styles.input}
+      <DateTimeField
+        date={state.date}
+        time={state.time}
+        onDateChange={state.setDate}
+        onTimeChange={state.setTime}
+        onClearTime={state.clearTime}
       />
-      <Text style={styles.label}>{t("match.field.away")}</Text>
-      <TextInput
-        accessibilityLabel={t("match.field.away")}
-        value={state.awayName}
-        onChangeText={state.setAwayName}
-        maxLength={NAME_MAX_LENGTH}
-        style={styles.input}
+      <TeamNameFields
+        home={state.homeName}
+        away={state.awayName}
+        onHomeChange={state.setHomeName}
+        onAwayChange={state.setAwayName}
+        onMyTeamAs={state.setMyTeamAs}
       />
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => state.setMyTeamAs("home")}
-        style={styles.quick}
-      >
-        <Text>{t("match.quickHome")}</Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => state.setMyTeamAs("away")}
-        style={styles.quick}
-      >
-        <Text>{t("match.quickAway")}</Text>
-      </Pressable>
       <Text style={styles.label}>{t("match.field.score")}</Text>
       <ScoreFields
         home={state.homeScore}
@@ -92,12 +72,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-  },
-  quick: {
-    alignItems: "center",
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#888888",
-    borderRadius: 8,
   },
 });

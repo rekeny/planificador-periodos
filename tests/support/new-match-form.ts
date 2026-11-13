@@ -92,3 +92,15 @@ export function checkedFormats(): number[] {
       }) !== null,
   );
 }
+
+/** «Quitar hora» of the date and time slot (T082). */
+export async function pressClearTime(): Promise<void> {
+  await fireEvent.press(screen.getByRole("button", { name: "Quitar hora" }));
+}
+
+/** Every text on screen that looks like a time, «HH:MM» (T082): empty when no time is chosen. */
+export function shownTimes(): string[] {
+  return screen
+    .queryAllByText(/^\d{2}:\d{2}$/)
+    .map((node) => String(node.props.children));
+}
