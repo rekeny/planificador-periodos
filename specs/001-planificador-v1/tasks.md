@@ -612,7 +612,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: removing from one match leaves her in other matches.
   - Pending: nothing.
 
-- [ ] **T040** · State: new-match draft, its fields and the call-up selection (RF-026, RF-027, RF-030, RF-031, RF-036, RF-068, RF-083, RF-084, E-015, E-024, E-030)
+- [x] **T040** · State: new-match draft, its fields and the call-up selection (RF-026, RF-027, RF-030, RF-031, RF-036, RF-068, RF-083, RF-084, E-015, E-024, E-030)
   - Layer and files: state · `src/state/new-match-draft.ts` (factory with the database and a clock), `src/state/app-stores.ts` (adds the draft), tests in `new-match-draft.fields.test.ts`. `create()` is T086 (split on 2026-11-12, review D2-A-06).
   - Done when: a reset (when the screen opens) fills the draft with `newMatchDefaults`: the team default format, today's date from the clock passed to the factory (so tests fix 2026-11-11) and no time, and `callUpSelection` lists the team's active players only, sorted (`initialCallUp`), all selected, with `callUpRange` (RF-068); `setFormat(format)` changes it without confirmation and without touching the team (RF-084, E-024); `setDate` and `setTime` take the picker's parts and store them with `isoDate` and `isoTime`; `clearTime()` leaves no time (RF-083); `setMyTeamAs("home" | "away")` writes the team name only (RF-027; not named `use…`, because `react-hooks/rules-of-hooks` would take it for a hook, review D2-A-03); the home, away, score and notes fields are set as typed; `toggle(playerId)` selects or deselects and updates `callUpRange`.
   - Scenarios:
