@@ -73,7 +73,7 @@ export interface Literal {
 }
 
 const LITERAL_KEYS =
-  "tapOn|assertVisible|assertNotVisible|inputText|text|below|above";
+  "tapOn|assertVisible|assertNotVisible|inputText|text|below|above|rightOf|leftOf";
 const LITERAL_LINE = new RegExp(`^\\s*(?:- )?(${LITERAL_KEYS}):\\s*(\\S.*)$`);
 
 /** Every text the flow taps, asserts, types or uses as a position anchor, in order. */
