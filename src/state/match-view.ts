@@ -5,6 +5,7 @@ import type { Format } from "@/domain/format";
 import type { CallUpEntryId, MatchGrid } from "@/domain/grid";
 import { lastOvertimeHasMarks } from "@/domain/overtime";
 import type { MatchId, Player } from "@/domain/squad";
+import type { LegendItem } from "@/domain/legend";
 import type { UndoEntry } from "@/domain/undo";
 import type { Warnings } from "@/domain/warnings";
 import {
@@ -13,6 +14,7 @@ import {
   type CellView,
   type ColumnView,
 } from "@/state/match-view-grid";
+import { isInRed, warningView } from "@/state/match-view-warnings";
 
 export interface MatchViewSource {
   readonly matchId: MatchId;
@@ -29,6 +31,7 @@ export interface RowView {
   readonly hasMarks: boolean; // decides the removal confirmation (RF-033, RF-034)
   readonly counter: PlayerCounter; // RF-070, RF-071
   readonly cells: readonly CellView[]; // in column order (RF-042)
+  readonly isInRed: boolean; // RF-062, RF-063
 }
 
 export interface MatchView {
@@ -39,6 +42,8 @@ export interface MatchView {
   readonly canUndo: boolean; // RF-055
   readonly canRemoveOvertime: boolean; // only with an overtime (RF-059)
   readonly lastOvertimeHasMarks: boolean; // decides the removal confirmation (RF-059)
+  readonly ruleImpossible: boolean; // the general warning (RF-067)
+  readonly legend: readonly LegendItem[]; // RF-087
   readonly callUpRange: CallUpRangeWarning | null; // RF-068
   readonly playersToAdd: readonly Player[]; // active, not in the call-up, sorted (RF-032)
 }
@@ -54,7 +59,7 @@ export function buildMatchView({
   history,
   teamPlayers,
 }: MatchViewSource): MatchView {
-  const columns = columnViews(grid);
+  const columns = columnViews(grid, warnings);
   // Keys look like "12:P3" or "12:OT1": the entry id is what comes before the colon.
   const withMarks = new Set(
     Object.keys(grid.marks).map((key) => Number(key.split(":")[0])),
@@ -72,8 +77,10 @@ export function buildMatchView({
       name: entry.name,
       hasMarks: withMarks.has(entry.id),
       counter: playerCounter(grid, entry.id),
-      cells: cellViews(grid, entry.id, columns),
+      cells: cellViews(grid, entry.id, columns, warnings),
+      isInRed: isInRed(warnings, entry.id),
     })),
+    ...warningView(warnings),
     callUpRange: warnings.callUpRange,
     playersToAdd: playersToAdd(teamPlayers, grid.callUp),
   };

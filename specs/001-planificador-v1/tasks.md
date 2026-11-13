@@ -908,7 +908,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US4 · See the rule warnings
 
-- [ ] **T058** · State: warnings and legend in the match view (RF-006, RF-060, RF-061, RF-062, RF-063, RF-064, RF-065, RF-066, RF-067, RF-072, RF-087, E-001, E-027)
+- [x] **T058** · State: warnings and legend in the match view (RF-006, RF-060, RF-061, RF-062, RF-063, RF-064, RF-065, RF-066, RF-067, RF-072, RF-087, E-001, E-027)
   - Layer and files: state · `src/state/match-view-warnings.ts` (created here, review D2-A-11: `CellView.isLightRed`, `RowView.isInRed`, `ColumnView.headerMark`), `src/state/match-view.ts` (calls it; `MatchView.ruleImpossible`, `MatchView.legend`), tests in `match-view.warnings.test.ts`.
   - Done when: the view takes every colour and mark from `Warnings` (`lightRedCells`, `playersInRed`, `periodWarnings`, `ruleImpossible`) and the legend from `legendItems`; a grid with no warning has nothing set. These flags are the machine proof of the colours: Maestro checks only text (T060). The examples are grids passed straight to `buildMatchView`, because grids with a circled X in the rule window (E-002, E-027) cannot be built through D2's store actions; one `it.each` table per file, with one literal title carrying its RF and E IDs.
   - Scenarios:
@@ -919,7 +919,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: after each tap the view matches the new warnings (RF-060). Also: after the last light red cell disappears, the legend loses its line (E-001 → fill P4 and P5 → none).
     - Interruptions: reopening rebuilds the same view.
     - Mistakes: a header both incomplete and inconsistent gives only «≠». Also: E-002 gives «≠» on P3 and «!» on the others; an empty free period or overtime has no mark.
-  - Pending: nothing.
+  - Pending: the colours and the legend are drawn in T059; nothing else.
 
 - [ ] **T059** · UI: warnings on the grid, colours and legend (RF-006, RF-060, RF-061, RF-062, RF-063, RF-064, RF-065, RF-066, RF-067, RF-072, RF-087, E-001, E-002, E-003, E-004, E-007, E-027)
   - Layer and files: UI · `src/ui/theme/warning-colors.ts`, `src/ui/grid/*` (colours and header marks), `src/ui/warnings/rule-impossible-banner.tsx`, `src/ui/warnings/warning-legend.tsx`, `src/i18n/es.json` (`warning.*`, `grid.header.incompleteMark`, `grid.header.inconsistentMark`), tests.
