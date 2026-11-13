@@ -22,12 +22,13 @@ export interface Flow {
   readonly commands: readonly FlowCommand[];
 }
 
-export function flowFiles(): string[] {
+/** The flow files of e2e/, only those whose name starts with `prefix` (all of them by default). */
+export function flowFiles(prefix = ""): string[] {
   if (!existsSync(E2E_DIR)) {
     return [];
   }
   return readdirSync(E2E_DIR)
-    .filter((file) => /\.ya?ml$/.test(file))
+    .filter((file) => /\.ya?ml$/.test(file) && file.startsWith(prefix))
     .sort();
 }
 
@@ -149,6 +150,26 @@ export function taskText(
 
 export function idsIn(text: string): string[] {
   return [...new Set(text.match(/\b(?:RF|E)-\d{3}\b/g) ?? [])];
+}
+
+/** Texts of the operating system's own pickers, which the flow taps and which are not app texts (T048). */
+export const NATIVE_PICKER_TEXTS: readonly string[] = [
+  "1",
+  "18",
+  "30",
+  "(?i)previous.*|anterior.*",
+  "(?i)[0-9]+[^/0-9][0-9][0-9].*",
+];
+
+/** What the pickers show once a date and a time are chosen: formatted by the app, not in es.json. */
+export const PICKED_AND_SHOWN: readonly string[] = ["01/03/2026", "18:30"];
+
+/** The date of today, which the flow computes itself with `evalScript` and then asserts. */
+export const TODAY_VARIABLE = "${output.today}";
+
+/** A name may be matched as `.*Name.*` where the platform merges a row's texts into one. */
+export function withoutWildcards(text: string): string {
+  return text.replace(/^\.\*|\.\*$/g, "");
 }
 
 export const FLOW_ROOT = ROOT;

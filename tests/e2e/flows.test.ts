@@ -31,14 +31,14 @@ const FLOWS = ["us1-form-interruption.yaml", "us1-teams-and-players.yaml"];
 
 describe("T036 Maestro flows", () => {
   it("RF-073 RF-082 E-029: e2e/ holds exactly the two US1 flows", () => {
-    expect(flowFiles()).toEqual(FLOWS);
+    expect(flowFiles("us1-")).toEqual(FLOWS);
   });
 
   it("RF-073 RF-082 E-029: every flow name starts with IDs that are in the spec and in T036", () => {
     const valid = specIds(spec);
     const allowed = idsIn(task.all);
-    expect(flowFiles().length).toBeGreaterThan(0);
-    for (const file of flowFiles()) {
+    expect(flowFiles("us1-").length).toBeGreaterThan(0);
+    for (const file of flowFiles("us1-")) {
       const name = headerValue(readFlow(file), "name") ?? "";
       const lead = /^((?:(?:RF|E)-\d{3} )+)[^ ].*$/.exec(name);
       expect({ file, named: lead !== null }).toEqual({ file, named: true });
@@ -49,7 +49,7 @@ describe("T036 Maestro flows", () => {
   });
 
   it("RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 RF-082 E-029: together the flow names cover every ID of the T036 title", () => {
-    const named = flowFiles().flatMap((file) =>
+    const named = flowFiles("us1-").flatMap((file) =>
       idsIn(headerValue(readFlow(file), "name") ?? ""),
     );
     expect(idsIn(task.title).filter((id) => !named.includes(id))).toEqual([]);
@@ -58,8 +58,8 @@ describe("T036 Maestro flows", () => {
 
   it("RF-011 RF-073: every flow targets the app id of app.json on iOS and Android", () => {
     expect(app.expo.ios.bundleIdentifier).toBe(app.expo.android.package);
-    expect(flowFiles().length).toBeGreaterThan(0);
-    for (const file of flowFiles()) {
+    expect(flowFiles("us1-").length).toBeGreaterThan(0);
+    for (const file of flowFiles("us1-")) {
       expect(headerValue(readFlow(file), "appId")).toBe(
         app.expo.ios.bundleIdentifier,
       );
@@ -67,8 +67,8 @@ describe("T036 Maestro flows", () => {
   });
 
   it("RF-013 RF-016 E-022: every text a flow taps or asserts is in es.json or is typed by the flow itself", () => {
-    expect(flowFiles().length).toBeGreaterThan(0);
-    for (const file of flowFiles()) {
+    expect(flowFiles("us1-").length).toBeGreaterThan(0);
+    for (const file of flowFiles("us1-")) {
       const flow = readFlow(file);
       expect(inlineStructures(flow)).toEqual([]);
       const literals = literalsOf(flow);
@@ -143,8 +143,8 @@ describe("T036 Maestro flows", () => {
   });
 
   it("RF-082: no flow contains a literal it( or test( call", () => {
-    expect(flowFiles().length).toBeGreaterThan(0);
-    for (const file of flowFiles()) {
+    expect(flowFiles("us1-").length).toBeGreaterThan(0);
+    for (const file of flowFiles("us1-")) {
       expect(readFlow(file).text).not.toMatch(/\b(?:it|test)\(/);
     }
   });

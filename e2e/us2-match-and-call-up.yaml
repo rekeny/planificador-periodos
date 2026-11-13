@@ -1,0 +1,364 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-084 E-015 E-022 E-023 E-024 E-030 E-032: a match is created with the native pickers, the call-up is chosen, edited and warned about, and the grid opens"
+---
+# Journey of US2 on a clean install (T048). Written WITHOUT running it: Maestro is not installed
+# here (developer decision of 2026-11-13). The first real run will need the adjustments marked
+# "unverified" below, like the swipe of the US1 flows. Nothing here uses the network.
+# The removal of a player WITH marks (E-017) is T056: the grid cannot be marked until T055.
+- launchApp:
+    clearState: true
+# Today's date as the app shows it (E-023), written by the flow because it changes every day.
+- evalScript: ${output.today = ('0' + new Date().getDate()).slice(-2) + '/' + ('0' + (new Date().getMonth() + 1)).slice(-2) + '/' + new Date().getFullYear()}
+
+# Two teams, both with the default format (6 periods): «Alevín A» gets 12 players, «Infantil» none.
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Alevín A"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Infantil"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Ana"
+- tapOn: "Dorsal"
+- inputText: "1"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Bea"
+- tapOn: "Dorsal"
+- inputText: "2"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Carla"
+- tapOn: "Dorsal"
+- inputText: "3"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Dani"
+- tapOn: "Dorsal"
+- inputText: "4"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Eva"
+- tapOn: "Dorsal"
+- inputText: "5"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Fran"
+- tapOn: "Dorsal"
+- inputText: "6"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Gala"
+- tapOn: "Dorsal"
+- inputText: "7"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Hugo"
+- tapOn: "Dorsal"
+- inputText: "8"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Iker"
+- tapOn: "Dorsal"
+- inputText: "9"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Jon"
+- tapOn: "Dorsal"
+- inputText: "10"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Kira"
+- tapOn: "Dorsal"
+- inputText: "11"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Luis"
+- tapOn: "Dorsal"
+- inputText: "12"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Luis"
+
+# RF-082: the form half-filled and the app closed. No match is created: D2 has no match list, so
+# the deep link of the first match, which would be number 1, must show the not-found message.
+- tapOn: "Nuevo partido"
+- tapOn: "Local"
+- inputText: "Rivales"
+- assertVisible: "Rivales"
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertNotVisible: "Guardar"
+- openLink: planificadorperiodos://matches/1
+- assertVisible: "No se ha encontrado: puede que se haya borrado."
+- stopApp
+- launchApp
+- tapOn: "Alevín A"
+- tapOn: "Nuevo partido"
+# The form opened again has the defaults: nothing typed, everyone selected, today's date (E-023).
+- assertNotVisible: "Rivales"
+- assertVisible: ${output.today}
+- assertVisible: "12 convocados"
+- assertNotVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 12."
+
+# MATCH 1: format 8 (E-024), the pickers (RF-083, E-032), the field limits (E-022), the messages.
+- tapOn: "8 periodos"
+- assertNotVisible: "Cancelar"
+- assertNotVisible: "Convocatoria fuera del rango: con 8 periodos deben ser de 8 a 12 jugadores, y hay 12."
+# Unverified on a device: the native pickers differ by platform, version and language. Date: go
+# back month by month until March 2026 is shown, then choose day 1. Time: 18 and 30.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - repeat:
+          times: 14
+          while:
+            notVisible: "(?i).*mar.* 2026.*"
+          commands:
+            - tapOn: "(?i)previous.*|anterior.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - repeat:
+          times: 14
+          while:
+            notVisible: "(?i).*mar.* 2026.*"
+          commands:
+            - swipe:
+                direction: RIGHT
+- tapOn: "1"
+- assertVisible: "01/03/2026"
+- scrollUntilVisible:
+    element:
+      text: "Hora"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "(?i)[0-9]+[^/0-9][0-9][0-9].*"
+- tapOn: "18"
+- tapOn: "30"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Hora"
+- assertVisible: "18:30"
+# E-032: «Quitar hora» leaves no time and keeps the date. The match is saved without a time.
+- tapOn: "Quitar hora"
+- assertNotVisible: "18:30"
+- assertVisible: "01/03/2026"
+# The quick option writes the team name, which is then edited. E-022: a 41st character is not
+# accepted and shows no message.
+- scrollUntilVisible:
+    element:
+      text: "Mi equipo es local"
+- tapOn: "Mi equipo es local"
+- assertVisible: "Alevín A"
+- tapOn: "Alevín A"
+- eraseText
+- inputText: "mnopqrstuvmnopqrstuvmnopqrstuvmnopqrstuvw"
+- assertVisible: "mnopqrstuvmnopqrstuvmnopqrstuvmnopqrstuv"
+- assertNotVisible: "mnopqrstuvmnopqrstuvmnopqrstuvmnopqrstuvw"
+- eraseText
+- inputText: "Alevín A B"
+- tapOn: "Visitante"
+- inputText: "Rivales B"
+- hideKeyboard
+# One score only: the message; the second score makes it go away. A fourth digit is not accepted.
+- scrollUntilVisible:
+    element:
+      text: "Notas"
+- tapOn:
+    text: "Resultado final"
+    index: 1
+- inputText: "1234"
+- assertVisible: "123"
+- assertNotVisible: "1234"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Escribe los dos resultados o ninguno."
+- tapOn:
+    text: "Resultado final"
+    index: 2
+- inputText: "45"
+- hideKeyboard
+- assertNotVisible: "Escribe los dos resultados o ninguno."
+- tapOn: "Notas"
+- inputText: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdez"
+- assertVisible: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcde"
+- assertNotVisible: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdez"
+- hideKeyboard
+# Everyone selected, 12 players: no warning. Guardar opens the grid.
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- assertVisible: "12 convocados"
+- assertNotVisible: "Convocatoria fuera del rango: con 8 periodos deben ser de 8 a 12 jugadores, y hay 12."
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- assertVisible: "Ana"
+- assertVisible: "Luis"
+- assertNotVisible: "Guardar"
+# Back from the grid goes to the team and never shows the filled form again (review P-30).
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: "Nuevo partido"
+- assertNotVisible: "Guardar"
+
+# MATCH 2: the team's default is still 6 (E-024, RF-036, RF-037). Deselecting to 8 players warns
+# and «Guardar» still works (E-015, RF-010, RF-068).
+- tapOn: "Nuevo partido"
+- assertVisible: "12 convocados"
+- scrollUntilVisible:
+    element:
+      text: ".*Ana.*"
+- tapOn: ".*Ana.*"
+- tapOn: ".*Bea.*"
+- tapOn: ".*Carla.*"
+- tapOn: ".*Dani.*"
+- assertVisible: "8 convocados"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 8."
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 8."
+- assertVisible: "Eva"
+- assertNotVisible: "Ana"
+
+# The call-up screen. A player created from the match joins the team and the call-up (RF-035):
+# 9 players, so the warning goes away (RF-068).
+- tapOn: "Convocatoria"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 8."
+- scrollUntilVisible:
+    element:
+      text: "Crear jugador nuevo"
+- tapOn: "Crear jugador nuevo"
+- tapOn: "Nombre"
+- inputText: "Nora"
+- tapOn: "Dorsal"
+- inputText: "15"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible:
+    text: "Nora"
+    above: "Añadir a la convocatoria"
+- assertNotVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 8."
+# RF-033: a player with no marks is removed without a question and offered again below; adding
+# him puts him back in the call-up. The first «Quitar de la convocatoria» is Eva's row.
+- tapOn: "Quitar de la convocatoria"
+- assertNotVisible: "¿Quitar a Eva de la convocatoria?"
+- assertVisible:
+    text: ".*Eva.*"
+    below: "Añadir a la convocatoria"
+- tapOn:
+    text: ".*Eva.*"
+    below: "Añadir a la convocatoria"
+- assertVisible:
+    text: "Eva"
+    above: "Añadir a la convocatoria"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 70%, 50%
+- assertVisible: "Eva"
+- assertVisible: "Nora"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+
+# MATCH 3: the team now has 13 players, all selected: the warning shows and the match is created
+# (E-030, RF-010, RF-068).
+- tapOn: "Nuevo partido"
+- assertVisible: "13 convocados"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 13."
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 13."
+- assertVisible: "Nora"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+      - tapOn: "Equipos"
+
+# MATCH 4: a team with no active players. The match is created with an empty call-up.
+- tapOn: "Infantil"
+- tapOn: "Nuevo partido"
+- assertVisible: "0 convocados"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 0."
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 0."
+- tapOn: "Convocatoria"
+- assertVisible: "No quedan jugadores activos por añadir. Puedes crear uno nuevo."
+- assertVisible: "Crear jugador nuevo"
