@@ -19,7 +19,7 @@ import { pressSave } from "./new-team-form";
 export const NUMBER_INVALID =
   "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda.";
 export const DUPLICATE_BANNER = /Hay jugadores con el mismo dorsal/;
-const CHROME = ["Editar", "Nuevo jugador", "Jugadores"];
+const CHROME = ["Editar", "Nuevo jugador", "Nuevo partido", "Jugadores"];
 
 type Players = readonly (readonly [string, string])[];
 

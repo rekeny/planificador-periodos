@@ -46,6 +46,13 @@ export default function TeamScreen(): ReactElement {
         >
           <Text style={styles.actionText}>{t("players.new")}</Text>
         </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push(`/teams/${id}/matches/new`)}
+          style={styles.action}
+        >
+          <Text style={styles.actionText}>{t("matches.new")}</Text>
+        </Pressable>
       </View>
       <DuplicateNumberBanner numbers={duplicates} />
       <FlatList

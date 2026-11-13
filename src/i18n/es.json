@@ -18,6 +18,20 @@
   "players": {
     "new": "Nuevo jugador"
   },
+  "matches": {
+    "new": "Nuevo partido"
+  },
+  "match": {
+    "field": {
+      "format": "Variante",
+      "home": "Local",
+      "away": "Visitante",
+      "score": "Resultado final",
+      "notes": "Notas"
+    },
+    "quickHome": "Mi equipo es local",
+    "quickAway": "Mi equipo es visitante"
+  },
   "player": {
     "field": {
       "name": "Nombre",
@@ -36,6 +50,7 @@
   },
   "validation": {
     "nameRequired": "Escribe un nombre.",
+    "scoreIncomplete": "Escribe los dos resultados o ninguno.",
     "numberInvalid": "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda."
   },
   "warning": {
