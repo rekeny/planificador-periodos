@@ -29,6 +29,9 @@ The reference is the OWASP MASVS standard for mobile apps. Since the app works o
 - [ ] Android: the prebuilt manifest has `android:dataExtractionRules` and `android:fullBackupContent`, and both XML files exclude the nine domains (cloud backup, device transfer and full backup).
 - [ ] iOS: the prebuilt `AppDelegate.swift` has the tagged block `with-backup-exclusion-ios` once, inside the launch function and before `let delegate = ReactNativeDelegate()`. It builds the folder from `.documentDirectory` + `"SQLite"` (the `defaultDatabaseDirectory` of the installed `expo-sqlite`), creates it if missing, sets `isExcludedFromBackup` and deletes nothing. Any new place that stores data on the device (another folder, `directory` argument of `openDatabaseSync`, a file, `AsyncStorage`) is also excluded or justified.
 - [ ] iOS: a failed attribute write must not stay silent without a trace: the block reports it with a fixed message that holds no path and no data (see `review.md`, SEC-T026-1). Before each release, check with `xattr` on a device that `com.apple.metadata:com_apple_backup_excludeItem` is on the SQLite folder.
+- [ ] State layer: no `devtools`, `persist` or `zustand/middleware` (they would push or store children's names outside the database).
+- [ ] `better-sqlite3` is imported only from `tests/` (never from `src/`), and `drizzle-orm` only through its `better-sqlite3` subpaths there.
+- [ ] No route writes on open: every write is called from a button, a form submit or a cell tap, and routes carry only numeric ids parsed with `parseTeamId`, `parsePlayerId` or `parseMatchId`.
 - [ ] Workflows with minimal permissions and pinned versions.
 - [ ] `npm audit` (fails only at high severity or above), OSV-Scanner, gitleaks and Semgrep green.
 
@@ -36,7 +39,8 @@ The reference is the OWASP MASVS standard for mobile apps. Since the app works o
 
 - [ ] Block the Internet permission in the Android production build and check that the app works without it.
 - [ ] MobSF on the APK and the IPA, with no open high findings.
-- [ ] Review the generated `AndroidManifest.xml` and `Info.plist`: only the essential permissions.
+- [ ] Review the generated `AndroidManifest.xml` and `Info.plist`: only the essential permissions. Block `SYSTEM_ALERT_WINDOW`, `VIBRATE`, `READ_EXTERNAL_STORAGE` and `WRITE_EXTERNAL_STORAGE` with `android.blockedPermissions`, and check that the dev-client residue (`exp+` scheme, local-network and Bonjour keys in `Info.plist`) is gone from the production build.
+- [ ] Set `ios.config.usesNonExemptEncryption: false` (`ITSAppUsesNonExemptEncryption`) before the first iOS upload.
 - [ ] Declare in the App Store and Google Play that the app collects no data.
 - [ ] Review the GDPR privacy obligations, because there is children's data on the device.
 - [ ] Full dependency audit, including development ones.
