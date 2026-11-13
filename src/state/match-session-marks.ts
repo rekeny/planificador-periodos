@@ -4,50 +4,24 @@ import {
   saveCellChanges,
 } from "@/data/grid-repository";
 import { listPlayers } from "@/data/player-repository";
-import { cellExists, type Cell, type MatchGrid } from "@/domain/grid";
+import type { PlayerRecord } from "@/data/records";
+import { cellExists, type Cell } from "@/domain/grid";
 import { tapCell } from "@/domain/marking";
 import { addOvertime, removeLastOvertime } from "@/domain/overtime";
-import {
-  cellChanges,
-  pruneHistory,
-  undoEntryFor,
-  type UndoEntry,
-} from "@/domain/undo";
-import { evaluateWarnings } from "@/domain/warnings";
+import { cellChanges, pruneHistory, undoEntryFor } from "@/domain/undo";
 import {
   failed,
   openMatchOf,
+  publish,
   type CallUpHost,
-  type OpenMatch,
 } from "@/state/match-session-call-up";
 import type { MatchSessionState } from "@/state/match-session-store";
-import { buildMatchView } from "@/state/match-view";
 import type { SaveResult } from "@/state/save-result";
 
 type Actions = Pick<
   MatchSessionState,
   "tapCell" | "addOvertime" | "removeLastOvertime"
 >;
-
-/** Warnings and view are recomputed from the saved grid (RF-060); the caller decides the history. */
-export function publish(
-  host: CallUpHost,
-  current: OpenMatch,
-  grid: MatchGrid,
-  history: readonly UndoEntry[],
-): SaveResult {
-  const warnings = evaluateWarnings(grid);
-  const teamPlayers = listPlayers(host.db, current.teamId);
-  const view = buildMatchView({
-    matchId: current.matchId,
-    grid,
-    warnings,
-    history,
-    teamPlayers,
-  });
-  host.set({ grid, warnings, view, history, saveFailed: false });
-  return { kind: "saved" };
-}
 
 // In D2 the questions and "unchanged" change nothing (the questions arrive in D3).
 function tap(host: CallUpHost, cell: Cell): SaveResult {
@@ -59,7 +33,10 @@ function tap(host: CallUpHost, cell: Cell): SaveResult {
   if (result.kind !== "changed") {
     return { kind: "unchanged" };
   }
+  let teamPlayers: PlayerRecord[];
   try {
+    // Read first, write last: nothing fallible is left after the commit (RF-085).
+    teamPlayers = listPlayers(host.db, current.teamId);
     saveCellChanges(
       host.db,
       current.matchId,
@@ -69,7 +46,12 @@ function tap(host: CallUpHost, cell: Cell): SaveResult {
     return failed(host);
   }
   const entry = undoEntryFor(current.grid, result.grid);
-  return publish(host, current, result.grid, [...host.get().history, entry]);
+  return publish(host, {
+    matchId: current.matchId,
+    grid: result.grid,
+    history: [...host.get().history, entry],
+    teamPlayers,
+  });
 }
 
 function add(host: CallUpHost): SaveResult {
@@ -77,12 +59,19 @@ function add(host: CallUpHost): SaveResult {
   if (current === null) {
     return { kind: "unchanged" };
   }
+  let teamPlayers: PlayerRecord[];
   try {
+    teamPlayers = listPlayers(host.db, current.teamId);
     saveOvertime(host.db, current.matchId);
   } catch {
     return failed(host);
   }
-  return publish(host, current, addOvertime(current.grid), host.get().history);
+  return publish(host, {
+    matchId: current.matchId,
+    grid: addOvertime(current.grid),
+    history: host.get().history,
+    teamPlayers,
+  });
 }
 
 function removeLast(host: CallUpHost): SaveResult {
@@ -90,14 +79,22 @@ function removeLast(host: CallUpHost): SaveResult {
   if (current === null || current.grid.overtimeCount === 0) {
     return { kind: "unchanged" };
   }
+  let teamPlayers: PlayerRecord[];
   try {
+    teamPlayers = listPlayers(host.db, current.teamId);
     deleteLastOvertime(host.db, current.matchId);
   } catch {
     return failed(host);
   }
   const grid = removeLastOvertime(current.grid);
   // RF-086: entries that refer to the removed overtime are discarded.
-  return publish(host, current, grid, pruneHistory(host.get().history, grid));
+  const history = pruneHistory(host.get().history, grid);
+  return publish(host, {
+    matchId: current.matchId,
+    grid,
+    history,
+    teamPlayers,
+  });
 }
 
 export function createMarksActions(host: CallUpHost): Actions {

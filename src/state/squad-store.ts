@@ -106,26 +106,28 @@ function saveTeam(
   if (checked.kind === "invalid") {
     return checked;
   }
+  let saved: TeamRecord | undefined;
+  let before: readonly Team[];
   try {
-    const saved = write({
-      ...checked.value,
-      defaultFormat: input.defaultFormat,
-    });
-    if (saved) {
-      // The open team shows the new data at once (the team screen's header).
-      const open = get().team;
-      set({
-        teams: sortedTeams(db),
-        ...(open !== null && open.id === saved.id
-          ? { team: toTeam(saved) }
-          : {}),
-      });
-      return SAVED;
-    }
-    return SAVE_FAILED;
+    // The list is read first: once the write is committed no read is left that could fail (RF-085).
+    before = sortedTeams(db);
+    saved = write({ ...checked.value, defaultFormat: input.defaultFormat });
   } catch {
     return SAVE_FAILED;
   }
+  if (saved === undefined) {
+    return SAVE_FAILED;
+  }
+  // The saved team replaces its old copy (or joins the list) in memory, in the same sorted order.
+  const team = toTeam(saved);
+  const teams = [...before.filter((other) => other.id !== team.id), team];
+  // The open team shows the new data at once (the team screen's header).
+  const open = get().team;
+  set({
+    teams: teams.sort(compareTeams),
+    ...(open !== null && open.id === team.id ? { team } : {}),
+  });
+  return SAVED;
 }
 
 function addPlayer(db: AppDatabase, set: Set, get: Get, input: PlayerInput) {
