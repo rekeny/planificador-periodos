@@ -517,7 +517,7 @@ export function validateMatchInput(input: {
 }): Validation<{
   readonly homeName: string | null; //   trimmed; empty or spaces-only → null
   readonly awayName: string | null;
-  readonly notes: string | null; //      spaces-only → null, otherwise as typed
+  readonly notes: string | null; //      trimmed; empty or spaces-only → null
   readonly homeScore: number | null; //  "007" → 7; "" → null
   readonly awayScore: number | null;
 }>;
