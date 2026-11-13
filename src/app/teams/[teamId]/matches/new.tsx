@@ -16,12 +16,11 @@ export default function NewMatchScreen(): ReactElement {
   const draft = getNewMatchDraft();
   // Reset once, before the first render reads the draft, so a form left half-filled earlier
   // never shows (RF-082). It is a safe, repeatable read; an effect would need setState.
-  useState(() => {
-    if (id !== null) draft.getState().reset(id);
-  });
+  // A team that cannot be loaded leaves the draft empty and the route shows not found.
+  const [ready] = useState(() => id !== null && draft.getState().reset(id));
   const format = useStore(draft, (state) => state.format);
 
-  if (id === null) return <NotFound />;
+  if (id === null || !ready) return <NotFound />;
 
   return (
     <MatchForm

@@ -33,7 +33,8 @@ export interface NewMatchDraftState {
   readonly notes: string;
   readonly callUpSelection: readonly CallUpRow[];
   readonly callUpRange: CallUpRangeWarning | null;
-  reset(teamId: number): void;
+  /** True when the team loaded and the draft is ready; false leaves it empty and unsaveable. */
+  reset(teamId: number): boolean;
   setFormat(format: Format): void;
   setDate(parts: { year: number; month: number; day: number }): void;
   setTime(parts: { hour: number; minute: number }): void;
@@ -78,6 +79,35 @@ function today(now: () => Date): string {
   });
 }
 
+interface LoadedDraft {
+  readonly team: { readonly id: number; readonly name: string };
+  readonly state: Partial<NewMatchDraftState>;
+}
+
+// Reads the team and its squad; null when the team is missing or its format is not valid.
+function loadDraft(
+  db: AppDatabase,
+  teamId: number,
+  now: () => Date,
+): LoadedDraft | null {
+  const team = getTeam(db, teamId);
+  if (team === undefined || !isFormat(team.defaultFormat)) return null;
+  const rows = initialCallUp(listPlayers(db, teamId)).map((player) => ({
+    player,
+    selected: true,
+  }));
+  const defaults = newMatchDefaults(team.defaultFormat, today(now));
+  return {
+    team,
+    state: {
+      ...defaults,
+      ...EMPTY_FIELDS,
+      callUpSelection: rows,
+      callUpRange: rangeOf(defaults.format, rows),
+    },
+  };
+}
+
 function toggle(set: Set, get: Get, playerId: number): void {
   const { callUpSelection, format } = get();
   if (!callUpSelection.some((row) => row.player.id === playerId)) return;
@@ -96,23 +126,28 @@ export function createNewMatchDraft(
   let openedTeamId: number | null = null; // null: never reset, nothing to save (RF-025)
   let created: CreateResult | null = null; // the saved result: a second tap saves nothing (P-30)
 
-  function reset(set: Set, teamId: number): void {
-    const team = getTeam(db, teamId);
-    if (team === undefined || !isFormat(team.defaultFormat)) return;
-    teamName = team.name;
-    openedTeamId = team.id;
+  function invalidate(set: Set): void {
+    teamName = "";
+    openedTeamId = null;
     created = null;
-    const rows = initialCallUp(listPlayers(db, teamId)).map((player) => ({
-      player,
-      selected: true,
-    }));
-    const defaults = newMatchDefaults(team.defaultFormat, today(now));
-    set({
-      ...defaults,
-      ...EMPTY_FIELDS,
-      callUpSelection: rows,
-      callUpRange: rangeOf(defaults.format, rows),
-    });
+    set({ ...EMPTY_FIELDS, callUpSelection: [], callUpRange: null });
+  }
+
+  // Invalidates first so that nothing of an earlier team survives a reset that cannot finish
+  // (unknown team, bad format, failed read): the route then shows not found (RF-082).
+  function reset(set: Set, teamId: number): boolean {
+    invalidate(set);
+    try {
+      const loaded = loadDraft(db, teamId, now);
+      if (loaded === null) return false;
+      teamName = loaded.team.name;
+      openedTeamId = loaded.team.id;
+      set(loaded.state);
+      return true;
+    } catch {
+      invalidate(set);
+      return false;
+    }
   }
 
   function create(get: Get): CreateResult {
