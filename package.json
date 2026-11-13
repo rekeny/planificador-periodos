@@ -63,7 +63,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:mutation": "stryker run",
-    "verify": "scripts/verify.sh"
+    "verify": "scripts/verify.sh",
+    "db:generate": "drizzle-kit generate && node scripts/bundle-migrations.mjs"
   },
   "private": true,
   "engines": {

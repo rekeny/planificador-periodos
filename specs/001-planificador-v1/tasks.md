@@ -419,7 +419,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: an `AppDelegate.swift` without the anchor makes the plugin throw with a clear message; the Library/Caches folder is never used. the iOS merge leaves the Android part untouched (the T025 tests still pass) and an iOS-only `prebuild` writes no Android file.
   - Pending: the simulator `xattr` device check (`npx expo prebuild --platform ios --clean`, dev build, `xattr` on the SQLite folder) is for Fernando. SEC-T026-3 is carried to T029: it must call `openDatabaseSync` without a `directory` argument, because the default folder is the excluded one.
 
-- [ ] **T027** · Schema, first migration and the migration bundle script (RF-011, RF-082)
+- [x] **T027** · Schema, first migration and the migration bundle script (RF-011, RF-082)
   - Layer and files: data and tooling · `drizzle.config.ts` (moved here from T024: `dialect: "sqlite"`, no driver, `schema: "./src/data/schema.ts"`, `out: "./src/data/migrations"`), `src/data/schema.ts`, `src/data/migrations/` (generated SQL and `meta/`), `scripts/bundle-migrations.mjs`, `src/data/migrations/bundle.ts` (generated), `package.json` (`db:generate`), `tests/scripts/bundle-migrations.test.ts`.
   - Done when: the five tables of `plan.md` (`teams`, `players`, `matches`, `call_up_entries`, `marks`) exist with every column, check, unique index, index and cascade of the plan's table in the generated SQL; `bundle.ts` exports the journal and every migration as a string, in the shape that the installed `drizzle-orm/expo-sqlite/migrator` `migrate()` expects (checked against its types; Drizzle's current Expo guide is written for the 1.0 release candidate, with `babel-plugin-inline-import`, so it is not the reference for 0.45); `db:generate` runs `drizzle-kit generate` and then the script; the test fails when `bundle.ts` differs from the SQL files; `drizzle-kit check` green.
   - Scenarios:
@@ -429,7 +429,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Odd data: a journal with one entry. a missing `meta/_journal.json`, or a journal entry without its `.sql` file, makes the script exit non-zero with a message and leaves the previous `bundle.ts` untouched.
     - Sequences: generating twice with no schema change changes no file.
     - Interruptions: the script reads every file before it writes `bundle.ts`, so an error halfway (an unreadable `.sql`) never leaves a half-written bundle.
-    - Mistakes: editing a `.sql` file without re-bundling turns the test red. `bundle.ts` assigned to the parameter type of the installed `migrate()` compiles with `tsc`, so a change in the shape between drizzle-orm versions turns it red; `drizzle-kit check` fails when a snapshot is missing.
+    - Mistakes: editing a `.sql` file without re-bundling turns the test red. `bundle.ts` assigned to the parameter type of the installed `migrate()` compiles with `tsc`, so a change in the shape between drizzle-orm versions turns it red; every journal entry has its snapshot file in `meta/` (checked by the tests; `drizzle-kit` 0.31 does not fail on a missing snapshot).
   - Size (review D2-A-06, checked): not split. The schema has no test of its own until T028, so the bundle script and its test are what make this task testable; the five tables are declarative and the script is small.
   - Pending: nothing.
 
