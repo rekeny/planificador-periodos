@@ -625,7 +625,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: quick home then edit the text → edited text kept; the category is never copied. Also: `setMyTeamAs("home")` then `setMyTeamAs("away")` writes the team name in each field as asked and edits to one field never change the other.
   - Pending: nothing.
 
-- [ ] **T086** · State: create the match from the draft, once (RF-025, RF-030, RF-031, RF-036, RF-084, RF-085, E-015, E-024, E-030)
+- [x] **T086** · State: create the match from the draft, once (RF-025, RF-030, RF-031, RF-036, RF-084, RF-085, E-015, E-024, E-030)
   - Layer and files: state · `src/state/new-match-draft.ts` (`create()`), tests in `new-match-draft.create.test.ts`. Taken out of T040 on 2026-11-12 (review D2-A-06).
   - Done when: `create()` validates with `validateMatchInput` and returns `invalid` with its errors (`scoreIncomplete` or `scoreInvalid`) and nothing saved; otherwise it saves the normalised value (trimmed names, `null` for empty texts, scores as numbers; T037) with `createMatch` (T038); `create()` on a draft that was never reset for a team returns `unchanged` and writes nothing; with the selected players' snapshots from `callUpEntryFor`, and returns `saved` with the match id, or `saveFailed` with nothing saved; after a successful `create`, calling it again returns the same match id and writes nothing, until the draft is reset (review P-30).
   - Scenarios:
@@ -636,7 +636,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: E-024 → a match with 8 periods, team default still 6; deselect in one match, next new match has everyone selected again (RF-031). Also: a `saveFailed` create followed by a second `create` tries again and saves one match (a failed create is not remembered as done).
     - Interruptions: a failing write → `saveFailed`, no match and no entries in the database (RF-085).
     - Mistakes: only the home score → `invalid` with `scoreIncomplete`, no match saved; `create` called twice in a row → one match in the database and the same id both times; after a reset, `create` makes a new match.
-  - Pending: nothing.
+  - Pending: nothing. `create()` lives in `new-match-draft.ts`; the validation and the save are in `new-match-save.ts` (split to keep the factory under 60 lines). `SaveResult` is unchanged: `CreateResult = SaveResult & { matchId? }` is defined in `new-match-save.ts`.
 
 - [ ] **T041** · State: match session, opening and closing, and the first row view (RF-042, RF-068, E-020)
   - Layer and files: state · `src/state/match-session-store.ts` (created here, factory `createMatchSessionStore(db)`: the state of `plan.md` with `status`, `grid`, `warnings`, `view`, `history` and `saveFailed`, and the actions `openMatch` and `closeMatch`; the other actions go to their own slice files, `plan.md` "State"), `src/state/match-view.ts` (first version of `buildMatchView(source)`: `matchId`, `format`, rows sorted, with `entryId`, number, name and `hasMarks`; `callUpRange`), `src/state/app-stores.ts`, tests split as `match-session-store.open.test.ts` and `match-view.rows.test.ts`.

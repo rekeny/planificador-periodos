@@ -11,6 +11,8 @@ import type { Format } from "@/domain/format";
 import { isoDate, isoTime } from "@/domain/match-date";
 import { newMatchDefaults } from "@/domain/match-input";
 import type { Player } from "@/domain/squad";
+import { saveDraft } from "@/state/new-match-save";
+import type { CreateResult } from "@/state/new-match-save";
 
 export interface CallUpRow {
   readonly player: Player;
@@ -43,6 +45,7 @@ export interface NewMatchDraftState {
   setAwayScore(text: string): void;
   setNotes(text: string): void;
   toggle(playerId: number): void;
+  create(): CreateResult;
 }
 
 export type NewMatchDraft = StoreApi<NewMatchDraftState>;
@@ -75,17 +78,30 @@ function today(now: () => Date): string {
   });
 }
 
+function toggle(set: Set, get: Get, playerId: number): void {
+  const { callUpSelection, format } = get();
+  if (!callUpSelection.some((row) => row.player.id === playerId)) return;
+  const rows = callUpSelection.map((row) =>
+    row.player.id === playerId ? { ...row, selected: !row.selected } : row,
+  );
+  set({ callUpSelection: rows, callUpRange: rangeOf(format, rows) });
+}
+
 export function createNewMatchDraft(
   db: AppDatabase,
   now: () => Date,
 ): NewMatchDraft {
   // The team name and id are not part of the screen's state: only setMyTeamAs needs them.
   let teamName = "";
+  let openedTeamId: number | null = null; // null: never reset, nothing to save (RF-025)
+  let created: CreateResult | null = null; // the saved result: a second tap saves nothing (P-30)
 
   function reset(set: Set, teamId: number): void {
     const team = getTeam(db, teamId);
     if (team === undefined || !isFormat(team.defaultFormat)) return;
     teamName = team.name;
+    openedTeamId = team.id;
+    created = null;
     const rows = initialCallUp(listPlayers(db, teamId)).map((player) => ({
       player,
       selected: true,
@@ -99,13 +115,12 @@ export function createNewMatchDraft(
     });
   }
 
-  function toggle(set: Set, get: Get, playerId: number): void {
-    const { callUpSelection, format } = get();
-    if (!callUpSelection.some((row) => row.player.id === playerId)) return;
-    const rows = callUpSelection.map((row) =>
-      row.player.id === playerId ? { ...row, selected: !row.selected } : row,
-    );
-    set({ callUpSelection: rows, callUpRange: rangeOf(format, rows) });
+  function create(get: Get): CreateResult {
+    if (openedTeamId === null) return { kind: "unchanged" };
+    if (created !== null) return created;
+    const result = saveDraft(db, openedTeamId, get());
+    if (result.kind === "saved") created = result; // only a saved match is remembered
+    return result;
   }
 
   return createStore<NewMatchDraftState>()((set, get) => ({
@@ -127,5 +142,6 @@ export function createNewMatchDraft(
     setAwayScore: (awayScore) => set({ awayScore }),
     setNotes: (notes) => set({ notes }),
     toggle: (playerId) => toggle(set, get, playerId),
+    create: () => create(get),
   }));
 }

@@ -8,10 +8,12 @@
 //   Actions: reset(teamId), setFormat(format), setDate({ year, month, day }),
 //     setTime({ hour, minute }), clearTime(), setMyTeamAs("home" | "away"), setHomeName(text),
 //     setAwayName(text), setHomeScore(text), setAwayScore(text), setNotes(text),
-//     toggle(playerId).
+//     toggle(playerId), and create() (T086): returns a SaveResult; on success it is
+//     { kind: "saved", matchId: number }; the other kinds carry no matchId.
 import { sql } from "drizzle-orm";
 import type { AppDatabase } from "@/data/database-types";
 import { createPlayer } from "@/data/player-repository";
+import { callUpEntries, matches } from "@/data/schema";
 import type { TeamValues } from "@/data/team-repository";
 import { createTeam } from "@/data/team-repository";
 import type { Format } from "@/domain/format";
@@ -97,4 +99,54 @@ export function selectedNumbers(store: NewMatchDraft): string[] {
 
 export function selectedCount(store: NewMatchDraft): number {
   return selectedNumbers(store).length;
+}
+
+/** Every match saved in the database, in creation order (T086). */
+export function savedMatches(db: AppDatabase) {
+  return db.select().from(matches).all();
+}
+
+/** The call-up entries of a match as "number name" text, sorted by number as a text (T086). */
+export function savedEntryLabels(db: AppDatabase, matchId: number): string[] {
+  return db
+    .select()
+    .from(callUpEntries)
+    .all()
+    .filter((entry) => entry.matchId === matchId)
+    .map((entry) => `${entry.playerNumber} ${entry.playerName}`)
+    .sort();
+}
+
+export function savedEntryCount(db: AppDatabase): number {
+  return db.select().from(callUpEntries).all().length;
+}
+
+type MatchTable = "matches" | "call_up_entries";
+
+/**
+ * Every insert on the table fails, as a full device would make it (RF-085). With `onNumber`, only
+ * the entry of the player with that number fails, so a match is half written before the failure.
+ */
+export function failInserts(
+  db: AppDatabase,
+  table: MatchTable,
+  onNumber?: string,
+): void {
+  const when =
+    onNumber === undefined ? "" : `WHEN NEW.player_number = '${onNumber}' `;
+  db.run(
+    sql.raw(
+      `CREATE TRIGGER fail_insert_${table} BEFORE INSERT ON ${table} ${when}` +
+        `BEGIN SELECT RAISE(ABORT, 'disk full'); END`,
+    ),
+  );
+}
+
+export function allowInserts(db: AppDatabase, table: MatchTable): void {
+  db.run(sql.raw(`DROP TRIGGER fail_insert_${table}`));
+}
+
+/** The table cannot be found from now on, so any write to it throws. */
+export function breakMatchTable(db: AppDatabase, table: MatchTable): void {
+  db.run(sql.raw(`ALTER TABLE ${table} RENAME TO broken_${table}`));
 }
