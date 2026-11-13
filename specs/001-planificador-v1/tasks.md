@@ -760,7 +760,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 ## US3 · Plan the periods
 
-- [ ] **T049** · Data: grid repository, save cell changes and overtimes (RF-056, RF-058, RF-059, RF-082, RF-085)
+- [x] **T049** · Data: grid repository, save cell changes and overtimes (RF-056, RF-058, RF-059, RF-082, RF-085)
   - Layer and files: data · `src/data/grid-repository.ts` (adds the writes to the file of T038), tests split as `grid-repository.marks.test.ts` and `grid-repository.overtimes.test.ts`.
   - Done when: `saveCellChanges(matchId, changes)` upserts or deletes marks (an `"empty"` state deletes the row) in one transaction, mapping each `Cell` to `column_kind` and `column_number`; `addOvertime` and `removeLastOvertime` update `overtime_count`, and `removeLastOvertime` deletes the marks of that overtime in the same transaction; what is saved reads back the same with `loadGridRecords`.
   - Scenarios:
