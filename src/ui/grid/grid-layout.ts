@@ -67,3 +67,41 @@ export function gridLayout(input: GridLayoutInput): GridLayout {
     buttonsInHeader: buttonsInHeader(input.windowWidth, input.windowHeight),
   };
 }
+
+export type ViewportLayoutInput = {
+  viewportWidth: number;
+  viewportHeight: number;
+  periods: number;
+  overtimes: number;
+  players: number;
+  playerColumnWidth: number;
+  headerRowHeight: number;
+};
+
+export type ViewportLayout = Omit<GridLayout, "buttonsInHeader">;
+
+/**
+ * Same size rules as gridLayout, over the space the grid container really measured instead of the
+ * window minus guessed chrome: rows are never clipped with scrolling disabled.
+ */
+export function viewportLayout(input: ViewportLayoutInput): ViewportLayout {
+  const columns = input.periods + input.overtimes;
+  const fittingWidth =
+    columns > 0
+      ? Math.floor((input.viewportWidth - input.playerColumnWidth) / columns)
+      : MIN_CELL_WIDTH;
+  const rowsSpace = input.viewportHeight - input.headerRowHeight;
+  const rowHeight =
+    input.players > 0
+      ? Math.max(
+          MIN_ROW_HEIGHT,
+          Math.min(MAX_ROW_HEIGHT, rowsSpace / input.players),
+        )
+      : MAX_ROW_HEIGHT;
+  return {
+    cellWidth: Math.max(MIN_CELL_WIDTH, fittingWidth),
+    rowHeight,
+    horizontalScroll: fittingWidth < MIN_CELL_WIDTH,
+    verticalScroll: input.players * rowHeight > rowsSpace,
+  };
+}

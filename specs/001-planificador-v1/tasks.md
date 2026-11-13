@@ -825,6 +825,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Interruptions: not applicable.
     - Mistakes: the cell width and the row height are never below 44. Also: on a phone the grid buttons are in the toolbar under the grid, in both orientations (667 × 375 included), and on the tablet sizes in the header.
   - Pending: for Fernando's review: the scenario "3 overtimes on a tablet → horizontal scroll" cannot happen with the plan's player column of about 100 pt (8 periods + 3 overtimes = 11 columns × 44 + 100 = 584 ≤ 768, and 13 columns would still fit), so the tests use a wider `playerColumnWidth` (180) for that case; the scroll rule itself is unchanged. The device check of the real player column width belongs to T057.
+  - Pending (Codex F2 fix, 2026-11-13): the grid sizes come from the measured viewport; the fallback to window sizing only applies before the first measurement. The real device look (clipping, scroll) is for Fernando to check.
 
 - [x] **T054** · UI: column headers and grid cells with their three states and accessible labels (RF-042, RF-043)
   - Layer and files: UI · `src/ui/grid/column-header.tsx`, `src/ui/grid/grid-cell.tsx`, `src/i18n/es.json` (`grid.header.period`, `grid.header.overtime`, `grid.cell.empty`, `grid.cell.starter`, `grid.cell.sub`), tests next to each component. The grid that assembles them is T083 (split on 2026-11-12, review D2-A-06).
@@ -851,6 +852,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Interruptions: rendering the same view twice (unmount, mount) gives the same tree; nothing is kept in the component between mounts.
     - Mistakes: the player column never sits inside the horizontal `ScrollView`. Also: the header row scrolls with the cells (it is inside the horizontal `ScrollView`); the grid imports only types from the domain and draws only `MatchView` (it computes no rule).
   - Pending: the look on a real device is for Fernando to check: the 100 pt player column, the header row (44 pt) lining up with the spacer, and the rows on a phone and a tablet. Colours and rule highlights come in T058 and T059.
+  - Pending (Codex F2 fix, 2026-11-13): the grid sizes come from the measured viewport; the fallback to window sizing only applies before the first measurement. The real device look (clipping, scroll) is for Fernando to check.
 
 - [x] **T055** · UI: match screen with tap, overtimes, toolbar and save error (RF-044, RF-049, RF-056, RF-058, RF-059, RF-085, E-025)
   - Layer and files: app and UI · `src/app/matches/[matchId]/index.tsx` (composes the grid of T083, the toolbar and the banners, so the screen file stays under 250 lines and no function passes 60), `src/ui/grid/grid-toolbar.tsx` (the three buttons), `src/i18n/es.json` (`grid.undo`, `grid.addOvertime`, `grid.removeOvertime`, `confirm.removeOvertime.title`, `confirm.removeOvertime.message`, `confirm.removeOvertime.confirm`), tests in `tests/app/` split by subject (marks, overtimes). The Undo history across the match's routes is T084 (split on 2026-11-12, review D2-A-06).
@@ -864,6 +866,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Interruptions: E-025 with a failing repository double → the cell stays empty and `error.saveFailed` is shown. Also: after the failed tap «Deshacer» is still disabled (no entry was pushed), and the message goes away after the next successful tap.
     - Mistakes: cancel removing an overtime with marks → stays with its marks; tapping outside that dialog, or pressing Android Back (`onRequestClose`) while it is open, does nothing and leaves the overtime with its marks (RF-059). Also: «Deshacer» is disabled with an empty history, and pressing it more times than there are marks changes nothing.
   - Pending: nothing in code. `grid.addOvertime` («Añadir prórroga») is in `es.json` and in the spec's «Spanish texts» table. `buttonsInHeader(width, height)` was extracted from `gridLayout` so the screen reads the same rule. Device check of the header/toolbar and the dialog is for Fernando (T057).
+  - Pending (Codex F2 fix, 2026-11-13): the grid sizes come from the measured viewport; the fallback to window sizing only applies before the first measurement. The real device look (clipping, scroll) is for Fernando to check.
 
 - [x] **T084** · UI: the Undo history across the match's own routes, and leaving the match (RF-057, RF-082, E-019)
   - Layer and files: app · `src/app/matches/[matchId]/index.tsx` (the mount effect: `openMatch` on mount, `closeMatch` only in its cleanup), tests in `tests/app/` with `renderRouter` from `expo-router/testing-library` (awaited `testRouter` calls) and the database mock of T029. Taken out of T055 on 2026-11-12 (review D2-A-06).

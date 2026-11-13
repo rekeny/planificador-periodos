@@ -10,7 +10,7 @@ import type { Cell } from "@/domain/grid";
 import type { MatchView } from "@/state/match-view";
 import { ColumnHeader } from "./column-header";
 import { GridCell } from "./grid-cell";
-import { gridLayout, type GridLayout } from "./grid-layout";
+import { gridLayout, viewportLayout, type ViewportLayout } from "./grid-layout";
 import { PlayerColumn } from "./player-column";
 
 export interface MatchGridProps {
@@ -25,12 +25,30 @@ export interface MatchGridProps {
 const PLAYER_COLUMN_WIDTH = 100;
 const HEADER_HEIGHT = 44;
 
-function useLayout(props: MatchGridProps, headerRowHeight: number): GridLayout {
+type Size = { readonly width: number; readonly height: number };
+
+function useLayout(
+  props: MatchGridProps,
+  headerRowHeight: number,
+  viewport: Size | null,
+): ViewportLayout {
   const { width, height } = useWindowDimensions();
   const { view } = props;
   const overtimes = view.columns.filter(
     (column) => column.column.kind === "overtime",
   ).length;
+  if (viewport !== null) {
+    // Measured: what the container really has wins over every guess (Codex F2).
+    return viewportLayout({
+      viewportWidth: viewport.width,
+      viewportHeight: viewport.height,
+      periods: view.columns.length - overtimes,
+      overtimes,
+      players: view.rows.length,
+      playerColumnWidth: PLAYER_COLUMN_WIDTH,
+      headerRowHeight,
+    });
+  }
   return gridLayout({
     windowWidth: width,
     windowHeight: height,
@@ -51,7 +69,7 @@ function Rows({
   onTapCell,
 }: {
   readonly view: MatchView;
-  readonly layout: GridLayout;
+  readonly layout: ViewportLayout;
   readonly onTapCell: (cell: Cell) => void;
 }): ReactElement {
   return (
@@ -78,48 +96,59 @@ function Rows({
 export function MatchGrid(props: MatchGridProps): ReactElement {
   const { view, onTapCell } = props;
   const [headerRowHeight, setHeaderRowHeight] = useState(0);
-  const layout = useLayout(props, headerRowHeight);
+  const [viewport, setViewport] = useState<Size | null>(null);
+  const layout = useLayout(props, headerRowHeight, viewport);
   return (
-    <ScrollView
-      testID="grid-vertical-scroll"
-      scrollEnabled={layout.verticalScroll}
+    <View
+      testID="grid-viewport"
+      style={styles.viewport}
+      onLayout={(event) => {
+        const { width, height } = event.nativeEvent.layout;
+        setViewport({ width, height });
+      }}
     >
-      <View style={styles.line}>
-        <View style={{ width: PLAYER_COLUMN_WIDTH }}>
-          {/* Same height as the header row, so the rows of both sides line up. */}
-          <View style={{ height: headerRowHeight }} />
-          <PlayerColumn rows={view.rows} rowHeight={layout.rowHeight} />
-        </View>
-        <ScrollView
-          testID="grid-horizontal-scroll"
-          horizontal
-          scrollEnabled={layout.horizontalScroll}
-        >
-          <View>
-            <View
-              testID="grid-header-row"
-              style={styles.line}
-              onLayout={(event) =>
-                setHeaderRowHeight(event.nativeEvent.layout.height)
-              }
-            >
-              {view.columns.map((column) => (
-                <ColumnHeader
-                  key={column.key}
-                  column={column}
-                  cellWidth={layout.cellWidth}
-                  height={HEADER_HEIGHT}
-                />
-              ))}
-            </View>
-            <Rows view={view} layout={layout} onTapCell={onTapCell} />
+      <ScrollView
+        testID="grid-vertical-scroll"
+        scrollEnabled={layout.verticalScroll}
+      >
+        <View style={styles.line}>
+          <View style={{ width: PLAYER_COLUMN_WIDTH }}>
+            {/* Same height as the header row, so the rows of both sides line up. */}
+            <View style={{ height: headerRowHeight }} />
+            <PlayerColumn rows={view.rows} rowHeight={layout.rowHeight} />
           </View>
-        </ScrollView>
-      </View>
-    </ScrollView>
+          <ScrollView
+            testID="grid-horizontal-scroll"
+            horizontal
+            scrollEnabled={layout.horizontalScroll}
+          >
+            <View>
+              <View
+                testID="grid-header-row"
+                style={styles.line}
+                onLayout={(event) =>
+                  setHeaderRowHeight(event.nativeEvent.layout.height)
+                }
+              >
+                {view.columns.map((column) => (
+                  <ColumnHeader
+                    key={column.key}
+                    column={column}
+                    cellWidth={layout.cellWidth}
+                    height={HEADER_HEIGHT}
+                  />
+                ))}
+              </View>
+              <Rows view={view} layout={layout} onTapCell={onTapCell} />
+            </View>
+          </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  viewport: { flex: 1 },
   line: { flexDirection: "row" },
 });
