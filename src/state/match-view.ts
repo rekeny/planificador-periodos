@@ -1,3 +1,4 @@
+import { playersToAdd } from "@/domain/call-up";
 import type { CallUpRangeWarning } from "@/domain/call-up-range";
 import type { Format } from "@/domain/format";
 import type { CallUpEntryId, MatchGrid } from "@/domain/grid";
@@ -25,6 +26,7 @@ export interface MatchView {
   readonly format: Format;
   readonly rows: readonly RowView[];
   readonly callUpRange: CallUpRangeWarning | null; // RF-068
+  readonly playersToAdd: readonly Player[]; // active, not in the call-up, sorted (RF-032)
 }
 
 /**
@@ -35,6 +37,7 @@ export function buildMatchView({
   matchId,
   grid,
   warnings,
+  teamPlayers,
 }: MatchViewSource): MatchView {
   // Keys look like "12:P3" or "12:OT1": the entry id is what comes before the colon.
   const withMarks = new Set(
@@ -50,5 +53,6 @@ export function buildMatchView({
       hasMarks: withMarks.has(entry.id),
     })),
     callUpRange: warnings.callUpRange,
+    playersToAdd: playersToAdd(teamPlayers, grid.callUp),
   };
 }

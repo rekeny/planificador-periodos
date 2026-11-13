@@ -6,8 +6,10 @@ import { listPlayers } from "@/data/player-repository";
 import type { MatchGrid } from "@/domain/grid";
 import type { UndoEntry } from "@/domain/undo";
 import { evaluateWarnings, type Warnings } from "@/domain/warnings";
+import { createCallUpActions } from "@/state/match-session-call-up";
 import { gridFromRecords } from "@/state/match-session-grid";
 import { buildMatchView, type MatchView } from "@/state/match-view";
+import type { SaveResult } from "@/state/save-result";
 
 export interface MatchSessionState {
   readonly status: "closed" | "open" | "notFound";
@@ -18,6 +20,9 @@ export interface MatchSessionState {
   readonly saveFailed: boolean; //       RF-085
   openMatch(id: number): void;
   closeMatch(): void;
+  addToCallUp(playerId: number): SaveResult; //       RF-032
+  removeFromCallUp(entryId: number): SaveResult; //   RF-033, RF-034
+  createPlayerInMatch(input: { name: string; number: string }): SaveResult; // RF-035
 }
 
 export type MatchSessionStore = StoreApi<MatchSessionState>;
@@ -30,7 +35,9 @@ const EMPTY = {
   saveFailed: false,
 } as const;
 
-type Published = Pick<MatchSessionState, "grid" | "warnings" | "view">;
+type Published = Pick<MatchSessionState, "grid" | "warnings" | "view"> & {
+  readonly teamId: number;
+};
 
 function load(db: AppDatabase, matchId: number): Published | undefined {
   const records = loadGridRecords(db, matchId);
@@ -47,27 +54,39 @@ function load(db: AppDatabase, matchId: number): Published | undefined {
     history: [],
     teamPlayers,
   });
-  return { grid, warnings, view };
+  return { grid, warnings, view, teamId: records.match.teamId };
 }
 
 export function createMatchSessionStore(db: AppDatabase): MatchSessionStore {
-  return createStore<MatchSessionState>()((set) => ({
+  // The open match's team: the grid does not hold it and the call-up actions need it.
+  let teamId: number | undefined;
+  return createStore<MatchSessionState>()((set, get) => ({
     status: "closed",
     ...EMPTY,
+    ...createCallUpActions({ db, get, set, teamId: () => teamId }),
     openMatch(id) {
       try {
         const loaded = load(db, id);
+        teamId = loaded?.teamId;
         set(
           loaded === undefined
             ? { status: "notFound", ...EMPTY }
-            : { status: "open", ...EMPTY, ...loaded },
+            : {
+                status: "open",
+                ...EMPTY,
+                grid: loaded.grid,
+                warnings: loaded.warnings,
+                view: loaded.view,
+              },
         );
       } catch {
         // A read that throws shows the same "not found" screen, with no new text (T041).
+        teamId = undefined;
         set({ status: "notFound", ...EMPTY });
       }
     },
     closeMatch() {
+      teamId = undefined;
       set({ status: "closed", ...EMPTY });
     },
   }));
