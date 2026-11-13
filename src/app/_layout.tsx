@@ -40,6 +40,11 @@ export default function RootLayout(): ReactElement | null {
         if (route.name === "teams/[teamId]/matches/new") {
           return { title: t("matches.new"), presentation: "modal" };
         }
+        // The match screen has no title of its own yet; the empty string hides the route name.
+        if (route.name === "matches/[matchId]/index") return { title: "" };
+        if (route.name === "matches/[matchId]/call-up") {
+          return { title: t("callUp.title") };
+        }
         return { title: t("teams.title") };
       }}
     />

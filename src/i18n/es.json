@@ -58,9 +58,24 @@
     "numberInvalid": "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda."
   },
   "warning": {
-    "duplicateNumber": "Hay jugadores con el mismo dorsal: {{numbers}}."
+    "duplicateNumber": "Hay jugadores con el mismo dorsal: {{numbers}}.",
+    "callUpRange": "Convocatoria fuera del rango: con {{format}} periodos deben ser de {{min}} a 12 jugadores, y hay {{count}}."
   },
   "error": {
     "saveFailed": "No se ha podido guardar el cambio. Inténtalo de nuevo."
+  },
+  "callUp": {
+    "title": "Convocatoria",
+    "add": "Añadir a la convocatoria",
+    "remove": "Quitar de la convocatoria",
+    "createPlayer": "Crear jugador nuevo",
+    "addEmpty": "No quedan jugadores activos por añadir. Puedes crear uno nuevo."
+  },
+  "confirm": {
+    "removeFromCallUp": {
+      "title": "¿Quitar a {{name}} de la convocatoria?",
+      "message": "Tiene marcas en este partido y se borrarán.",
+      "confirm": "Quitar"
+    }
   }
 }
