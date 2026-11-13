@@ -24,7 +24,8 @@ The reference is the OWASP MASVS standard for mobile apps. Since the app works o
 - [ ] No network calls and no player data in logs.
 - [ ] Database queries only through Drizzle with parameters.
 - [ ] Route parameters validated; no link triggers destructive actions.
-- [ ] `app.json` still has `android.allowBackup: false`.
+- [ ] `app.json` still has `android.allowBackup: false` and lists `./plugins/with-backup-exclusion.js` once.
+- [ ] Android: the prebuilt manifest has `android:dataExtractionRules` and `android:fullBackupContent`, and both XML files exclude the nine domains (cloud backup, device transfer and full backup).
 - [ ] Workflows with minimal permissions and pinned versions.
 - [ ] `npm audit` (fails only at high severity or above), OSV-Scanner, gitleaks and Semgrep green.
 
