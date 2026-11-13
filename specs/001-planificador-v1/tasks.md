@@ -503,7 +503,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Mistakes: blank team name → error, nothing saved; repository throws → `saveFailed`, list unchanged. Also: blank name and invalid number together → `invalid` with both errors and nothing saved; `updateTeam` with an unknown ID → `saveFailed`, list unchanged; after a `saveFailed`, the next valid action returns `saved` (the failure is not remembered).
   - Pending: nothing.
 
-- [ ] **T033** · UI: navigation and the list of teams (RF-012, RF-014, RF-073)
+- [x] **T033** · UI: navigation and the list of teams (RF-012, RF-014, RF-073)
   - Layer and files: app · `src/app/_layout.tsx` (the `Stack`, with the header of the list, `teams.title`), `src/app/index.tsx`, `src/i18n/es.json` (`teams.title`, `teams.empty`), tests in `tests/app/` (`renderRouter`, with the database mock of T029).
   - Done when: the app opens on the list of teams, sorted alphabetically, read from the squad store's `loadTeams()`; an empty list shows `teams.empty`; every text comes from `es.json`. The list has no links yet: «Nuevo equipo» arrives with its route in T034 and the link to a team with its route in T035 (D2 rule 8, review D2-A-10).
   - Scenarios:
@@ -514,7 +514,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
     - Sequences: a team created through the store appears in the list without restarting.
     - Interruptions: launching the app again shows the list of teams first (RF-073).
     - Mistakes: two teams with the same name are both listed (RF-014). Also: no English text anywhere on the screen (RF-012: every visible text is in `es.json`, checked by querying the Spanish texts only); the list screen is built only after the database is ready (T029), so it never shows `teams.empty` for a moment before the teams load. If reading the teams fails (repository double that throws), the screen shows the empty list with `teams.empty` and no other text (answer of 2026-11-12; known D2 limit, T061).
-  - Pending: nothing.
+  - Pending: the phase-0 placeholder test `tests/app/index.test.tsx` (old home title) was deleted, authorized by the developer on 2026-11-13. Device check (header «Equipos» on iOS and Android) is for the developer.
 
 - [ ] **T034** · UI: new-team form, format picker, input limits and save error (RF-001, RF-012, RF-013, RF-082, RF-085, E-022, E-029)
   - Layer and files: app and UI · `src/app/teams/new.tsx` (modal, header `teams.new`), `src/app/index.tsx` (the «Nuevo equipo» button), `src/ui/team-form.tsx`, `src/ui/format-picker.tsx`, `src/ui/input-limits.ts`, `src/ui/save-error-banner.tsx`, `src/i18n/es.json` (`teams.new`, `team.field.name`, `team.field.category`, `team.field.defaultFormat`, `common.save`, `format.option`, `validation.nameRequired`, `error.saveFailed`), tests in `tests/app/` and next to the components.

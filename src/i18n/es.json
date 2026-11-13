@@ -1,5 +1,9 @@
 {
   "app": {
     "title": "Planificador de periodos"
+  },
+  "teams": {
+    "title": "Equipos",
+    "empty": "Todavía no hay equipos. Crea el primero."
   }
 }
