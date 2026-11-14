@@ -1,35 +1,24 @@
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { shownDate, shownTime } from "@/state/match-date-text";
+import { DateTimeFieldAndroid } from "./date-time-field-android";
+import { toLocalDate } from "./date-time-field-shared";
+import type { DateTimeFieldProps } from "./date-time-field-shared";
 
-interface DateTimeFieldProps {
-  // "YYYY-MM-DD" and "HH:MM" as the draft keeps them; no time is null.
-  readonly date: string;
-  readonly time: string | null;
-  readonly onDateChange: (parts: {
-    year: number;
-    month: number;
-    day: number;
-  }) => void;
-  readonly onTimeChange: (parts: { hour: number; minute: number }) => void;
-  readonly onClearTime: () => void;
+// iOS keeps both pickers inline (they report nothing on mount); Android opens dialogs from buttons
+// because its inline picker reports its initial value on mount (see date-time-field-android.tsx).
+export function DateTimeField(props: DateTimeFieldProps): ReactElement {
+  return Platform.OS === "android" ? (
+    <DateTimeFieldAndroid {...props} />
+  ) : (
+    <DateTimeFieldInline {...props} />
+  );
 }
 
-// The native picker works with a Date; the draft's strings are turned into one in local time.
-// This is plumbing, not a rule: what is shown comes from displayDate and displayTime.
-function toLocalDate(date: string, time: string | null): Date {
-  const [year = 0, month = 1, day = 1] = date.split("-").map(Number);
-  const [hour = 12, minute = 0] =
-    time === null ? [] : time.split(":").map(Number);
-  return new Date(year, month - 1, day, hour, minute);
-}
-
-// Both pickers are inline on both platforms, so nothing opens on a press and a dismissed picker
-// changes nothing: only a real pick (onValueChange) reaches the draft.
-export function DateTimeField({
+function DateTimeFieldInline({
   date,
   time,
   onDateChange,
