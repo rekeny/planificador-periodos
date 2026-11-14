@@ -706,3 +706,5 @@ Codex's validation: types, lint, formatting, traceability, focused-test detectio
 ### Verdict (Codex review · D2 fifth run)
 
 Not approved for closing. Two BLOCKING findings (1 and 2) and one IMPORTANT finding (3) are open and must be resolved, through phase 6, before phase 8 can pass again. Finding 4 (MINOR) is a suggestion. Status of all four: Open.
+
+Findings 2, 3 and 4: fixed in e4ad5eb (finding 2), f053b37 (finding 3) and 42ed4a6 (finding 4).
