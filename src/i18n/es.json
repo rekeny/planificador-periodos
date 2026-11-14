@@ -60,6 +60,7 @@
   },
   "common": {
     "save": "Guardar",
+    "accept": "Aceptar",
     "edit": "Editar",
     "cancel": "Cancelar"
   },

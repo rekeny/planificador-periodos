@@ -27,6 +27,7 @@ function PickerDialog({
   onPick,
   onClose,
 }: DialogProps): ReactElement {
+  const { t } = useTranslation();
   const armed = useRef(false);
   useEffect(() => {
     armed.current = true;
@@ -35,6 +36,8 @@ function PickerDialog({
     <DateTimePicker
       mode={mode}
       presentation="dialog"
+      positiveButton={{ label: t("common.accept") }}
+      negativeButton={{ label: t("common.cancel") }}
       value={value}
       onValueChange={(_event, picked) => {
         if (!armed.current) return;

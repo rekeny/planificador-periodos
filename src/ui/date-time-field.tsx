@@ -34,6 +34,7 @@ function DateTimeFieldInline({
       <DateTimePicker
         mode="date"
         presentation="inline"
+        locale="es-ES"
         value={toLocalDate(date, time)}
         onValueChange={(_event, picked) =>
           onDateChange({
@@ -48,6 +49,7 @@ function DateTimeFieldInline({
       <DateTimePicker
         mode="time"
         presentation="inline"
+        locale="es-ES"
         value={toLocalDate(date, time)}
         onValueChange={(_event, picked) =>
           onTimeChange({
