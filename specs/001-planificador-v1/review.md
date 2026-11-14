@@ -626,3 +626,5 @@ Codex's validation: TypeScript, ESLint, source formatting, traceability and focu
 ### Verdict (Codex review · D2 re-run)
 
 Not approved for closing. Two BLOCKING findings are open (Android time default; tablet 12-row guarantee, which also means F2 is only partially resolved). One IMPORTANT (form scrolling) and one MINOR (mutation cache key) are open. Status of all four: Open.
+
+forms: fixed in ab6fe40, cache key: fixed in 190e524 (IMPORTANT and MINOR of the re-run; pending Codex confirmation).
