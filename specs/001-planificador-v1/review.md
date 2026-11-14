@@ -652,3 +652,5 @@ Codex's validation: TypeScript, ESLint, source formatting, traceability and focu
 ### Verdict (Codex review · D2 third run)
 
 Not approved for closing. Four BLOCKING findings (1 to 4) are open and must be resolved, through phase 6, before phase 8 can pass again. Finding 5 (MINOR) is a suggestion. Status of all five: Open.
+
+Findings 3 and 4: fixed in f575fd3.
