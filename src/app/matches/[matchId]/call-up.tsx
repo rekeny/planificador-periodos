@@ -65,7 +65,7 @@ export default function CallUpScreen(): ReactElement {
         onConfirm={confirmRemoval}
         onCancel={() => setAsking(null)}
       />
-      {saveFailed ? <SaveErrorBanner /> : null}
+      {saveFailed ? <SaveErrorBanner floating /> : null}
     </View>
   );
 }
