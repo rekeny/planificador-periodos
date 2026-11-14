@@ -29,7 +29,10 @@ function ToolbarButton({
       onPress={onPress}
       style={styles.button}
     >
-      <Text style={[styles.text, disabled === true && styles.disabled]}>
+      <Text
+        numberOfLines={2}
+        style={[styles.text, disabled === true && styles.disabled]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -61,8 +64,19 @@ export function GridButtons(props: GridButtonsProps): ReactElement {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  button: { paddingHorizontal: 12, paddingVertical: 10 },
+  // Wraps onto a second line: three buttons with an overtime were wider than a 375 pt phone.
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 8,
+  },
+  button: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
   text: { fontSize: 16, fontWeight: "600", color: "#1d4ed8" },
   disabled: { color: "#9ca3af" },
 });
