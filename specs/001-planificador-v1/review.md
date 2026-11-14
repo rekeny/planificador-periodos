@@ -630,3 +630,5 @@ Not approved for closing. Two BLOCKING findings are open (Android time default; 
 forms: fixed in ab6fe40, cache key: fixed in 190e524 (IMPORTANT and MINOR of the re-run; pending Codex confirmation).
 
 Android time: fixed in 4d809eb
+
+tablet 12 rows: fixed in e70d2d8
