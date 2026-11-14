@@ -6,7 +6,7 @@ import {
   launchApp,
 } from "../../tests/data/database-fixtures";
 import { sqliteDouble } from "../../tests/data/expo-sqlite-double";
-import { counts, userTables } from "../../tests/data/schema-fixtures";
+import { addTeam, counts, userTables } from "../../tests/data/schema-fixtures";
 
 jest.mock("expo-sqlite", () =>
   jest.requireActual("../../tests/data/expo-sqlite-double"),
@@ -102,5 +102,36 @@ describe("initializeDatabase, failures", () => {
     const next = launchApp();
     await next.ready.initializeDatabase();
     expect(userTables(next.data.getDatabase())).toEqual(FIVE_TABLES);
+  });
+});
+
+describe("initializeDatabase, retrying in the same launch (T087, RF-085)", () => {
+  it("RF-085: after a failed open in the same launch a new call opens again, migrates nothing more and keeps the saved team and the file", async () => {
+    const first = launchApp();
+    await first.ready.initializeDatabase();
+    addTeam(first.data.getDatabase(), { name: "Alevín A" });
+
+    sqliteDouble.failNextOpen(new Error("disk full"));
+    const second = launchApp();
+    await expect(second.ready.initializeDatabase()).rejects.toThrow(
+      "disk full",
+    );
+    await expect(second.ready.initializeDatabase()).resolves.toBeUndefined();
+
+    expect(sqliteDouble.openCalls()).toHaveLength(3);
+    expect(sqliteDouble.appliedMigrations()).toBe(1);
+    expect(sqliteDouble.tablesOnDisk()).toEqual(FIVE_TABLES);
+    expect(counts(second.data.getDatabase()).teams).toBe(1);
+  });
+
+  it("RF-085: fail, fail again, then succeed in the same launch: one open per call and a database at the end", async () => {
+    const { data, ready } = launchApp();
+    sqliteDouble.failNextOpen(new Error("locked"));
+    await expect(ready.initializeDatabase()).rejects.toThrow("locked");
+    sqliteDouble.failNextOpen(new Error("still locked"));
+    await expect(ready.initializeDatabase()).rejects.toThrow("still locked");
+    await expect(ready.initializeDatabase()).resolves.toBeUndefined();
+    expect(sqliteDouble.openCalls()).toHaveLength(3);
+    expect(userTables(data.getDatabase())).toEqual(FIVE_TABLES);
   });
 });

@@ -64,6 +64,10 @@
     "edit": "Editar",
     "cancel": "Cancelar"
   },
+  "db": {
+    "openFailed": "No se han podido abrir tus datos. No se ha borrado nada.",
+    "retry": "Reintentar"
+  },
   "notFound": {
     "message": "No se ha encontrado: puede que se haya borrado."
   },

@@ -5,6 +5,7 @@
 import { act, render, screen } from "@testing-library/react-native";
 
 import RootLayout from "@/app/_layout";
+import { OPEN_FAILED, RETRY } from "../support/database-start-harness";
 
 const READY_MODULE = "../../src/state/database-ready";
 type ReadyModule = { initializeDatabase: jest.Mock<Promise<void>, []> };
@@ -82,7 +83,7 @@ describe("root layout, start-up", () => {
     expect(splash.hideAsync).toHaveBeenCalledTimes(1);
   });
 
-  it("RF-011 RF-082: when the database fails it keeps the splash screen and renders no screen", async () => {
+  it("RF-011 RF-082 RF-085: when the database fails it hides the splash screen once, shows the message and «Reintentar» and renders no screen", async () => {
     const pending = deferred();
     initializeDatabase.mockReturnValue(pending.promise);
     await render(<RootLayout />);
@@ -91,6 +92,8 @@ describe("root layout, start-up", () => {
       await pending.promise.catch(() => undefined);
     });
     expect(screen.queryByText("SCREENS")).toBeNull();
-    expect(splash.hideAsync).not.toHaveBeenCalled();
+    expect(screen.getByText(OPEN_FAILED)).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: RETRY })).toBeOnTheScreen();
+    expect(splash.hideAsync).toHaveBeenCalledTimes(1);
   });
 });
