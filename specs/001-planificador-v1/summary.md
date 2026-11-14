@@ -115,7 +115,7 @@ D1 was the rules engine with no screens. D2 puts the app on top of it. With the 
 - **Overtimes and Undo:** add and remove overtimes (a question first if the last one has marks) and undo the last actions, also after going to the call-up screen and coming back.
 - **Call-up changes during the match:** add a player, remove one (a question first if the player has marks) or create a new player straight from the match.
 - **All the warnings and the legend:** light red cells, players in red, «!» and «≠» in the period headers, the "rule impossible" banner and the legend. The screen only draws what the state layer computed from the domain.
-- **Everything saved at every tap.** Each mark, overtime, undo and call-up change is written to the SQLite database first and shown only after it was stored. If the write fails, the screen does not change and shows an error banner (in normal flow on the forms, so «Guardar» stays tappable; floating only on the match and call-up screens).
+- **Everything saved at every tap.** Each mark, overtime, undo and call-up change is written to the SQLite database first and shown only after it was stored. If the write fails, the screen does not change and shows an error banner (always in normal flow, never over the screen: above the toolbar on the match screen, above the list on the call-up screen, inside the form on the forms, so «Guardar» and the buttons stay tappable).
 - **Kept out of backups.** Android builds write two rule files that exclude every backup domain; iOS launch code marks the database folder as excluded from iCloud and computer backups (RF-088).
 
 **Not in D2 (all D3):** substitutions and the long-press menu, the questions «sub or starter?» and «who leaves?», the list of a team's matches, editing or deleting a match, changing the format of a match, and squad upkeep. A tap that needs a question does nothing yet.
@@ -219,14 +219,19 @@ application.$["android:dataExtractionRules"] = `@xml/${RULES_NAME}`;
 //   try databaseFolder.setResourceValues(values)
 ```
 
-**Expo Router: open once, close on unmount** (`src/app/matches/[matchId]/index.tsx`). A `useState` initializer runs once, before the first render, so the screen never shows another match. The cleanup of an effect runs only when the screen is popped, not when another route is pushed over it. That is why Undo survives a trip to the call-up screen (T084).
+**Expo Router: a screen opens the session it shows and closes only its own** (`src/app/matches/[matchId]/index.tsx`, `useOwnSession`). `useFocusEffect` runs when the screen is focused, also when it comes back from a route pushed over it, and opens the match only if the session is not already open for it, so Undo survives a trip to the call-up screen (T084) but a `/matches/999` on top never leaves the grid without its session. The cleanup of an effect runs only when the screen is popped, and it closes the session only if the view's `matchId` is this screen's.
 
 ```tsx
-useState(() => {
-  if (id !== null) store.getState().openMatch(id);
-});
-useEffect(() => () => store.getState().closeMatch(), [store]);
+useFocusEffect(
+  useCallback(() => {
+    const { status, view, openMatch } = store.getState();
+    const owned = status === "open" && view?.matchId === id;
+    if (id !== null && !owned) openMatch(id);
+  }, [id, store]),
+);
 ```
+
+The new-match form works the same way for its draft: all forms share one draft, so each form resets it in `useFocusEffect` on opening and whenever the draft belongs to another team, and «Guardar» always saves for the team of its own route (Codex fourth run).
 
 **A pure layout function** (`src/ui/grid/grid-layout.ts`). Sizes and scroll flags come from numbers in and numbers out, so they are tested without a screen. `Math.max` and `Math.min` clamp a value between a minimum and a maximum.
 
