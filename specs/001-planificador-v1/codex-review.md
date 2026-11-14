@@ -1,45 +1,40 @@
 # Codex review
 
-- Date: 2026-11-14 09:22
+- Date: 2026-11-14 13:56
 - Branch: 001-planificador-v1-d2 against main
-- Commit: bf8bf3b
+- Commit: 932978f
 
-**Changes requested: 3 BLOCKING, 1 IMPORTANT, 1 MINOR.**
+**Changes requested: 2 BLOCKING, 1 IMPORTANT, 1 MINOR.**
 
-Reviewed `git diff main...HEAD` against spec 001 and its approved D1/D2 scope. D3 omissions are approved deferrals; the complete spec is not yet delivered.
+Reviewed `git diff main...HEAD` at `932978f`, treating the documented D3 deferrals as approved scope exclusions.
 
-1. **BLOCKING — SQLite exposes the database through development tooling.**  
-   **File:** `src/data/database.ts:19`  
-   `openDatabaseSync(DATABASE_NAME)` automatically registers this connection with Expo’s development inspector. The installed implementation opens a WebSocket and supports exporting the database and returning query results, including player names. This violates RF-011 and constitution principles 3 and 5 in the development builds used by this project. Expo documents that the inspector is [automatically enabled in development](https://docs.expo.dev/versions/v58.0.0/sdk/sqlite/#browse-an-on-device-database).  
-   **Fix:** prevent this database from registering with DevTools—for the installed version, `useNewConnection: true` bypasses registration—and test that opening it under `__DEV__` creates no inspector connection or export handlers. Update the security report accordingly.
+1. **BLOCKING — Android native UI still follows the device language.**  
+   **File:** `src/ui/date-time-field-android.tsx:36`  
+   Translating the dialog buttons leaves calendar headings, month/day names and native controls in the device language. The installed implementation reads `LocalConfiguration.current.locales[0]`; the picker’s `locale` property is [iOS-only](https://docs.expo.dev/versions/v58.0.0/sdk/ui/drop-in-replacements/datetimepicker/#locale). Fourth-run finding 3 therefore remains partially unresolved against RF-012 and constitution principle 7.  
+   **Fix:** configure Spanish localization for the Android native controls and verify both pickers on an English-configured device. Tests must cover more than button labels.
 
-2. **BLOCKING — Returning to a form can save a match for another team.**  
-   **File:** `src/app/teams/[teamId]/matches/new.tsx:22`  
-   Every mounted form shares one draft, but `ready` is initialized only once. Reproduced through the real routes: open team 1’s form, push team 2’s form, press Back, then «Guardar». The pathname belongs to team 1, while SQLite stores the match under team 2. The regression assertion fails with **expected team 1, received team 2**. This breaks RF-025 and RF-082.  
-   **Fix:** give each form its own draft, or restore and validate draft ownership when focus returns. Add this two-team navigation regression, asserting both the saved team and call-up.
+2. **BLOCKING — Returning to team forms shows a false not-found state.**  
+   **Files:** `src/app/teams/[teamId]/players/new.tsx:19`, `src/app/teams/[teamId]/edit.tsx:19`  
+   Both routes load their team only once while sharing the squad store. Reproduced for each: open team 1’s form, push team 2’s equivalent form, then Back. Team 1’s route displays «No se ha encontrado» because the store still belongs to team 2. Two additional navigation tests failed on this assertion. This breaks RF-013/RF-016.  
+   **Fix:** restore or isolate each form’s team state when focus returns, and validate route ownership when saving. Add both navigation regressions.
 
-3. **BLOCKING — Native pickers are not constrained to Spanish.**  
-   **Files:** `src/ui/date-time-field.tsx:34`, `src/ui/date-time-field-android.tsx:35`  
-   i18next controls the surrounding labels, but the native controls inherit their platform locale. The iOS picker receives no `locale`; Android uses the device configuration and default system button labels. On an English-configured device, the form therefore includes English native UI, contrary to RF-012 and constitution principle 7. The picker doubles conceal this.  
-   **Fix:** configure Spanish native localization, supply the supported picker locale and translated Android button labels, and verify on devices configured in English. The [SDK 58 picker API](https://docs.expo.dev/versions/v58.0.0/sdk/ui/drop-in-replacements/datetimepicker/) exposes these locale and button-label controls.
+3. **IMPORTANT — The three-button toolbar exceeds the reference phone width.**  
+   **File:** `src/ui/grid/grid-toolbar.tsx:64`  
+   After adding an overtime, the unwrapped row contains all three Spanish labels, fixed padding and gaps. Its natural width is approximately 400 points, exceeding the supported 375-point portrait viewport. The final action extends beyond the screen; existing tests check button presence without checking bounds.  
+   **Fix:** allow wrapping or distribute available width between responsive buttons. Verify all labels and touch areas at 375 points with an overtime present.
 
-4. **IMPORTANT — The floating save error overlaps the phone toolbar.**  
-   **Files:** `src/ui/save-error-banner.tsx:31`, `src/app/matches/[matchId]/index.tsx:147`  
-   The phone toolbar occupies the screen’s bottom edge. The error banner is rendered afterward, absolutely positioned 16 points above that same edge, without reserved space. After a failed operation, it covers part of the toolbar labels and intercepts taps in that area. The form correction did not address this placement.  
-   **Fix:** position the banner above the toolbar or reserve its space. Verify physical button reachability after failed Undo and overtime operations.
+4. **MINOR — Current explanations still contradict the implementation.**  
+   **Files:** `specs/001-planificador-v1/summary.md:158`, `plan.md:680`, `tasks.md:882`  
+   The summary still says errors float on match/call-up screens, while they now use normal flow. The plan and T084 still prohibit focus events, while `useOwnSession` uses `useFocusEffect`.  
+   **Fix:** update these passages to describe the final banner placement and ownership-guarded session restoration.
 
-5. **MINOR — The learning explanation still shows the removed session implementation.**  
-   **Files:** `specs/001-planificador-v1/summary.md:222`, `specs/001-planificador-v1/tasks.md:878`  
-   The summary describes a `useState` initializer and unconditional cleanup; T084 says no focus event is used. The current implementation uses `useFocusEffect` and ownership-guarded cleanup.  
-   **Fix:** replace the obsolete snippet and update T084 and the corresponding plan explanation to describe `useOwnSession`.
+Category results:
 
-| Requested category                             | Result                                                                                                                                                                |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RF/E implementation, tests and scope           | Findings 1–4; no unrelated product additions found. D3 and device verification remain pending.                                                                        |
-| Constitution, layers, conventions and glossary | Findings 1 and 3 violate constitutional requirements; no additional structural findings.                                                                              |
-| Test integrity and effectiveness               | Coverage gaps above. No skipped tests or unapproved weakening found; placeholder-test deletion has recorded authorization.                                            |
-| Security                                       | Finding 1. No additional query-parameterization, application-log, or dependency-justification findings. Existing release-permission and backup checks remain pending. |
-| Explanation accuracy                           | Finding 5; the security assurance also needs correction following finding 1.                                                                                          |
-| Simplicity and efficiency                      | No additional findings.                                                                                                                                               |
+- **RF/E coverage and scope:** findings 1–3. Full v1 remains incomplete through approved D3 deferrals; no unrelated product additions found.
+- **Constitution, layers, conventions and glossary:** finding 1 violates the Spanish-only principle; no additional structural findings.
+- **Test integrity/effectiveness:** coverage gaps above. No unapproved deletion, skipping or weakening found; the deleted placeholder test has recorded authorization.
+- **Security:** no additional findings in network usage, player-data logging, query parameterization or dependency justification. Device backup and production-permission checks remain pending.
+- **Explanation accuracy:** finding 4.
+- **Simplicity and efficiency:** no findings.
 
-Validation passed: TypeScript, ESLint, source/configuration formatting, traceability, focused/skipped-test detection and Gitleaks. With cache writes disabled in memory, **2,310 existing tests passed**; nine startup tests were blocked by temporary-file permissions. Full verification, coverage, Stryker and device behaviour were not independently confirmed. No repository files were changed.
+Validation: types, lint, formatting, traceability, focused-test detection and Gitleaks passed. With cache writes disabled only in memory, **2,518 tests passed**; **23 tests** were blocked by temporary-file permissions. Full verification, coverage, mutation testing and device behavior were not independently confirmed. No repository files were changed.
