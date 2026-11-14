@@ -632,3 +632,23 @@ forms: fixed in ab6fe40, cache key: fixed in 190e524 (IMPORTANT and MINOR of the
 Android time: fixed in 4d809eb
 
 tablet 12 rows: fixed in e70d2d8
+
+## Codex review · D2 third run (2026-11-14)
+
+Run: `scripts/review.sh specs/001-planificador-v1` at commit `3e03a1e` (branch `001-planificador-v1-d2` against `main`), 2026-11-14 08:46. Full output: [codex-review.md](codex-review.md). The previous run's output is kept in the scratchpad only.
+
+Summary: 5 findings in total. BLOCKING 4, IMPORTANT 0, MINOR 1. Codex verdict: **changes requested (not approved)**. Status of all five: Open.
+
+- **1 · BLOCKING · Returning from another match link leaves the original grid unavailable.** File: `src/app/matches/[matchId]/index.tsx:80`. Codex: Reproduced: open match 1, navigate to `/matches/999`, then Back. The pathname returns to match 1, but the shared session is `closed`; its mounted screen never reloads. Proposed fix: guard cleanup by the owning match ID and restore the requested session when focus returns with a missing or different session. Preserve Undo when returning from child routes. Add this navigation regression test.
+- **2 · BLOCKING · The save-error banner overlaps «Guardar».** Files: `src/ui/save-error-banner.tsx:17`, `src/ui/team-form.tsx:77`, `src/ui/player-form.tsx:65`. Codex: The banner now sits inside the scroll content but remains absolutely positioned at its bottom. Since Save is the last element in normal flow, the banner covers it after a failure. Existing tests invoke its handler directly and cannot detect the overlap. Proposed fix: render form errors in normal flow, or reserve space for the overlay. Verify that Save remains visible and physically tappable after failure.
+- **3 · BLOCKING · The 12-row guarantee excludes supported smaller tablets.** File: `src/ui/grid/tablet-budget.ts:9`. Codex: The budget assumes 768 points is the shortest tablet height, while the approved tablet threshold is 600. Direct evaluation at 900 × 600, with twelve players, produces `verticalScroll: true`, violating RF-081. Proposed fix: cover the 600-point boundary in both orientations and reconcile the layout with the twelve-row requirement. If the planned 44-point minimum row height makes that impossible, resolve that constraint through the specification workflow.
+- **4 · BLOCKING · Compact warnings can become permanently unreadable.** File: `src/ui/warnings/warning-strip.tsx:57`. Codex: The strip caps content at 80 points and hides overflow, while the legend wraps without a height limit. Additional wrapping, particularly in portrait or with larger system text, clips required explanations without any way to reveal them, contrary to RF-087. Proposed fix: make all warning content reachable within the bounded strip, or use a responsive layout that preserves it. Test rendered bounds and accessibility, beyond checking that Text nodes exist.
+- **5 · MINOR · The picker explanation describes the previous implementation.** File: `specs/001-planificador-v1/summary.md:153`. Codex: It says there is one picker file and Android is always open. Android now uses a separate component and explicitly opened dialogs. Proposed fix: update this paragraph to match the current implementation.
+
+Codex's category results: RF/E coverage and scope (findings 1 to 4; D3 omissions are approved deferrals; no unrelated product additions found). Constitution, layers, conventions and glossary (behavioural violations above; no additional structural findings). Test integrity and effectiveness (coverage gaps above; no unapproved deletion, skipping or weakening; the placeholder-test deletion has recorded authorisation). Security (no new findings from static inspection; production permissions and device backup verification remain pending as documented). Explanation accuracy (finding 5; reachability claims also need adjustment following findings 2 to 4). Simplicity and efficiency (no additional findings).
+
+Codex's validation: TypeScript, ESLint, source formatting, traceability and focused/skipped-test checks passed. With cache writes disabled in memory, 1,772 existing tests passed; nine startup tests remained blocked by temporary-file permissions. The navigation reproduction failed as described. Full verification, coverage, mutation testing and device behaviour were not independently confirmed.
+
+### Verdict (Codex review · D2 third run)
+
+Not approved for closing. Four BLOCKING findings (1 to 4) are open and must be resolved, through phase 6, before phase 8 can pass again. Finding 5 (MINOR) is a suggestion. Status of all five: Open.

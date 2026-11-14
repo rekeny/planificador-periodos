@@ -1,40 +1,43 @@
 # Codex review
 
-- Date: 2026-11-13 19:31
+- Date: 2026-11-14 08:46
 - Branch: 001-planificador-v1-d2 against main
-- Commit: 840d72e
+- Commit: 3e03a1e
 
-**Changes requested: 2 BLOCKING, 1 IMPORTANT, 1 MINOR.** Reviewed `git diff main...HEAD` at `840d72e`, against the approved D2 scope.
+Changes requested: **4 BLOCKING findings and 1 MINOR finding.** Reviewed with `git diff main...HEAD`, accounting for the approved D3 deferrals.
 
-1. **BLOCKING — Android assigns a time without user selection.**  
-   [`src/ui/date-time-field.tsx:59`](src/ui/date-time-field.tsx#L59)  
-   The inline time picker is always mounted, using 12:00 when `time` is null. The installed `@expo/ui` Android implementation emits its initial value from `LaunchedEffect`; this handler immediately stores it. Consequently, an untouched match can save 12:00, and clearing a previously selected time can restore 12:00. This violates RF-025 and RF-083/E-032. The test double emits only simulated user selections, hiding the defect.  
-   **Fix:** open the Android picker explicitly, commit only a confirmed selection, and unmount it after confirmation or dismissal. Test initialization and clearing with native-equivalent callbacks.
+1. **BLOCKING — Returning from another match link leaves the original grid unavailable.**  
+   [src/app/matches/[matchId]/index.tsx:80](src/app/matches/%5BmatchId%5D/index.tsx#L80)  
+   Reproduced: open match 1, navigate to `/matches/999`, then Back. The pathname returns to match 1, but the shared session is `closed`; its mounted screen never reloads.  
+   **Fix:** guard cleanup by the owning match ID and restore the requested session when focus returns with a missing or different session. Preserve Undo when returning from child routes. Add this navigation regression test.
 
-2. **BLOCKING — The tablet’s 12-row guarantee remains broken.**  
-   [`src/app/matches/[matchId]/index.tsx:111`](src/app/matches/%5BmatchId%5D/index.tsx#L111)  
-   Measuring the viewport fixes unreachable rows, but the surrounding controls still consume too much height. On the reference 1024 × 768 tablet, the call-up button, warning banner, vertical legend and headers leave fewer than the 528 points required for twelve 44-point rows. A six-period match with twelve players and one player marked in P1–P4 demonstrates this state. RF-081 requires the twelve rows to fit without scrolling. The new tests explicitly accept scrolling at these smaller viewports instead of enforcing that requirement.  
-   **Fix:** compact the tablet controls, banners and legend; test the assembled screen with warnings present and assert twelve visible rows without scrolling. Previous finding F2 is only partially resolved.
+2. **BLOCKING — The save-error banner overlaps «Guardar».**  
+   [src/ui/save-error-banner.tsx:17](src/ui/save-error-banner.tsx#L17), [src/ui/team-form.tsx:77](src/ui/team-form.tsx#L77), [src/ui/player-form.tsx:65](src/ui/player-form.tsx#L65)  
+   The banner now sits inside the scroll content but remains absolutely positioned at its bottom. Since Save is the last element in normal flow, the banner covers it after a failure. Existing tests invoke its handler directly and cannot detect the overlap.  
+   **Fix:** render form errors in normal flow, or reserve space for the overlay. Verify that Save remains visible and physically tappable after failure.
 
-3. **IMPORTANT — Team and player forms cannot scroll around the keyboard or overflow.**  
-   [`src/ui/team-form.tsx:51`](src/ui/team-form.tsx#L51), [`src/ui/player-form.tsx:41`](src/ui/player-form.tsx#L41)  
-   Both forms use a fixed `View` without scrolling or keyboard avoidance. On short landscape viewports, particularly with validation messages or the keyboard visible, lower controls extend beyond the usable area without a way to scroll them into view. This undermines RF-076’s orientation support.  
-   **Fix:** use keyboard-aware, scrollable form containers. Verify that fields, errors and Save remain reachable in landscape with the keyboard open.
+3. **BLOCKING — The 12-row guarantee excludes supported smaller tablets.**  
+   [src/ui/grid/tablet-budget.ts:9](src/ui/grid/tablet-budget.ts#L9)  
+   The budget assumes 768 points is the shortest tablet height, while the approved tablet threshold is 600. Direct evaluation at **900 × 600**, with twelve players, produces `verticalScroll: true`, violating RF-081.  
+   **Fix:** cover the 600-point boundary in both orientations and reconcile the layout with the twelve-row requirement. If the planned 44-point minimum row height makes that impossible, resolve that constraint through the specification workflow.
 
-4. **MINOR — Mutation cache excludes test setup files.**  
-   [`.github/workflows/verify.yml:60`](.github/workflows/verify.yml#L60)  
-   The cache hashes helpers and configurations but omits `tests/setup/**`, including `fast-check-mutation.ts`, which Stryker loads. Changes to property-test configuration can therefore reuse stale mutant results.  
-   **Fix:** add `tests/setup/**` consistently to the restore key, restore prefix and save key.
+4. **BLOCKING — Compact warnings can become permanently unreadable.**  
+   [src/ui/warnings/warning-strip.tsx:57](src/ui/warnings/warning-strip.tsx#L57)  
+   The strip caps content at 80 points and hides overflow, while the legend wraps without a height limit. Additional wrapping—particularly in portrait or with larger system text—clips required explanations without any way to reveal them, contrary to RF-087.  
+   **Fix:** make all warning content reachable within the bounded strip, or use a responsive layout that preserves it. Test rendered bounds and accessibility, beyond checking that Text nodes exist.
 
-Category results:
+5. **MINOR — The picker explanation describes the previous implementation.**  
+   [specs/001-planificador-v1/summary.md:153](specs/001-planificador-v1/summary.md#L153)  
+   It says there is one picker file and Android is always open. Android now uses a separate component and explicitly opened dialogs.  
+   **Fix:** update this paragraph to match the current implementation.
 
-| Category                                       | Result                                                                                                                                                                                          |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RF/E coverage and scope                        | Findings 1–3. Full v1 remains incomplete through the approved D3 deferrals; no unrelated product additions found.                                                                               |
-| Constitution, layers, conventions and glossary | No additional findings.                                                                                                                                                                         |
-| Test integrity                                 | Findings 1–2 expose coverage gaps; finding 4 affects verification. No unapproved deletion, skipping or weakening found. The placeholder test deletion has recorded authorization.               |
-| Security                                       | No new application-security findings: parameterised queries, no app network calls or player logging, and justified dependencies. Native backup and production-permission checks remain pending. |
-| Explanation accuracy                           | The assertion that F2 is fixed overstates the result, as explained in finding 2. No additional findings.                                                                                        |
-| Simplicity and efficiency                      | No findings.                                                                                                                                                                                    |
+| Requested category                             | Result                                                                                                                              |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| RF/E coverage and scope                        | Findings 1–4. D3 omissions are approved deferrals; no unrelated product additions found.                                            |
+| Constitution, layers, conventions and glossary | Behavioral violations above; no additional structural findings.                                                                     |
+| Test integrity and effectiveness               | Coverage gaps above. No unapproved deletion, skipping or weakening found; the placeholder-test deletion has recorded authorization. |
+| Security                                       | No new findings from static inspection. Production permissions and device backup verification remain pending as documented.         |
+| Explanation accuracy                           | Finding 5; reachability claims also need adjustment following findings 2–4.                                                         |
+| Simplicity and efficiency                      | No additional findings.                                                                                                             |
 
-Validation: TypeScript, ESLint, source formatting, traceability and focused/skipped-test checks passed. All **1,166 domain cases** passed through an in-memory runner. Gitleaks passed. Standard Jest was blocked by cache writes in the read-only environment; coverage, Stryker, full verification and device behaviour were not independently confirmed.
+TypeScript, ESLint, source formatting, traceability and focused/skipped-test checks passed. With cache writes disabled in memory, **1,772 existing tests passed**; nine startup tests remained blocked by temporary-file permissions. The navigation reproduction failed as described. Full verification, coverage, mutation testing and device behavior were not independently confirmed.
