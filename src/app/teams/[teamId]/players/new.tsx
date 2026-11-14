@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import type { ReactElement } from "react";
 import { useStore } from "zustand";
 
@@ -19,6 +19,15 @@ export default function NewPlayerScreen(): ReactElement {
   useState(() => {
     if (id !== null) store.getState().openTeam(id);
   });
+  // The squad store is shared by every mounted form: after Back from another team's form the open
+  // team is that other one, so this route opens its own team again when it is focused.
+  useFocusEffect(
+    useCallback(() => {
+      if (id !== null && store.getState().team?.id !== id) {
+        store.getState().openTeam(id);
+      }
+    }, [id, store]),
+  );
   const team = useStore(store, (state) => state.team);
 
   if (id === null || team === null || team.id !== id) return <NotFound />;
