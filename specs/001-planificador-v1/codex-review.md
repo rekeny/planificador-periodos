@@ -1,43 +1,45 @@
 # Codex review
 
-- Date: 2026-11-14 08:46
+- Date: 2026-11-14 09:22
 - Branch: 001-planificador-v1-d2 against main
-- Commit: 3e03a1e
+- Commit: bf8bf3b
 
-Changes requested: **4 BLOCKING findings and 1 MINOR finding.** Reviewed with `git diff main...HEAD`, accounting for the approved D3 deferrals.
+**Changes requested: 3 BLOCKING, 1 IMPORTANT, 1 MINOR.**
 
-1. **BLOCKING — Returning from another match link leaves the original grid unavailable.**  
-   [src/app/matches/[matchId]/index.tsx:80](src/app/matches/%5BmatchId%5D/index.tsx#L80)  
-   Reproduced: open match 1, navigate to `/matches/999`, then Back. The pathname returns to match 1, but the shared session is `closed`; its mounted screen never reloads.  
-   **Fix:** guard cleanup by the owning match ID and restore the requested session when focus returns with a missing or different session. Preserve Undo when returning from child routes. Add this navigation regression test.
+Reviewed `git diff main...HEAD` against spec 001 and its approved D1/D2 scope. D3 omissions are approved deferrals; the complete spec is not yet delivered.
 
-2. **BLOCKING — The save-error banner overlaps «Guardar».**  
-   [src/ui/save-error-banner.tsx:17](src/ui/save-error-banner.tsx#L17), [src/ui/team-form.tsx:77](src/ui/team-form.tsx#L77), [src/ui/player-form.tsx:65](src/ui/player-form.tsx#L65)  
-   The banner now sits inside the scroll content but remains absolutely positioned at its bottom. Since Save is the last element in normal flow, the banner covers it after a failure. Existing tests invoke its handler directly and cannot detect the overlap.  
-   **Fix:** render form errors in normal flow, or reserve space for the overlay. Verify that Save remains visible and physically tappable after failure.
+1. **BLOCKING — SQLite exposes the database through development tooling.**  
+   **File:** `src/data/database.ts:19`  
+   `openDatabaseSync(DATABASE_NAME)` automatically registers this connection with Expo’s development inspector. The installed implementation opens a WebSocket and supports exporting the database and returning query results, including player names. This violates RF-011 and constitution principles 3 and 5 in the development builds used by this project. Expo documents that the inspector is [automatically enabled in development](https://docs.expo.dev/versions/v58.0.0/sdk/sqlite/#browse-an-on-device-database).  
+   **Fix:** prevent this database from registering with DevTools—for the installed version, `useNewConnection: true` bypasses registration—and test that opening it under `__DEV__` creates no inspector connection or export handlers. Update the security report accordingly.
 
-3. **BLOCKING — The 12-row guarantee excludes supported smaller tablets.**  
-   [src/ui/grid/tablet-budget.ts:9](src/ui/grid/tablet-budget.ts#L9)  
-   The budget assumes 768 points is the shortest tablet height, while the approved tablet threshold is 600. Direct evaluation at **900 × 600**, with twelve players, produces `verticalScroll: true`, violating RF-081.  
-   **Fix:** cover the 600-point boundary in both orientations and reconcile the layout with the twelve-row requirement. If the planned 44-point minimum row height makes that impossible, resolve that constraint through the specification workflow.
+2. **BLOCKING — Returning to a form can save a match for another team.**  
+   **File:** `src/app/teams/[teamId]/matches/new.tsx:22`  
+   Every mounted form shares one draft, but `ready` is initialized only once. Reproduced through the real routes: open team 1’s form, push team 2’s form, press Back, then «Guardar». The pathname belongs to team 1, while SQLite stores the match under team 2. The regression assertion fails with **expected team 1, received team 2**. This breaks RF-025 and RF-082.  
+   **Fix:** give each form its own draft, or restore and validate draft ownership when focus returns. Add this two-team navigation regression, asserting both the saved team and call-up.
 
-4. **BLOCKING — Compact warnings can become permanently unreadable.**  
-   [src/ui/warnings/warning-strip.tsx:57](src/ui/warnings/warning-strip.tsx#L57)  
-   The strip caps content at 80 points and hides overflow, while the legend wraps without a height limit. Additional wrapping—particularly in portrait or with larger system text—clips required explanations without any way to reveal them, contrary to RF-087.  
-   **Fix:** make all warning content reachable within the bounded strip, or use a responsive layout that preserves it. Test rendered bounds and accessibility, beyond checking that Text nodes exist.
+3. **BLOCKING — Native pickers are not constrained to Spanish.**  
+   **Files:** `src/ui/date-time-field.tsx:34`, `src/ui/date-time-field-android.tsx:35`  
+   i18next controls the surrounding labels, but the native controls inherit their platform locale. The iOS picker receives no `locale`; Android uses the device configuration and default system button labels. On an English-configured device, the form therefore includes English native UI, contrary to RF-012 and constitution principle 7. The picker doubles conceal this.  
+   **Fix:** configure Spanish native localization, supply the supported picker locale and translated Android button labels, and verify on devices configured in English. The [SDK 58 picker API](https://docs.expo.dev/versions/v58.0.0/sdk/ui/drop-in-replacements/datetimepicker/) exposes these locale and button-label controls.
 
-5. **MINOR — The picker explanation describes the previous implementation.**  
-   [specs/001-planificador-v1/summary.md:153](specs/001-planificador-v1/summary.md#L153)  
-   It says there is one picker file and Android is always open. Android now uses a separate component and explicitly opened dialogs.  
-   **Fix:** update this paragraph to match the current implementation.
+4. **IMPORTANT — The floating save error overlaps the phone toolbar.**  
+   **Files:** `src/ui/save-error-banner.tsx:31`, `src/app/matches/[matchId]/index.tsx:147`  
+   The phone toolbar occupies the screen’s bottom edge. The error banner is rendered afterward, absolutely positioned 16 points above that same edge, without reserved space. After a failed operation, it covers part of the toolbar labels and intercepts taps in that area. The form correction did not address this placement.  
+   **Fix:** position the banner above the toolbar or reserve its space. Verify physical button reachability after failed Undo and overtime operations.
 
-| Requested category                             | Result                                                                                                                              |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| RF/E coverage and scope                        | Findings 1–4. D3 omissions are approved deferrals; no unrelated product additions found.                                            |
-| Constitution, layers, conventions and glossary | Behavioral violations above; no additional structural findings.                                                                     |
-| Test integrity and effectiveness               | Coverage gaps above. No unapproved deletion, skipping or weakening found; the placeholder-test deletion has recorded authorization. |
-| Security                                       | No new findings from static inspection. Production permissions and device backup verification remain pending as documented.         |
-| Explanation accuracy                           | Finding 5; reachability claims also need adjustment following findings 2–4.                                                         |
-| Simplicity and efficiency                      | No additional findings.                                                                                                             |
+5. **MINOR — The learning explanation still shows the removed session implementation.**  
+   **Files:** `specs/001-planificador-v1/summary.md:222`, `specs/001-planificador-v1/tasks.md:878`  
+   The summary describes a `useState` initializer and unconditional cleanup; T084 says no focus event is used. The current implementation uses `useFocusEffect` and ownership-guarded cleanup.  
+   **Fix:** replace the obsolete snippet and update T084 and the corresponding plan explanation to describe `useOwnSession`.
 
-TypeScript, ESLint, source formatting, traceability and focused/skipped-test checks passed. With cache writes disabled in memory, **1,772 existing tests passed**; nine startup tests remained blocked by temporary-file permissions. The navigation reproduction failed as described. Full verification, coverage, mutation testing and device behavior were not independently confirmed.
+| Requested category                             | Result                                                                                                                                                                |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RF/E implementation, tests and scope           | Findings 1–4; no unrelated product additions found. D3 and device verification remain pending.                                                                        |
+| Constitution, layers, conventions and glossary | Findings 1 and 3 violate constitutional requirements; no additional structural findings.                                                                              |
+| Test integrity and effectiveness               | Coverage gaps above. No skipped tests or unapproved weakening found; placeholder-test deletion has recorded authorization.                                            |
+| Security                                       | Finding 1. No additional query-parameterization, application-log, or dependency-justification findings. Existing release-permission and backup checks remain pending. |
+| Explanation accuracy                           | Finding 5; the security assurance also needs correction following finding 1.                                                                                          |
+| Simplicity and efficiency                      | No additional findings.                                                                                                                                               |
+
+Validation passed: TypeScript, ESLint, source/configuration formatting, traceability, focused/skipped-test detection and Gitleaks. With cache writes disabled in memory, **2,310 existing tests passed**; nine startup tests were blocked by temporary-file permissions. Full verification, coverage, Stryker and device behaviour were not independently confirmed. No repository files were changed.
