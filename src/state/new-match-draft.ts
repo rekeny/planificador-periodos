@@ -20,6 +20,8 @@ export interface CallUpRow {
 }
 
 export interface NewMatchDraftState {
+  /** The team the draft was reset for; null when it is empty (never reset or the reset failed). */
+  readonly teamId: number | null;
   readonly format: Format;
   /** "YYYY-MM-DD". */
   readonly date: string;
@@ -61,6 +63,14 @@ const EMPTY_FIELDS = {
   awayScore: "",
   notes: "",
 };
+
+// What an empty draft holds: no team, no text, nobody called up.
+const EMPTY_DRAFT = {
+  ...EMPTY_FIELDS,
+  teamId: null,
+  callUpSelection: [],
+  callUpRange: null,
+} satisfies Partial<NewMatchDraftState>;
 
 function rangeOf(
   format: Format,
@@ -130,7 +140,7 @@ export function createNewMatchDraft(
     teamName = "";
     openedTeamId = null;
     created = null;
-    set({ ...EMPTY_FIELDS, callUpSelection: [], callUpRange: null });
+    set(EMPTY_DRAFT);
   }
 
   // Invalidates first so that nothing of an earlier team survives a reset that cannot finish
@@ -142,7 +152,7 @@ export function createNewMatchDraft(
       if (loaded === null) return false;
       teamName = loaded.team.name;
       openedTeamId = loaded.team.id;
-      set(loaded.state);
+      set({ ...loaded.state, teamId: loaded.team.id });
       return true;
     } catch {
       invalidate(set);
@@ -160,9 +170,7 @@ export function createNewMatchDraft(
 
   return createStore<NewMatchDraftState>()((set, get) => ({
     ...newMatchDefaults(6, ""),
-    ...EMPTY_FIELDS,
-    callUpSelection: [],
-    callUpRange: null,
+    ...EMPTY_DRAFT,
     reset: (teamId) => reset(set, teamId),
     setFormat: (format) =>
       set({ format, callUpRange: rangeOf(format, get().callUpSelection) }),
