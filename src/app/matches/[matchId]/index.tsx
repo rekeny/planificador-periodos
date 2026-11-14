@@ -21,20 +21,26 @@ import { MatchGrid } from "@/ui/grid/match-grid";
 import { useMatchActions } from "@/ui/grid/use-match-actions";
 import { NotFound } from "@/ui/not-found";
 import { SaveErrorBanner } from "@/ui/save-error-banner";
-import { CallUpRangeBanner } from "@/ui/warnings/call-up-range-banner";
-import { RuleImpossibleBanner } from "@/ui/warnings/rule-impossible-banner";
-import { WarningLegend } from "@/ui/warnings/warning-legend";
+import { WarningStrip } from "@/ui/warnings/warning-strip";
 
-function CallUpButton({ id }: { readonly id: number }): ReactElement {
+function CallUpButton({
+  id,
+  inHeader,
+}: {
+  readonly id: number;
+  readonly inHeader: boolean;
+}): ReactElement {
   const { t } = useTranslation();
   const router = useRouter();
   return (
     <Pressable
       accessibilityRole="button"
       onPress={() => router.push(`/matches/${id}/call-up`)}
-      style={styles.action}
+      style={inHeader ? styles.headerAction : styles.action}
     >
-      <Text style={styles.actionText}>{t("callUp.title")}</Text>
+      <Text style={inHeader ? styles.headerActionText : styles.actionText}>
+        {t("callUp.title")}
+      </Text>
     </Pressable>
   );
 }
@@ -55,22 +61,6 @@ function useWarningHeights(view: MatchView | null) {
     onBannersLayout: (event: LayoutChangeEvent) => setBanners(heightOf(event)),
     onLegendLayout: (event: LayoutChangeEvent) => setLegend(heightOf(event)),
   };
-}
-
-function WarningBanners({
-  view,
-  onLayout,
-}: {
-  readonly view: MatchView;
-  readonly onLayout: (event: LayoutChangeEvent) => void;
-}): ReactElement | null {
-  if (!view.ruleImpossible && view.callUpRange === null) return null;
-  return (
-    <View testID="warning-banners" onLayout={onLayout}>
-      <RuleImpossibleBanner ruleImpossible={view.ruleImpossible} />
-      <CallUpRangeBanner warning={view.callUpRange} />
-    </View>
-  );
 }
 
 // The match screen: the grid with its buttons, the call-up entry and the warnings. It reads the
@@ -100,7 +90,14 @@ export default function MatchScreen(): ReactElement {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight:
-        showing && inHeader ? () => <GridButtons {...buttons} /> : undefined,
+        showing && inHeader
+          ? () => (
+              <View style={styles.headerRight}>
+                <CallUpButton id={id} inHeader />
+                <GridButtons {...buttons} />
+              </View>
+            )
+          : undefined,
     });
   });
 
@@ -108,9 +105,13 @@ export default function MatchScreen(): ReactElement {
 
   return (
     <View style={styles.screen}>
-      <CallUpButton id={id} />
-      <WarningBanners view={view} onLayout={heights.onBannersLayout} />
-      <WarningLegend items={view.legend} onLayout={heights.onLegendLayout} />
+      {inHeader ? null : <CallUpButton id={id} inHeader={false} />}
+      <WarningStrip
+        view={view}
+        compact={inHeader}
+        onBannersLayout={heights.onBannersLayout}
+        onLegendLayout={heights.onLegendLayout}
+      />
       <MatchGrid
         view={view}
         bannersHeight={heights.bannersHeight}
@@ -134,4 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1d4ed8",
   },
   actionText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headerAction: { paddingHorizontal: 12, paddingVertical: 10 },
+  headerActionText: { color: "#1d4ed8", fontSize: 16, fontWeight: "600" },
 });

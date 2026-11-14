@@ -6,16 +6,22 @@ import type { MatchView } from "@/state/match-view";
 
 interface CallUpRangeBannerProps {
   readonly warning: MatchView["callUpRange"];
+  // A one-line chip on tablets, to save height (RF-081).
+  readonly compact?: boolean;
 }
 
 /** Informs only (RF-068): the call-up is never refused. Nothing is drawn inside the range. */
 export function CallUpRangeBanner({
   warning,
+  compact = false,
 }: CallUpRangeBannerProps): ReactElement | null {
   const { t } = useTranslation();
   if (warning === null) return null;
   return (
-    <Text style={styles.banner}>
+    <Text
+      style={[styles.banner, compact && styles.chip]}
+      numberOfLines={compact ? 1 : undefined}
+    >
       {t("warning.callUpRange", {
         format: warning.format,
         min: warning.min,
@@ -33,4 +39,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#fde68a",
     fontSize: 16,
   },
+  chip: { marginVertical: 4, paddingVertical: 4, fontSize: 14, flexShrink: 1 },
 });
