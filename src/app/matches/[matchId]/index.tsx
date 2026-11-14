@@ -131,6 +131,7 @@ export default function MatchScreen(): ReactElement {
 
   return (
     <View style={styles.screen}>
+      {saveFailed ? <SaveErrorBanner /> : null}
       {inHeader ? null : <CallUpButton id={id} inHeader={false} />}
       <WarningStrip
         view={view}
@@ -146,7 +147,6 @@ export default function MatchScreen(): ReactElement {
       />
       {inHeader ? null : <GridButtons {...buttons} />}
       {dialog}
-      {saveFailed ? <SaveErrorBanner floating /> : null}
     </View>
   );
 }

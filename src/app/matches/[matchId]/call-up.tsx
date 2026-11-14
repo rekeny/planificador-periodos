@@ -41,6 +41,7 @@ export default function CallUpScreen(): ReactElement {
 
   return (
     <View style={styles.screen}>
+      {saveFailed ? <SaveErrorBanner /> : null}
       <ScrollView>
         <CallUpRangeBanner warning={view.callUpRange} />
         <CallUpRows rows={view.rows} onRemove={remove} />
@@ -65,7 +66,6 @@ export default function CallUpScreen(): ReactElement {
         onConfirm={confirmRemoval}
         onCancel={() => setAsking(null)}
       />
-      {saveFailed ? <SaveErrorBanner floating /> : null}
     </View>
   );
 }
