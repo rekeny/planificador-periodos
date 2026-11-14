@@ -1,6 +1,6 @@
 // T053: grid layout on tablets, with the height budget of plan.md "Tablet height". Expected API of
 // src/ui/grid/grid-layout.ts, which the Implementer writes (see grid-layout.phone.test.ts):
-//   gridLayout(input: GridLayoutInput): GridLayout, and TABLET_MIN_SHORT_SIDE = 600
+//   gridLayout(input: GridLayoutInput): GridLayout, and TABLET_MIN_SHORT_SIDE = 768
 import { assert, integer, property } from "fast-check";
 import {
   gridLayout,
@@ -46,22 +46,22 @@ describe("grid layout on a tablet", () => {
   it.each([
     [768, 1024, true],
     [1024, 768, true],
-    [600, 900, true],
-    [900, 600, true],
-    [599, 900, false],
-    [900, 599, false],
-    [600, 600, true],
-    [599, 599, false],
+    [768, 900, true],
+    [900, 768, true],
+    [767, 900, false],
+    [900, 767, false],
+    [768, 768, true],
+    [767, 767, false],
   ])(
-    "RF-076: the grid buttons go in the header when the shortest side is at least 600 pt (599 is a phone, 600 a tablet), in both orientations",
+    "RF-076: the grid buttons go in the header when the shortest side is at least 768 pt (767 is a phone, 768 a tablet), in both orientations",
     (windowWidth, windowHeight, inHeader) => {
       const layout = gridLayout(inputFor({ windowWidth, windowHeight }));
       expect(layout.buttonsInHeader).toBe(inHeader);
     },
   );
 
-  it("RF-076: the tablet threshold is 600 points", () => {
-    expect(TABLET_MIN_SHORT_SIDE).toBe(600);
+  it("RF-076: the tablet threshold is 768 points", () => {
+    expect(TABLET_MIN_SHORT_SIDE).toBe(768);
   });
 
   it.each([
@@ -135,13 +135,13 @@ describe("grid layout on a tablet", () => {
   });
 
   it("RF-078: 3 overtimes on a tablet whose width leaves less than 44 pt per column set horizontal scroll with cells of 44 pt", () => {
-    // 600 x 900, player column 180 pt: (600 - 180) / 11 columns = 38 pt.
+    // 768 x 1024, player column 290 pt: (768 - 290) / 11 columns = 43 pt.
     const layout = gridLayout(
       portrait({
-        windowWidth: 600,
-        windowHeight: 900,
+        windowWidth: 768,
+        windowHeight: 1024,
         overtimes: 3,
-        playerColumnWidth: 180,
+        playerColumnWidth: 290,
       }),
     );
     expect(layout.buttonsInHeader).toBe(true);

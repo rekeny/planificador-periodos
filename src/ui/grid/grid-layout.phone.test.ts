@@ -176,10 +176,10 @@ describe("grid layout on a phone", () => {
     [667, 375],
     [320, 568],
     [568, 320],
-    [599, 900],
-    [900, 599],
+    [767, 900],
+    [900, 767],
   ])(
-    "RF-076: on a phone window (shortest side under 600 pt) the grid buttons go in the toolbar under the grid, in both orientations",
+    "RF-076: on a phone window (shortest side under 768 pt) the grid buttons go in the toolbar under the grid, in both orientations",
     (windowWidth, windowHeight) => {
       const layout = gridLayout(inputFor({ windowWidth, windowHeight }));
       expect(layout.buttonsInHeader).toBe(false);
@@ -194,8 +194,8 @@ describe("grid layout on a phone", () => {
     expect(gridLayout(portrait)).toEqual(first);
   });
 
-  it("RF-076 RF-078: the tablet threshold is 600 points", () => {
-    expect(TABLET_MIN_SHORT_SIDE).toBe(600);
+  it("RF-076 RF-078: the tablet threshold is 768 points", () => {
+    expect(TABLET_MIN_SHORT_SIDE).toBe(768);
   });
 
   it("RF-078 RF-081: for any width from 320, any height, 4, 6 or 8 periods, 0 to 5 overtimes and 0 to 20 players, cells and rows are never below 44 pt, rows never above 56 pt, and no horizontal scroll means everything fits", () => {

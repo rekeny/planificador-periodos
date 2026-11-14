@@ -1,6 +1,6 @@
 // D2 review (Codex re-run): the real match screen keeps the tablet's 12 rows without scrolling
 // (RF-081) BY CONSTRUCTION, with warnings present. CONTRACT (the Implementer chooses the rest):
-//   - On a tablet (shortest side >= 600) the call-up button «Convocatoria» is in the navigation
+//   - On a tablet (shortest side >= 768) the call-up button «Convocatoria» is in the navigation
 //     header (headerRight, with the grid buttons), once, and not in the body; on a phone it stays
 //     in the body.
 //   - On a tablet a View testID `warning-strip` wraps the banners (`warning-banners`) and the

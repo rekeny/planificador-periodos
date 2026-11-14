@@ -1,5 +1,5 @@
 // The window size in grid tests (T083). This file holds no test calls. jest-expo starts with a
-// 750 × 1334 window, which would already be a tablet, so every grid test sets its own size and
+// 750 × 1334 window, whose shortest side (750) is a phone under the 768 threshold, so every grid test sets its own size and
 // puts the first one back. `Dimensions.set` fires the same event as a real rotation.
 import { act } from "@testing-library/react-native";
 import { Dimensions } from "react-native";

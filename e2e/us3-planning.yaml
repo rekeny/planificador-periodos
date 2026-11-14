@@ -4,7 +4,7 @@ name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth
 # Journey of US3 on a clean install (T056). Written WITHOUT running it: Maestro is not installed
 # here (developer decision of 2026-11-13), so the first real run will need adjustments, like the
 # swipes of the US1 flows. Nothing here uses the network.
-# Device size assumed: a phone in portrait (shortest side under 600 points, such as an iPhone 15 or
+# Device size assumed: a phone in portrait (shortest side under 768 points, such as an iPhone 15 or
 # a Pixel 7). There «Deshacer», «Añadir prórroga» and «Quitar prórroga» sit in a toolbar under the
 # grid. On a tablet they sit in the header with the same texts, so the commands would not change,
 # but that layout is not run here. With 6 periods the grid fits; with an overtime it scrolls.

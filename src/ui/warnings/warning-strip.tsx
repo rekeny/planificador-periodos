@@ -1,5 +1,10 @@
-import type { ReactElement } from "react";
-import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
+import { useState, type ReactElement } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+} from "react-native";
 
 import type { MatchView } from "@/state/match-view";
 import { TABLET_STRIP_MAX_HEIGHT } from "@/ui/grid/tablet-budget";
@@ -23,12 +28,25 @@ export function WarningStrip({
   onLegendLayout,
 }: WarningStripProps): ReactElement {
   const hasBanners = view.ruleImpossible || view.callUpRange !== null;
+  // The strip scrolls inside its bound only when its content is taller than the bound; an unreported
+  // part counts 0, and before any report nothing scrolls.
+  const [bannersHeight, setBannersHeight] = useState(0);
+  const [legendHeight, setLegendHeight] = useState(0);
+  const scrollEnabled = bannersHeight + legendHeight > TABLET_STRIP_MAX_HEIGHT;
+  const handleBannersLayout = (event: LayoutChangeEvent): void => {
+    setBannersHeight(event.nativeEvent.layout.height);
+    onBannersLayout(event);
+  };
+  const handleLegendLayout = (event: LayoutChangeEvent): void => {
+    setLegendHeight(event.nativeEvent.layout.height);
+    onLegendLayout(event);
+  };
   const content = (
     <>
       {hasBanners ? (
         <View
           testID="warning-banners"
-          onLayout={onBannersLayout}
+          onLayout={handleBannersLayout}
           style={compact ? styles.chips : undefined}
         >
           <RuleImpossibleBanner
@@ -40,7 +58,7 @@ export function WarningStrip({
       ) : null}
       <WarningLegend
         items={view.legend}
-        onLayout={onLegendLayout}
+        onLayout={handleLegendLayout}
         compact={compact}
       />
     </>
@@ -48,12 +66,19 @@ export function WarningStrip({
   if (!compact) return content;
   return (
     <View testID="warning-strip" style={styles.strip}>
-      {content}
+      <ScrollView
+        testID="warning-strip-scroll"
+        nestedScrollEnabled
+        showsVerticalScrollIndicator
+        scrollEnabled={scrollEnabled}
+      >
+        {content}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  strip: { maxHeight: TABLET_STRIP_MAX_HEIGHT, overflow: "hidden" },
+  strip: { maxHeight: TABLET_STRIP_MAX_HEIGHT },
   chips: { flexDirection: "row", flexWrap: "wrap" },
 });

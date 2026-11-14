@@ -1,5 +1,5 @@
 // T055: where the three grid buttons are: the navigation header on tablets and a toolbar under the
-// grid on phones, as grid-layout.ts decides with TABLET_MIN_SHORT_SIDE = 600 on the shortest side
+// grid on phones, as grid-layout.ts decides with TABLET_MIN_SHORT_SIDE = 768 on the shortest side
 // of the window (RF-076, RF-058, RF-059, RF-055). Same doubles as match-screen.marks.test.tsx.
 // A header button is a host element under "RNSScreenStackHeaderConfig" (match-screen-grid.ts).
 import { screen, waitFor } from "expo-router/testing-library";
@@ -52,10 +52,10 @@ const BUTTONS = [UNDO, ADD, REMOVE_OVERTIME];
 const WINDOWS: [number, number, boolean][] = [
   [375, 667, false],
   [667, 375, false],
-  [599, 900, false],
-  [900, 599, false],
-  [600, 900, true],
-  [900, 600, true],
+  [767, 900, false],
+  [900, 767, false],
+  [768, 900, true],
+  [900, 768, true],
   [768, 1024, true],
   [1024, 768, true],
 ];

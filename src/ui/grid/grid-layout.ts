@@ -1,8 +1,12 @@
 // Pure size rules of the grid (RF-076 to RF-081). No React and no react-native: the screen passes
 // the window size and the heights it measured, and gets back sizes and scroll flags.
 
-/** A window is a tablet when its shortest side reaches this many points (the same in both orientations). */
-export const TABLET_MIN_SHORT_SIDE = 600;
+/**
+ * A window is a tablet when its shortest side reaches this many points (the same in both orientations).
+ * 768 is where 12 rows of 44 fit: 768 - 74 chrome - 80 strip - 44 header = 570 >= 528. Windows of
+ * 600 to 767 use the phone layout.
+ */
+export const TABLET_MIN_SHORT_SIDE = 768;
 
 const MIN_CELL_WIDTH = 44;
 const MIN_ROW_HEIGHT = 44;
@@ -30,7 +34,7 @@ export type GridLayout = {
   buttonsInHeader: boolean;
 };
 
-/** Tablets (shortest side from 600) keep the buttons in the header; phones use a toolbar. */
+/** Tablets (shortest side from 768) keep the buttons in the header; phones use a toolbar. */
 export function buttonsInHeader(
   windowWidth: number,
   windowHeight: number,
