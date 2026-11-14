@@ -16,7 +16,7 @@ let opened: AppDatabase | undefined;
  * No directory is passed, so the file lives in the default folder that is kept out of backups.
  */
 export async function openAppDatabase(): Promise<void> {
-  const client = openDatabaseSync(DATABASE_NAME);
+  const client = openDatabaseSync(DATABASE_NAME, { useNewConnection: true });
   try {
     client.execSync("PRAGMA foreign_keys = ON");
     client.execSync("PRAGMA journal_mode = WAL");
