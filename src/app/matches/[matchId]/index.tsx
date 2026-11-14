@@ -1,5 +1,10 @@
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useLayoutEffect, useState } from "react";
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -63,6 +68,31 @@ function useWarningHeights(view: MatchView | null) {
   };
 }
 
+type Store = ReturnType<typeof getMatchSessionStore>;
+
+// The session is opened on focus (not while rendering, which updates another screen's store). The
+// screen stays mounted under another match route, which takes the session over, so it is
+// opened again, but only when it is not already open for this match: coming back from
+// the call-up or the new-player screen keeps the Undo history (RF-057, RF-058). Only popping this
+// screen closes the session, and only when it still belongs to it (a not-found or another match's
+// session is not this screen's to close).
+function useOwnSession(id: number | null, store: Store): void {
+  useFocusEffect(
+    useCallback(() => {
+      const { status, view, openMatch } = store.getState();
+      const owned = status === "open" && view?.matchId === id;
+      if (id !== null && !owned) openMatch(id);
+    }, [id, store]),
+  );
+  useEffect(
+    () => () => {
+      const { status, view, closeMatch } = store.getState();
+      if (status === "open" && view?.matchId === id) closeMatch();
+    },
+    [id, store],
+  );
+}
+
 // The match screen: the grid with its buttons, the call-up entry and the warnings. It reads the
 // session's view and calls its actions; the rules stay in the domain.
 export default function MatchScreen(): ReactElement {
@@ -71,19 +101,15 @@ export default function MatchScreen(): ReactElement {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const id = parseMatchId(matchId);
   const store = getMatchSessionStore();
-  // Opened once, before the first render reads the store, so another match's data is never shown.
-  useState(() => {
-    if (id !== null) store.getState().openMatch(id);
-  });
-  // Only popping this screen closes the session: the call-up screen is pushed on top of it and
-  // this one stays mounted below (RF-057). Focus events are not used for that reason.
-  useEffect(() => () => store.getState().closeMatch(), [store]);
+  useOwnSession(id, store);
   const status = useStore(store, (state) => state.status);
   const view = useStore(store, (state) => state.view);
   const saveFailed = useStore(store, (state) => state.saveFailed);
   const { buttons, dialog } = useMatchActions(view, () => store.getState());
   const heights = useWarningHeights(view);
-  const showing = id !== null && status === "open" && view !== null;
+  // Another match's view is never shown while the focus effect takes the session over.
+  const showing =
+    id !== null && status === "open" && view !== null && view.matchId === id;
   const inHeader = buttonsInHeader(width, height);
 
   // The header is native, so its buttons are set again whenever what they show changes.
@@ -120,7 +146,7 @@ export default function MatchScreen(): ReactElement {
       />
       {inHeader ? null : <GridButtons {...buttons} />}
       {dialog}
-      {saveFailed ? <SaveErrorBanner /> : null}
+      {saveFailed ? <SaveErrorBanner floating /> : null}
     </View>
   );
 }
