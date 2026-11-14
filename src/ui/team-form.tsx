@@ -1,13 +1,14 @@
 import { useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 
 import type { Format } from "@/domain/format";
 import type { SaveResult } from "@/state/save-result";
 import type { TeamInput } from "@/state/squad-store";
 import { FormatPicker } from "./format-picker";
 import { NAME_MAX_LENGTH } from "./input-limits";
+import { FormScroll } from "./form-scroll";
 import { SaveErrorBanner } from "./save-error-banner";
 
 export interface TeamFormValues {
@@ -48,7 +49,7 @@ export function TeamForm({
   };
 
   return (
-    <View style={styles.screen}>
+    <FormScroll contentStyle={styles.screen}>
       <Text style={styles.label}>{t("team.field.name")}</Text>
       <TextInput
         accessibilityLabel={t("team.field.name")}
@@ -74,12 +75,12 @@ export function TeamForm({
         <Text style={styles.saveText}>{t("common.save")}</Text>
       </Pressable>
       {message === "saveFailed" ? <SaveErrorBanner /> : null}
-    </View>
+    </FormScroll>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 16, gap: 8 },
+  screen: { padding: 16, gap: 8 },
   label: { fontSize: 14, marginTop: 8 },
   input: {
     borderWidth: 1,

@@ -1,12 +1,13 @@
 import type { ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { StyleSheet, Text, TextInput } from "react-native";
 import { useStore } from "zustand";
 
 import type { Format } from "@/domain/format";
 import type { NewMatchDraft } from "@/state/new-match-draft";
 import { DateTimeField } from "./date-time-field";
 import { FormatPicker } from "./format-picker";
+import { FormScroll } from "./form-scroll";
 import { NOTES_MAX_LENGTH } from "./input-limits";
 import { ScoreFields } from "./score-fields";
 import { TeamNameFields } from "./team-name-fields";
@@ -29,7 +30,7 @@ export function MatchForm({
   const { t } = useTranslation();
   const state = useStore(draft, (current) => current);
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <FormScroll contentStyle={styles.screen}>
       <Text style={styles.label}>{t("match.field.format")}</Text>
       <FormatPicker value={format} onChange={onFormatChange} />
       <DateTimeField
@@ -63,7 +64,7 @@ export function MatchForm({
         style={styles.input}
       />
       {children}
-    </ScrollView>
+    </FormScroll>
   );
 }
 
