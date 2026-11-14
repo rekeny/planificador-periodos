@@ -680,3 +680,5 @@ Codex's validation: TypeScript, ESLint, source and configuration formatting, tra
 ### Verdict (Codex review · D2 fourth run)
 
 Not approved for closing. Three BLOCKING findings (1 to 3) and one IMPORTANT finding (4) are open and must be resolved, through phase 6, before phase 8 can pass again. Finding 5 (MINOR) is a suggestion. Status of all five: Open.
+
+Findings 1 and 3: fixed in cb7999c and ed00114 (2026-11-14). Not verified on a device: the inspector behaviour and the pickers' language (Android calendar names follow the device language: residual risk in `plan.md` Deviations).
