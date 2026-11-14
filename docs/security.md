@@ -38,9 +38,9 @@ The reference is the OWASP MASVS standard for mobile apps. Since the app works o
 
 ## Before each release
 
-- [ ] Block the Internet permission in the Android production build and check that the app works without it.
+- [ ] Block the Internet permission in the Android production build and check that the app works without it. Done in the code (T088, SEC-D2-1): `app.config.js` blocks `android.permission.INTERNET` when `APP_VARIANT` is exactly `production`. Still to do for the release: create `eas.json` with `build.production.env.APP_VARIANT` set to `production` (EAS is not set up yet), build with that profile, and check the real manifest and that the app works without `INTERNET`.
 - [ ] MobSF on the APK and the IPA, with no open high findings.
-- [ ] Review the generated `AndroidManifest.xml` and `Info.plist`: only the essential permissions. Block `SYSTEM_ALERT_WINDOW`, `VIBRATE`, `READ_EXTERNAL_STORAGE` and `WRITE_EXTERNAL_STORAGE` with `android.blockedPermissions`, and check that the dev-client residue (`exp+` scheme, local-network and Bonjour keys in `Info.plist`) is gone from the production build.
+- [ ] Review the generated `AndroidManifest.xml` and `Info.plist`: only the essential permissions. `SYSTEM_ALERT_WINDOW`, `VIBRATE`, `READ_EXTERNAL_STORAGE` and `WRITE_EXTERNAL_STORAGE` are already blocked in `app.json` `android.blockedPermissions` (T088); check that they are marked `tools:node="remove"` in the release manifest, and check that the dev-client residue (`exp+` scheme, local-network and Bonjour keys in `Info.plist`) is gone from the production build.
 - [ ] Set `ios.config.usesNonExemptEncryption: false` (`ITSAppUsesNonExemptEncryption`) before the first iOS upload.
 - [ ] Declare in the App Store and Google Play that the app collects no data.
 - [ ] Review the GDPR privacy obligations, because there is children's data on the device.
