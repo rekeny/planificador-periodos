@@ -59,8 +59,15 @@ export async function typePlayerName(text: string): Promise<void> {
   await fireEvent.changeText(screen.getByLabelText("Nombre"), text);
 }
 
+/**
+ * Types into the number field as the keyboard does: the native `maxLength` of the field cuts the
+ * text (D42), which the test double of TextInput does not do by itself.
+ */
 export async function typeNumber(text: string): Promise<void> {
-  await fireEvent.changeText(screen.getByLabelText("Dorsal"), text);
+  const field = screen.getByLabelText("Dorsal");
+  const limit: unknown = field.props.maxLength;
+  const typed = typeof limit === "number" ? text.slice(0, limit) : text;
+  await fireEvent.changeText(field, typed);
 }
 
 /** Types the player and presses «Guardar», as the coach would. */

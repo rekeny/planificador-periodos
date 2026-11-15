@@ -1,7 +1,7 @@
 // T035: the new-player form, its fields, limits and validation (RF-016, RF-012, E-021, E-022).
 // Real src/app routes through renderRouter, with the doubles of team-screen.test.tsx. The route
-// `/teams/[teamId]/players/new` does not exist yet. The test double does not apply `maxLength`,
-// so "100" goes straight to the validation (T036 types it for real).
+// `/teams/[teamId]/players/new` does not exist yet. The test double does not apply `maxLength`:
+// `typeNumber` cuts the text at the field's limit, so typing "100" leaves "10" (D42).
 import { fireEvent, renderRouter, screen } from "expo-router/testing-library";
 
 import { createSquadStore } from "@/state/squad-store";
@@ -52,7 +52,7 @@ jest.mock("@/state/app-stores", () =>
 
 const FORTY = "Club Baloncesto Alevín Aragón Zaragoza 1";
 const SAVED_NUMBERS = ["0", "00", "7", "99"];
-const REJECTED_NUMBERS = ["07", "100", ""];
+const REJECTED_NUMBERS = ["07", ""];
 type Db = ReturnType<typeof resetMockDatabase>;
 let db: Db;
 let alevin: number;
@@ -153,6 +153,31 @@ describe("new-player form, the numbers of E-021", () => {
       expect(savedPlayers(db, alevin)).toEqual([{ name: "Ana", number: "4" }]);
     },
   );
+});
+
+describe("new-player form, a number over the limit", () => {
+  it("RF-016 E-021: typing 100 leaves 10 in the number field with no message and saving gives the number 10", async () => {
+    await renderRouter("./src/app", { initialUrl: `/teams/${alevin}` });
+    await screen.findByRole("button", { name: "Nuevo jugador" });
+    await openPlayerForm();
+    await addViaForm("Luis", "100");
+    expect(await screen.findByRole("button", { name: "Editar" })).toBeTruthy();
+    expect(screen).toHavePathname(`/teams/${alevin}`);
+    expect(playerOrder()).toContain("10 Luis");
+    expect(savedPlayers(db, alevin)).toContainEqual({
+      name: "Luis",
+      number: "10",
+    });
+    expect(screen.queryByText(NUMBER_INVALID)).toBeNull();
+  });
+
+  it("RF-016 E-021: typing 100 leaves 10 in the field itself and shows no message before saving", async () => {
+    await openPlayerFormAlone(alevin);
+    await screen.findByLabelText("Nombre");
+    await typeNumber("100");
+    expect(screen.getByLabelText("Dorsal")).toHaveDisplayValue("10");
+    expect(screen.queryByText(NUMBER_INVALID)).toBeNull();
+  });
 });
 
 describe("new-player form, the name", () => {

@@ -108,7 +108,7 @@ describe("new player from the match, the limits", () => {
 });
 
 describe("new player from the match, what is asked", () => {
-  it.each(["07", "100", ""])(
+  it.each(["07", ""])(
     "RF-035 RF-016 E-021: the number «%s» shows the number message, keeps the form open and creates nothing",
     async (number) => {
       const s = startSession(squadSpecs(9));
@@ -122,6 +122,15 @@ describe("new player from the match, what is asked", () => {
       expect(savedCallUp(s.db, s.matchId)).toHaveLength(9);
     },
   );
+
+  it("RF-035 RF-016 E-021: typing 100 leaves 10 in the field with no message and saving creates the player with number 10", async () => {
+    const s = startSession(squadSpecs(9));
+    await openFormAlone(s);
+    await addViaForm("Nora", "100");
+    expect(screen.queryByText(NUMBER_INVALID)).toBeNull();
+    expect(savedTeam(s.db, s.teamId)).toContain("10 Nora");
+    expect(savedCallUp(s.db, s.matchId)).toContain("10 Nora");
+  });
 
   it.each(["", "     "])(
     "RF-035 RF-016: a name typed as «%s» shows «Escribe un nombre.» and creates nothing",
