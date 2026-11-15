@@ -326,6 +326,7 @@ Known D2 limits (stated in the spec and tasks, not bugs to fix now):
 - A saved match cannot be reopened from the interface in D2: only by the deep link `planificadorperiodos://matches/1`. After Back from the grid there is no way back to it until the team's match list (T071, D3).
 - A team with no players shows an empty list with no text.
 - A failed read reuses the empty and not-found states, with no new text.
+- Small change (iOS 26 header): every screen sets `headerTransparent: false` so content starts below the header (`small-change-ios26-header.md`); the device look is still to be checked on the iPad simulator.
 
 Not done or not verified:
 

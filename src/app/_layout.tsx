@@ -17,29 +17,33 @@ type Translate = TFunction;
 const MODAL = "modal" as const;
 
 // Options by route name here, at layout level: the new-team form is a modal with its own title.
+// iOS 26 (Liquid Glass) makes the header transparent when no background is set, so the content
+// would start behind it. An explicit opaque header keeps the content below it.
+const BASE = { headerTransparent: false } as const;
+
 function screenOptionsFor(t: Translate) {
   return ({ route }: { route: { name: string } }) => {
     if (route.name === "teams/new") {
-      return { title: t("teams.new"), presentation: MODAL };
+      return { ...BASE, title: t("teams.new"), presentation: MODAL };
     }
     if (route.name === "teams/[teamId]/edit") {
-      return { title: t("common.edit"), presentation: MODAL };
+      return { ...BASE, title: t("common.edit"), presentation: MODAL };
     }
     if (route.name === "teams/[teamId]/players/new") {
-      return { title: t("players.new"), presentation: MODAL };
+      return { ...BASE, title: t("players.new"), presentation: MODAL };
     }
     if (route.name === "teams/[teamId]/matches/new") {
-      return { title: t("matches.new"), presentation: MODAL };
+      return { ...BASE, title: t("matches.new"), presentation: MODAL };
     }
     // The match screen has no title of its own yet; the empty string hides the route name.
-    if (route.name === "matches/[matchId]/index") return { title: "" };
+    if (route.name === "matches/[matchId]/index") return { ...BASE, title: "" };
     if (route.name === "matches/[matchId]/call-up") {
-      return { title: t("callUp.title") };
+      return { ...BASE, title: t("callUp.title") };
     }
     if (route.name === "matches/[matchId]/new-player") {
-      return { title: t("players.new"), presentation: MODAL };
+      return { ...BASE, title: t("players.new"), presentation: MODAL };
     }
-    return { title: t("teams.title") };
+    return { ...BASE, title: t("teams.title") };
   };
 }
 
