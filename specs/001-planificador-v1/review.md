@@ -731,7 +731,7 @@ Not approved for closing. One BLOCKING finding (1) is open and must be resolved,
 
 Run: `scripts/review.sh specs/001-planificador-v1` at commit `7bbbf37` (branch `001-planificador-v1-d2` against `main`), 2026-11-15 09:53. Full output: [codex-review.md](codex-review.md). The previous run's output is kept in the scratchpad only.
 
-Summary: 2 findings in total. BLOCKING 1, IMPORTANT 0, MINOR 1. Codex verdict: **changes requested (not approved)**. Status of both: Fixed in HASH7 (finding 1: each mounted form owns the draft by `formId`) and in the following docs commit (finding 2).
+Summary: 2 findings in total. BLOCKING 1, IMPORTANT 0, MINOR 1. Codex verdict: **changes requested (not approved)**. Status of both: Fixed in `c2ea193` (finding 1: each mounted form owns the draft by `formId`) and in the following docs commit (finding 2).
 
 - **1 · BLOCKING · Returning to another form for the same team can silently reuse an already-created match.** Files: `src/app/teams/[teamId]/matches/new.tsx:31`, `src/state/new-match-draft.ts:165`. Codex: Reproduced through the real routes and in-memory SQLite: open team 1's new-match form, push another new-match form for team 1, save it, return from its grid to the first form, then press Save. Only one match exists: the first form reopens the previously created match. Draft ownership checks only `teamId`, so returning to the first form skips initialization and retains the second form's cached `created` result. Subsequent saves bypass validation and persistence. This breaks RF-025 and RF-082. Existing navigation tests cover different teams and miss this case. Proposed fix: give each mounted form its own draft, or track ownership with a unique form instance identifier. On returning to a displaced form, initialize its draft and clear the unrelated saved result. Add a regression that edits fields after returning and verifies a distinct match with those values.
 - **2 · MINOR · Current explanations still contain superseded statements.** Files: `specs/001-planificador-v1/summary.md:343`, `specs/001-planificador-v1/tasks.md:834`. Codex: The summary says a sixth review never happened. T053 still describes 600 points as the tablet boundary and puts landscape-phone buttons in the toolbar. Current code uses 768 points and places landscape-phone buttons in the header. Proposed fix: update the current summary and task scenarios; explicitly label any retained earlier decisions as historical.
@@ -742,7 +742,7 @@ Codex's validation: types, lint, source and configuration formatting, traceabili
 
 ### Verdict (Codex review · D2 seventh run)
 
-Not approved for closing when the run ended. Finding 1 (BLOCKING) fixed in HASH7 and finding 2 (MINOR) fixed in the docs commit after it; a new phase 8 run is needed.
+Not approved for closing when the run ended. Finding 1 (BLOCKING) fixed in `c2ea193` and finding 2 (MINOR) fixed in the docs commit after it; a new phase 8 run is needed.
 
 ## Security · T087 and T088 (D2, 2026-11-14)
 
