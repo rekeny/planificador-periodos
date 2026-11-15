@@ -713,7 +713,7 @@ Findings 2, 3 and 4: fixed in e4ad5eb (finding 2), f053b37 (finding 3) and 42ed4
 
 Run: `scripts/review.sh specs/001-planificador-v1` at commit `582fedf` (branch `001-planificador-v1-d2` against `main`), 2026-11-15 09:14. Full output: [codex-review.md](codex-review.md). The previous run's output is kept in the scratchpad only.
 
-Summary: 2 findings in total. BLOCKING 1, IMPORTANT 0, MINOR 1. Codex verdict: **changes requested (not approved)**. Status of both: Open.
+Summary: 2 findings in total. BLOCKING 1, IMPORTANT 0, MINOR 1. Codex verdict: **changes requested (not approved)**. Status of both: Fixed in 864302a (2026-11-15).
 
 - **1 · BLOCKING · Phone landscape warnings can make the grid inaccessible.** Files: `src/ui/warnings/warning-strip.tsx:66`, `src/app/matches/[matchId]/index.tsx:136`. Codex: On phones, warnings have neither a height bound nor a surrounding scroll container. In a 667 × 375 window, a six-period match with 13 players and one player marked in P1–P4 displays both banners and three legend entries. Together with the call-up button, toolbar and navigation header, these consume the grid's available height. Enabling scrolling inside the collapsed grid cannot make its cells reachable. This violates RF-010, RF-076 and RF-080. Existing tests inject viewport heights and miss this surrounding layout problem. Proposed fix: bound and scroll the phone warnings while reserving usable grid space. Verify this assembled scenario in landscape, including after a save failure.
 
@@ -725,7 +725,7 @@ Codex's validation: types, lint, source formatting, traceability, focused-test d
 
 ### Verdict (Codex review · D2 sixth run)
 
-Not approved for closing. One BLOCKING finding (1) is open and must be resolved, through phase 6, before phase 8 can pass again. Finding 2 (MINOR) is a suggestion. Status of both: Open.
+Not approved for closing. One BLOCKING finding (1) is open and must be resolved, through phase 6, before phase 8 can pass again. Finding 2 (MINOR) is a suggestion. Status of both: Fixed in 864302a (2026-11-15).
 
 ## Security · T087 and T088 (D2, 2026-11-14)
 
