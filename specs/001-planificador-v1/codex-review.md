@@ -1,30 +1,34 @@
 # Codex review
 
-- Date: 2026-11-15 09:14
+- Date: 2026-11-15 09:53
 - Branch: 001-planificador-v1-d2 against main
-- Commit: 582fedf
+- Commit: 7bbbf37
 
-**Changes requested: 1 BLOCKING, 0 IMPORTANT, 1 MINOR.**
+**Changes requested: 1 BLOCKING finding, no IMPORTANT findings, 1 MINOR finding.** Reviewed `git diff main...HEAD` at `7bbbf37`, accounting for the approved D2/D3 split.
 
-Reviewed `git diff main...HEAD` at `582fedf`, treating D3 functionality as an approved deferral.
+1. **BLOCKING — Returning to another form for the same team can silently reuse an already-created match.**  
+   Files: [new.tsx:31](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/app/teams/[teamId]/matches/new.tsx:31), [new-match-draft.ts:165](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/state/new-match-draft.ts:165).
 
-1. **BLOCKING — Phone landscape warnings can make the grid inaccessible.**  
-   **Files:** `src/ui/warnings/warning-strip.tsx:66`, `src/app/matches/[matchId]/index.tsx:136`.  
-   On phones, warnings have neither a height bound nor a surrounding scroll container. In a 667 × 375 window, a six-period match with 13 players and one player marked in P1–P4 displays both banners and three legend entries. Together with the call-up button, toolbar and navigation header, these consume the grid’s available height. Enabling scrolling inside the collapsed grid cannot make its cells reachable. This violates RF-010, RF-076 and RF-080. Existing tests inject viewport heights and miss this surrounding layout problem.  
-   **Fix:** bound and scroll the phone warnings while reserving usable grid space. Verify this assembled scenario in landscape, including after a save failure.
+   Reproduced through the real routes and in-memory SQLite: open team 1’s new-match form, push another new-match form for team 1, save it, return from its grid to the first form, then press Save. Only one match exists: the first form reopens the previously created match.
 
-2. **MINOR — Current documentation retains superseded instructions.**  
-   **Files:** `specs/001-planificador-v1/plan.md:754`, `plan.md:769`, `tasks.md:829`, `summary.md:333`.  
-   These passages still describe an overlay error banner, a 600-point tablet threshold and approvals as pending. The implementation uses normal flow and 768 points; later documentation records the approvals.  
-   **Fix:** update current design, completion criteria and pending lists. Keep superseded decisions explicitly marked as historical.
+   Draft ownership checks only `teamId`, so returning to the first form skips initialization and retains the second form’s cached `created` result. Subsequent saves bypass validation and persistence. This breaks RF-025/RF-082. Existing navigation tests cover different teams and miss this case.
 
-Category results:
+   **Fix:** give each mounted form its own draft, or track ownership with a unique form instance identifier. On returning to a displaced form, initialize its draft and clear the unrelated saved result. Add a regression that edits fields after returning and verifies a distinct match with those values.
 
-- **RF/E coverage and scope:** finding 1. Full v1 remains incomplete through approved D3 deferrals; device-dependent checks remain pending. No unrelated product additions found.
-- **Constitution, layers, conventions and glossary:** finding 1 affects required behavior; no additional structural findings.
-- **Test integrity and effectiveness:** finding 1 exposes a coverage gap. No unapproved deletion, skipping or weakening found; the deleted placeholder test has recorded authorization.
-- **Security:** no additional findings from static inspection. Backup behavior and release permissions still require the documented device and artifact checks.
-- **Explanation accuracy:** finding 2.
-- **Simplicity and efficiency:** no findings.
+2. **MINOR — Current explanations still contain superseded statements.**  
+   Files: [summary.md:343](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/specs/001-planificador-v1/summary.md:343), [tasks.md:834](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/specs/001-planificador-v1/tasks.md:834).
 
-Validation: types, lint, source formatting, traceability, focused-test detection and Gitleaks passed. With Jest cache writes disabled only in memory, **2,570 tests passed**; **25 were blocked by temporary-file permissions**. Full verification, coverage, Stryker and native layout behavior were not independently confirmed. No repository files were changed.
+   The summary says a sixth review never happened. T053 still describes 600 points as the tablet boundary and puts landscape-phone buttons in the toolbar. Current code uses 768 points and places landscape-phone buttons in the header.
+
+   **Fix:** update the current summary and task scenarios; explicitly label any retained earlier decisions as historical.
+
+| Review category                                | Result                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| RF/E implementation and scope                  | Finding 1. D3 requirements remain approved deferrals; no unrelated additions found.                      |
+| Constitution, layers, conventions and glossary | Finding 1 affects saving guarantees. No additional structural findings.                                  |
+| Test integrity and effectiveness               | Finding 1 exposes missing coverage. No unapproved deletion, skipping or weakening found.                 |
+| Security                                       | No additional findings from static inspection. Device backup and production-build checks remain pending. |
+| Explanation accuracy                           | Finding 2.                                                                                               |
+| Simplicity and efficiency                      | No findings.                                                                                             |
+
+Validation: types, lint, source/configuration formatting, traceability, focused-test detection and Gitleaks passed. With Jest cache writes disabled in memory, **2,596 existing tests passed**; 25 startup tests were blocked by temporary-file permissions. The supplemental navigation regression failed as described. Full verification, coverage, mutation testing and device behaviour were not independently confirmed. No repository files were changed.

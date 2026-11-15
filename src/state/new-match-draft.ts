@@ -22,6 +22,8 @@ export interface CallUpRow {
 export interface NewMatchDraftState {
   /** The team the draft was reset for; null when it is empty (never reset or the reset failed). */
   readonly teamId: number | null;
+  /** The mounted form that owns the draft; null when it is empty or was reset without a form. */
+  readonly formId: string | null;
   readonly format: Format;
   /** "YYYY-MM-DD". */
   readonly date: string;
@@ -36,7 +38,7 @@ export interface NewMatchDraftState {
   readonly callUpSelection: readonly CallUpRow[];
   readonly callUpRange: CallUpRangeWarning | null;
   /** True when the team loaded and the draft is ready; false leaves it empty and unsaveable. */
-  reset(teamId: number): boolean;
+  reset(teamId: number, formId?: string): boolean;
   setFormat(format: Format): void;
   setDate(parts: { year: number; month: number; day: number }): void;
   setTime(parts: { hour: number; minute: number }): void;
@@ -68,6 +70,7 @@ const EMPTY_FIELDS = {
 const EMPTY_DRAFT = {
   ...EMPTY_FIELDS,
   teamId: null,
+  formId: null,
   callUpSelection: [],
   callUpRange: null,
 } satisfies Partial<NewMatchDraftState>;
@@ -145,14 +148,14 @@ export function createNewMatchDraft(
 
   // Invalidates first so that nothing of an earlier team survives a reset that cannot finish
   // (unknown team, bad format, failed read): the route then shows not found (RF-082).
-  function reset(set: Set, teamId: number): boolean {
+  function reset(set: Set, teamId: number, formId: string | null): boolean {
     invalidate(set);
     try {
       const loaded = loadDraft(db, teamId, now);
       if (loaded === null) return false;
       teamName = loaded.team.name;
       openedTeamId = loaded.team.id;
-      set({ ...loaded.state, teamId: loaded.team.id });
+      set({ ...loaded.state, teamId: loaded.team.id, formId });
       return true;
     } catch {
       invalidate(set);
@@ -171,7 +174,7 @@ export function createNewMatchDraft(
   return createStore<NewMatchDraftState>()((set, get) => ({
     ...newMatchDefaults(6, ""),
     ...EMPTY_DRAFT,
-    reset: (teamId) => reset(set, teamId),
+    reset: (teamId, formId) => reset(set, teamId, formId ?? null),
     setFormat: (format) =>
       set({ format, callUpRange: rangeOf(format, get().callUpSelection) }),
     setDate: (parts) => set({ date: isoDate(parts) }),

@@ -727,6 +727,23 @@ Codex's validation: types, lint, source formatting, traceability, focused-test d
 
 Not approved for closing. One BLOCKING finding (1) is open and must be resolved, through phase 6, before phase 8 can pass again. Finding 2 (MINOR) is a suggestion. Status of both: Fixed in 864302a (2026-11-15).
 
+## Codex review · D2 seventh run (2026-11-15)
+
+Run: `scripts/review.sh specs/001-planificador-v1` at commit `7bbbf37` (branch `001-planificador-v1-d2` against `main`), 2026-11-15 09:53. Full output: [codex-review.md](codex-review.md). The previous run's output is kept in the scratchpad only.
+
+Summary: 2 findings in total. BLOCKING 1, IMPORTANT 0, MINOR 1. Codex verdict: **changes requested (not approved)**. Status of both: Fixed in HASH7 (finding 1: each mounted form owns the draft by `formId`) and in the following docs commit (finding 2).
+
+- **1 · BLOCKING · Returning to another form for the same team can silently reuse an already-created match.** Files: `src/app/teams/[teamId]/matches/new.tsx:31`, `src/state/new-match-draft.ts:165`. Codex: Reproduced through the real routes and in-memory SQLite: open team 1's new-match form, push another new-match form for team 1, save it, return from its grid to the first form, then press Save. Only one match exists: the first form reopens the previously created match. Draft ownership checks only `teamId`, so returning to the first form skips initialization and retains the second form's cached `created` result. Subsequent saves bypass validation and persistence. This breaks RF-025 and RF-082. Existing navigation tests cover different teams and miss this case. Proposed fix: give each mounted form its own draft, or track ownership with a unique form instance identifier. On returning to a displaced form, initialize its draft and clear the unrelated saved result. Add a regression that edits fields after returning and verifies a distinct match with those values.
+- **2 · MINOR · Current explanations still contain superseded statements.** Files: `specs/001-planificador-v1/summary.md:343`, `specs/001-planificador-v1/tasks.md:834`. Codex: The summary says a sixth review never happened. T053 still describes 600 points as the tablet boundary and puts landscape-phone buttons in the toolbar. Current code uses 768 points and places landscape-phone buttons in the header. Proposed fix: update the current summary and task scenarios; explicitly label any retained earlier decisions as historical.
+
+Codex's category results: RF/E implementation and scope (finding 1; D3 requirements remain approved deferrals; no unrelated additions found). Constitution, layers, conventions and glossary (finding 1 affects saving guarantees; no additional structural findings). Test integrity and effectiveness (finding 1 exposes missing coverage; no unapproved deletion, skipping or weakening found). Security (no additional findings from static inspection; device backup and production-build checks remain pending). Explanation accuracy (finding 2). Simplicity and efficiency (no findings).
+
+Codex's validation: types, lint, source and configuration formatting, traceability, focused-test detection and Gitleaks passed. With Jest cache writes disabled in memory, 2,596 existing tests passed; 25 startup tests were blocked by temporary-file permissions. The supplemental navigation regression failed as described. Full verification, coverage, mutation testing and device behaviour were not independently confirmed. No repository files were changed.
+
+### Verdict (Codex review · D2 seventh run)
+
+Not approved for closing when the run ended. Finding 1 (BLOCKING) fixed in HASH7 and finding 2 (MINOR) fixed in the docs commit after it; a new phase 8 run is needed.
+
 ## Security · T087 and T088 (D2, 2026-11-14)
 
 Scope: commits `4090040` (T087: message and Retry when the database fails to open) and `cdb06d3` (T088: blocked Android permissions). Method: read the diffs and the final files; `npx expo prebuild --platform android --no-install --clean` in two temporary copies outside the repository (no `ios/` or `android/` was created in the repository), one without `APP_VARIANT` and one with `APP_VARIANT=production`; `npm audit`, OSV-Scanner, gitleaks and Semgrep as `scripts/verify.sh` runs them. No code was changed.

@@ -1,5 +1,5 @@
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { useStore } from "zustand";
 
@@ -15,28 +15,31 @@ export default function NewMatchScreen(): ReactElement | null {
   const id = parseTeamId(teamId);
   const draft = getNewMatchDraft();
   const draftTeamId = useStore(draft, (state) => state.teamId);
+  const draftFormId = useStore(draft, (state) => state.formId);
+  const formId = useId(); // this mounted form, told apart from another form of the same team
   const format = useStore(draft, (state) => state.format);
   const [failed, setFailed] = useState(false);
   const [opened, setOpened] = useState(false);
   const started = useRef(false);
 
   // Every mounted form shares one draft. A form always resets it when it opens (a form left is
-  // lost, RF-082) and again when it is focused with the draft of another team, as after Back from a
-  // second team's form (RF-025). An effect, not render: resetting while rendering updates others.
+  // lost, RF-082) and again when it is focused while the draft belongs to another form, of another
+  // team or of the same one, as after Back from a later form (RF-025). An effect, not render: resetting while rendering updates others.
   useFocusEffect(
     useCallback(() => {
       if (id === null) return;
       const first = !started.current;
       started.current = true;
-      if (!first && draft.getState().teamId === id) return;
-      setFailed(!draft.getState().reset(id));
+      const current = draft.getState();
+      if (!first && current.teamId === id && current.formId === formId) return;
+      setFailed(!current.reset(id, formId));
       setOpened(true);
-    }, [draft, id]),
+    }, [draft, id, formId]),
   );
 
   if (id === null || failed) return <NotFound />;
   // Until the focus effect has loaded this team, nothing of an earlier draft is shown.
-  if (draftTeamId !== id || !opened) return null;
+  if (draftTeamId !== id || draftFormId !== formId || !opened) return null;
 
   return (
     <MatchForm
