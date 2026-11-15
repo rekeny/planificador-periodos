@@ -761,6 +761,22 @@ Codex's validation: types, lint, source and configuration formatting, traceabili
 
 Not approved by Codex: changes requested. No BLOCKING finding, so the phase 8 blocking gate is met, but IMPORTANT finding 1 must be fixed or explicitly accepted by the developer as pending before closing. Finding 2 (MINOR) is a suggestion. Both fixed in the next commit: finding 1 by amending E-021 (and the RF-016 criterion) to match D42, so typing or pasting 100 leaves "10" with no message and 10 is saved (Fernando, 2026-11-15, chat); finding 2 by updating `summary.md` (landscape-phone header buttons in the overview, draft ownership by mounted form in the teaching paragraph).
 
+## Codex review · D2 ninth run (2026-11-15)
+
+Run: `scripts/review.sh specs/001-planificador-v1` at commit `eb83ab1` (branch `001-planificador-v1-d2` against `main`), 2026-11-15 17:05. Full output: [codex-review.md](codex-review.md). The previous run's output is kept in the scratchpad only.
+
+Summary: 0 findings in total. BLOCKING 0, IMPORTANT 0, MINOR 0. Codex verdict: no explicit approval word in the output; Codex reported no new BLOCKING, IMPORTANT or MINOR findings in any category. Whether this counts as approval is left to the orchestrator.
+
+- No findings.
+
+Codex's category results: RF/E implementation and scope (no findings within the approved D1/D2 delivery; full v1 remains incomplete through the documented D3 deferrals). Constitution, layers, conventions and glossary (no new findings). Test integrity and effectiveness (no findings; placeholder-test deletion and changed startup expectations have recorded authorization; amended E-021 tests match the approved two-character input policy). Security (no new findings from source inspection). Explanation accuracy (no material mismatch). Simplicity, clarity and efficiency (no findings).
+
+Codex's validation: types, lint, source and configuration formatting, traceability, focused and skipped-test detection and Gitleaks passed. With Jest cache writes disabled in memory, 2,821 tests passed; 218 were blocked by temporary-file permissions across 15 suites. Full verification, coverage, mutation testing, fresh dependency scans and native behaviour were not independently confirmed. Maestro, device checks, backup and transfer verification and CI evidence remain pending as documented; the review does not establish completion of T061. No repository files were changed.
+
+### Verdict (Codex review · D2 ninth run)
+
+No open Codex findings (BLOCKING 0, IMPORTANT 0, MINOR 0). Codex did not write an explicit approval; the orchestrator decides whether this closes the phase 8 gate. The 218 tests blocked by temporary-file permissions were not run and are not covered by this review.
+
 ## Security · T087 and T088 (D2, 2026-11-14)
 
 Scope: commits `4090040` (T087: message and Retry when the database fails to open) and `cdb06d3` (T088: blocked Android permissions). Method: read the diffs and the final files; `npx expo prebuild --platform android --no-install --clean` in two temporary copies outside the repository (no `ios/` or `android/` was created in the repository), one without `APP_VARIANT` and one with `APP_VARIANT=production`; `npm audit`, OSV-Scanner, gitleaks and Semgrep as `scripts/verify.sh` runs them. No code was changed.
