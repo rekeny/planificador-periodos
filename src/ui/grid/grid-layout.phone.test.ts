@@ -8,6 +8,7 @@
 //   GridLayout = { cellWidth, rowHeight, horizontalScroll, verticalScroll, buttonsInHeader }
 import { assert, constantFrom, integer, property, record } from "fast-check";
 import {
+  buttonsInHeader,
   gridLayout,
   TABLET_MIN_SHORT_SIDE,
   type GridLayoutInput,
@@ -173,16 +174,42 @@ describe("grid layout on a phone", () => {
 
   it.each([
     [375, 667],
-    [667, 375],
     [320, 568],
-    [568, 320],
     [767, 900],
-    [900, 767],
+    [700, 700],
   ])(
-    "RF-076: on a phone window (shortest side under 768 pt) the grid buttons go in the toolbar under the grid, in both orientations",
+    "RF-076: on a phone window in portrait or square (shortest side under 768 pt, width not above height) the grid buttons go in the toolbar under the grid",
     (windowWidth, windowHeight) => {
       const layout = gridLayout(inputFor({ windowWidth, windowHeight }));
       expect(layout.buttonsInHeader).toBe(false);
+    },
+  );
+
+  it.each([
+    [667, 375],
+    [568, 320],
+    [900, 767],
+    [1024, 600],
+  ])(
+    "RF-076: on a phone window in landscape (width above height, shortest side under 768 pt) the grid buttons go in the header",
+    (windowWidth, windowHeight) => {
+      const layout = gridLayout(inputFor({ windowWidth, windowHeight }));
+      expect(layout.buttonsInHeader).toBe(true);
+    },
+  );
+
+  it.each([
+    [375, 667, false],
+    [667, 375, true],
+    [767, 768, false],
+    [768, 767, true],
+    [768, 768, true],
+    [1024, 768, true],
+    [768, 1024, true],
+  ])(
+    "RF-076: buttonsInHeader(%s, %s) is %s: header on tablets and on phones in landscape, toolbar on phones in portrait",
+    (windowWidth, windowHeight, expected) => {
+      expect(buttonsInHeader(windowWidth, windowHeight)).toBe(expected);
     },
   );
 
@@ -229,7 +256,8 @@ describe("grid layout on a phone", () => {
             );
           }
           expect(layout.buttonsInHeader).toBe(
-            Math.min(windowWidth, windowHeight) >= TABLET_MIN_SHORT_SIDE,
+            Math.min(windowWidth, windowHeight) >= TABLET_MIN_SHORT_SIDE ||
+              windowWidth > windowHeight,
           );
         },
       ),

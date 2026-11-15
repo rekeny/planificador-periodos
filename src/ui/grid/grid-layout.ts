@@ -34,12 +34,19 @@ export type GridLayout = {
   buttonsInHeader: boolean;
 };
 
-/** Tablets (shortest side from 768) keep the buttons in the header; phones use a toolbar. */
+/**
+ * The buttons go in the header on tablets (shortest side from 768) and on every window wider than
+ * tall: a phone in landscape has no height to spare for a toolbar and a call-up button in the body
+ * (decided 2026-11-15, Codex round 6). Phones in portrait or square keep the toolbar.
+ */
 export function buttonsInHeader(
   windowWidth: number,
   windowHeight: number,
 ): boolean {
-  return Math.min(windowWidth, windowHeight) >= TABLET_MIN_SHORT_SIDE;
+  return (
+    Math.min(windowWidth, windowHeight) >= TABLET_MIN_SHORT_SIDE ||
+    windowWidth > windowHeight
+  );
 }
 
 export function gridLayout(input: GridLayoutInput): GridLayout {

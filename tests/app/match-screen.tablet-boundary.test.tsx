@@ -1,7 +1,9 @@
 // D2 review (third run, finding 3): the tablet threshold is 768 pt on the SHORTEST side (decided
 // 2026-11-14, replacing 600), so the 12 rows without scrolling (RF-081) hold on every tablet and
-// windows of 600-767 pt use the phone layout (RF-076): grid buttons in a toolbar under the grid,
-// the call-up button in the body, no compact warning strip. Same doubles as the tablet budget test.
+// windows of 600-767 pt use the phone layout (RF-076): in portrait (and square) the grid buttons are
+// in a toolbar under the grid and the call-up button in the body; in landscape (width > height,
+// decided 2026-11-15, sixth Codex review) both go in the header so the grid keeps its height. The
+// warnings use the bounded scroll strip on every phone. Same doubles as the tablet budget test.
 import { screen } from "expo-router/testing-library";
 
 import { tabletGridViewportHeight } from "@/ui/grid/tablet-budget";
@@ -63,13 +65,22 @@ const TABLETS = [
   [768, 1024],
   [768, 768],
 ];
-// Phones under the 768 rule: 600-767 pt on the shortest side, both orientations, and just under.
-const WIDE_PHONES = [
-  [900, 600],
+// Phones under the 768 rule, 600-767 pt on the shortest side, and just under. Portrait or square
+// (width not above height): the call-up button in the body and the buttons in the toolbar.
+const PORTRAIT_PHONES = [
   [600, 900],
-  [1024, 767],
   [767, 1024],
+  [375, 667],
+  [700, 700],
 ];
+// Landscape (width above height): the call-up button and the grid buttons are in the header.
+const LANDSCAPE_PHONES = [
+  [900, 600],
+  [1024, 767],
+  [667, 375],
+  [568, 320],
+];
+const ALL_PHONES = [...PORTRAIT_PHONES, ...LANDSCAPE_PHONES];
 
 async function openWorstCase(width: number, height: number, players = 12) {
   await setWindow(width, height);
@@ -77,9 +88,9 @@ async function openWorstCase(width: number, height: number, players = 12) {
   expect(screen.queryByText(RULE_IMPOSSIBLE)).not.toBeNull();
 }
 
-describe("match screen, windows of 600 to 767 pt use the phone layout", () => {
-  it.each(WIDE_PHONES)(
-    "RF-076 RF-032: in a %s × %s window the call-up button is in the body, once, and not in the header",
+describe("match screen, windows under 768 pt use the phone layout", () => {
+  it.each(PORTRAIT_PHONES)(
+    "RF-076 RF-032: in a portrait or square %s × %s window the call-up button is in the body, once, and not in the header",
     async (width, height) => {
       await openWorstCase(width, height);
       const found = buttonsNamed(CALL_UP);
@@ -88,8 +99,8 @@ describe("match screen, windows of 600 to 767 pt use the phone layout", () => {
     },
   );
 
-  it.each(WIDE_PHONES)(
-    "RF-076 RF-058 RF-059: in a %s × %s window «Deshacer» and «Añadir prórroga» are in the toolbar under the grid, once each",
+  it.each(PORTRAIT_PHONES)(
+    "RF-076 RF-058 RF-059: in a portrait or square %s × %s window «Deshacer» and «Añadir prórroga» are in the toolbar under the grid, once each",
     async (width, height) => {
       await openWorstCase(width, height);
       for (const name of [UNDO, ADD]) {
@@ -103,11 +114,23 @@ describe("match screen, windows of 600 to 767 pt use the phone layout", () => {
     },
   );
 
-  it.each(WIDE_PHONES)(
-    "RF-076 RF-081: in a %s × %s window there is no compact tablet strip above the grid",
+  it.each(LANDSCAPE_PHONES)(
+    "RF-076 RF-032 RF-058 RF-059: in a landscape %s × %s phone window the call-up button, «Deshacer» and «Añadir prórroga» are in the header, once each",
     async (width, height) => {
       await openWorstCase(width, height);
-      expect(screen.queryByTestId("warning-strip")).toBeNull();
+      for (const name of [CALL_UP, UNDO, ADD]) {
+        const found = buttonsNamed(name);
+        expect(found).toHaveLength(1);
+        expect(found[0] === undefined ? false : inHeader(found[0])).toBe(true);
+      }
+    },
+  );
+
+  it.each(ALL_PHONES)(
+    "RF-076 RF-081: in a %s × %s phone window the warnings sit in the bounded scroll strip above the grid",
+    async (width, height) => {
+      await openWorstCase(width, height);
+      expect(screen.queryByTestId("warning-strip")).not.toBeNull();
     },
   );
 });

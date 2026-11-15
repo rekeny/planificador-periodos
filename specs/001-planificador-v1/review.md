@@ -709,6 +709,24 @@ Not approved for closing. Two BLOCKING findings (1 and 2) and one IMPORTANT find
 
 Findings 2, 3 and 4: fixed in e4ad5eb (finding 2), f053b37 (finding 3) and 42ed4a6 (finding 4).
 
+## Codex review · D2 sixth run (2026-11-15)
+
+Run: `scripts/review.sh specs/001-planificador-v1` at commit `582fedf` (branch `001-planificador-v1-d2` against `main`), 2026-11-15 09:14. Full output: [codex-review.md](codex-review.md). The previous run's output is kept in the scratchpad only.
+
+Summary: 2 findings in total. BLOCKING 1, IMPORTANT 0, MINOR 1. Codex verdict: **changes requested (not approved)**. Status of both: Open.
+
+- **1 · BLOCKING · Phone landscape warnings can make the grid inaccessible.** Files: `src/ui/warnings/warning-strip.tsx:66`, `src/app/matches/[matchId]/index.tsx:136`. Codex: On phones, warnings have neither a height bound nor a surrounding scroll container. In a 667 × 375 window, a six-period match with 13 players and one player marked in P1–P4 displays both banners and three legend entries. Together with the call-up button, toolbar and navigation header, these consume the grid's available height. Enabling scrolling inside the collapsed grid cannot make its cells reachable. This violates RF-010, RF-076 and RF-080. Existing tests inject viewport heights and miss this surrounding layout problem. Proposed fix: bound and scroll the phone warnings while reserving usable grid space. Verify this assembled scenario in landscape, including after a save failure.
+
+- **2 · MINOR · Current documentation retains superseded instructions.** Files: `specs/001-planificador-v1/plan.md:754`, `plan.md:769`, `tasks.md:829`, `summary.md:333`. Codex: These passages still describe an overlay error banner, a 600-point tablet threshold and approvals as pending. The implementation uses normal flow and 768 points; later documentation records the approvals. Proposed fix: update current design, completion criteria and pending lists. Keep superseded decisions explicitly marked as historical.
+
+Codex's category results: RF/E coverage and scope (finding 1; full v1 remains incomplete through approved D3 deferrals; device-dependent checks remain pending; no unrelated product additions found). Constitution, layers, conventions and glossary (finding 1 affects required behaviour; no additional structural findings). Test integrity and effectiveness (finding 1 exposes a coverage gap; no unapproved deletion, skipping or weakening found; the deleted placeholder test has recorded authorization). Security (no additional findings from static inspection; backup behaviour and release permissions still require the documented device and artifact checks). Explanation accuracy (finding 2). Simplicity and efficiency (no findings).
+
+Codex's validation: types, lint, source formatting, traceability, focused-test detection and Gitleaks passed. With Jest cache writes disabled only in memory, 2,570 tests passed; 25 were blocked by temporary-file permissions. Full verification, coverage, Stryker and native layout behaviour were not independently confirmed. No repository files were changed.
+
+### Verdict (Codex review · D2 sixth run)
+
+Not approved for closing. One BLOCKING finding (1) is open and must be resolved, through phase 6, before phase 8 can pass again. Finding 2 (MINOR) is a suggestion. Status of both: Open.
+
 ## Security · T087 and T088 (D2, 2026-11-14)
 
 Scope: commits `4090040` (T087: message and Retry when the database fails to open) and `cdb06d3` (T088: blocked Android permissions). Method: read the diffs and the final files; `npx expo prebuild --platform android --no-install --clean` in two temporary copies outside the repository (no `ios/` or `android/` was created in the repository), one without `APP_VARIANT` and one with `APP_VARIANT=production`; `npm audit`, OSV-Scanner, gitleaks and Semgrep as `scripts/verify.sh` runs them. No code was changed.

@@ -1,6 +1,7 @@
 // T055: where the three grid buttons are: the navigation header on tablets and a toolbar under the
-// grid on phones, as grid-layout.ts decides with TABLET_MIN_SHORT_SIDE = 768 on the shortest side
-// of the window (RF-076, RF-058, RF-059, RF-055). Same doubles as match-screen.marks.test.tsx.
+// grid on phones in portrait, as grid-layout.ts decides with TABLET_MIN_SHORT_SIDE = 768 on the
+// shortest side of the window; phones in landscape (width > height) use the header too, decided
+// 2026-11-15 after the sixth Codex review (RF-076, RF-058, RF-059, RF-055). Same doubles as match-screen.marks.test.tsx.
 // A header button is a host element under "RNSScreenStackHeaderConfig" (match-screen-grid.ts).
 import { screen, waitFor } from "expo-router/testing-library";
 
@@ -48,12 +49,17 @@ jest.mock("@/state/app-stores", () =>
 );
 
 const BUTTONS = [UNDO, ADD, REMOVE_OVERTIME];
-// [width, height, buttons are in the header]: the shortest side decides, in both orientations.
+// [width, height, buttons are in the header]: a tablet (shortest side from 768) always has them in
+// the header; a phone has them in the header only in landscape (width above height), in the toolbar
+// under the grid in portrait or square.
 const WINDOWS: [number, number, boolean][] = [
   [375, 667, false],
-  [667, 375, false],
+  [667, 375, true],
+  [320, 568, false],
+  [568, 320, true],
   [767, 900, false],
-  [900, 767, false],
+  [900, 767, true],
+  [700, 700, false],
   [768, 900, true],
   [900, 768, true],
   [768, 1024, true],

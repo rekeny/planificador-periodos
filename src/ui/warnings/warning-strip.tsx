@@ -7,15 +7,20 @@ import {
 } from "react-native";
 
 import type { MatchView } from "@/state/match-view";
-import { TABLET_STRIP_MAX_HEIGHT } from "@/ui/grid/tablet-budget";
+import {
+  PHONE_STRIP_MAX_HEIGHT,
+  TABLET_STRIP_MAX_HEIGHT,
+} from "@/ui/grid/tablet-budget";
 import { CallUpRangeBanner } from "./call-up-range-banner";
 import { RuleImpossibleBanner } from "./rule-impossible-banner";
 import { WarningLegend } from "./warning-legend";
 
 interface WarningStripProps {
   readonly view: MatchView;
-  // On a tablet the strip is bounded so the 12 rows keep their room (RF-081).
+  // Chips and short legend, as on a tablet or a phone in landscape (RF-076).
   readonly compact: boolean;
+  // The strip is bounded on every device so the grid keeps its room (RF-081); phones get less.
+  readonly tablet: boolean;
   readonly onBannersLayout: (event: LayoutChangeEvent) => void;
   readonly onLegendLayout: (event: LayoutChangeEvent) => void;
 }
@@ -24,6 +29,7 @@ interface WarningStripProps {
 export function WarningStrip({
   view,
   compact,
+  tablet,
   onBannersLayout,
   onLegendLayout,
 }: WarningStripProps): ReactElement {
@@ -32,7 +38,8 @@ export function WarningStrip({
   // part counts 0, and before any report nothing scrolls.
   const [bannersHeight, setBannersHeight] = useState(0);
   const [legendHeight, setLegendHeight] = useState(0);
-  const scrollEnabled = bannersHeight + legendHeight > TABLET_STRIP_MAX_HEIGHT;
+  const maxHeight = tablet ? TABLET_STRIP_MAX_HEIGHT : PHONE_STRIP_MAX_HEIGHT;
+  const scrollEnabled = bannersHeight + legendHeight > maxHeight;
   const handleBannersLayout = (event: LayoutChangeEvent): void => {
     setBannersHeight(event.nativeEvent.layout.height);
     onBannersLayout(event);
@@ -63,9 +70,8 @@ export function WarningStrip({
       />
     </>
   );
-  if (!compact) return content;
   return (
-    <View testID="warning-strip" style={styles.strip}>
+    <View testID="warning-strip" style={{ maxHeight }}>
       <ScrollView
         testID="warning-strip-scroll"
         nestedScrollEnabled
@@ -79,6 +85,5 @@ export function WarningStrip({
 }
 
 const styles = StyleSheet.create({
-  strip: { maxHeight: TABLET_STRIP_MAX_HEIGHT },
   chips: { flexDirection: "row", flexWrap: "wrap" },
 });

@@ -49,11 +49,11 @@ describe("grid layout on a tablet", () => {
     [768, 900, true],
     [900, 768, true],
     [767, 900, false],
-    [900, 767, false],
+    [900, 767, true],
     [768, 768, true],
     [767, 767, false],
   ])(
-    "RF-076: the grid buttons go in the header when the shortest side is at least 768 pt (767 is a phone, 768 a tablet), in both orientations",
+    "RF-076: the grid buttons go in the header when the shortest side is at least 768 pt (767 is a phone, 768 a tablet), or when a phone is in landscape (width above height)",
     (windowWidth, windowHeight, inHeader) => {
       const layout = gridLayout(inputFor({ windowWidth, windowHeight }));
       expect(layout.buttonsInHeader).toBe(inHeader);
@@ -170,11 +170,11 @@ describe("grid layout on a tablet", () => {
     expect(gridLayout(portrait({ players: 13 }))).toEqual(first);
   });
 
-  it("RF-076: for any window, rotating it never changes whether the buttons go in the header, and rotating twice gives the same result", () => {
+  it("RF-076: for any tablet window (shortest side from 768 pt), rotating it never changes that the buttons go in the header, and rotating twice gives the same result", () => {
     assert(
       property(
-        integer({ min: 320, max: 2000 }),
-        integer({ min: 320, max: 2000 }),
+        integer({ min: 768, max: 2000 }),
+        integer({ min: 768, max: 2000 }),
         (width, height) => {
           const upright = gridLayout(
             inputFor({ windowWidth: width, windowHeight: height }),
@@ -185,7 +185,8 @@ describe("grid layout on a tablet", () => {
           const back = gridLayout(
             inputFor({ windowWidth: width, windowHeight: height }),
           );
-          expect(turned.buttonsInHeader).toBe(upright.buttonsInHeader);
+          expect(upright.buttonsInHeader).toBe(true);
+          expect(turned.buttonsInHeader).toBe(true);
           expect(back).toEqual(upright);
         },
       ),

@@ -20,7 +20,7 @@ import { useStore } from "zustand";
 import { getMatchSessionStore } from "@/state/app-stores";
 import type { MatchView } from "@/state/match-view";
 import { parseMatchId } from "@/state/route-params";
-import { buttonsInHeader } from "@/ui/grid/grid-layout";
+import { TABLET_MIN_SHORT_SIDE, buttonsInHeader } from "@/ui/grid/grid-layout";
 import { GridButtons } from "@/ui/grid/grid-toolbar";
 import { MatchGrid } from "@/ui/grid/match-grid";
 import { useMatchActions } from "@/ui/grid/use-match-actions";
@@ -136,6 +136,7 @@ export default function MatchScreen(): ReactElement {
       <WarningStrip
         view={view}
         compact={inHeader}
+        tablet={Math.min(width, height) >= TABLET_MIN_SHORT_SIDE}
         onBannersLayout={heights.onBannersLayout}
         onLegendLayout={heights.onLegendLayout}
       />

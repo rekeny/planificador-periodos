@@ -16,3 +16,9 @@ export const TABLET_STRIP_MAX_HEIGHT = 80;
 export function tabletGridViewportHeight(windowHeight: number): number {
   return windowHeight - TABLET_CHROME_HEIGHT - TABLET_STRIP_MAX_HEIGHT;
 }
+
+/**
+ * The most the warnings strip may take on a phone (any orientation): a landscape phone (375 high)
+ * keeps 375 - 74 - 60 - 44 = 197 >= 132 for the grid, with or without the save-error banner (44).
+ */
+export const PHONE_STRIP_MAX_HEIGHT = 60;
