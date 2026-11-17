@@ -1,22 +1,22 @@
 # Codex review
 
-- Date: 2026-11-15 17:05
-- Branch: 001-planificador-v1-d2 against main
-- Commit: eb83ab1
+- Date: 2026-11-17 22:48
+- Branch: fix/expo-sdk58-patches against main
+- Commit: d871ad1
 
-Reviewed `git diff main...HEAD` at `eb83ab1`.
+No new **BLOCKING**, **IMPORTANT** or **MINOR** findings at `d871ad1`, reviewed using `git diff main...HEAD`.
 
-**No new BLOCKING, IMPORTANT or MINOR findings.**
+| Category                                       | Result                                                                                                                                             |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RF/E implementation, tests and scope           | No findings within the approved D1/D2 scope. D3 requirements remain explicitly deferred; no unrelated product additions found.                     |
+| Constitution, layers, conventions and glossary | No new findings.                                                                                                                                   |
+| Test integrity and effectiveness               | No unapproved deletion, skipping or weakening found. The placeholder-test removal and revised startup expectations have recorded authorization.    |
+| Security                                       | No new findings. Queries are parameterized; no application network calls or player-data logging found. Dependencies and exceptions are documented. |
+| Explanation accuracy                           | No material mismatch between the implementation and current explanations.                                                                          |
+| Simplicity, clarity and efficiency             | No findings.                                                                                                                                       |
 
-1. **Requirements, examples and scope:** no findings within the approved D1/D2 delivery. Full v1 remains incomplete through the documented D3 deferrals. No unrelated product additions found.
-2. **Constitution, layers, conventions and glossary:** no new findings.
-3. **Test integrity and effectiveness:** no new findings. The placeholder-test deletion and changed startup expectations have recorded authorization. The amended E-021 tests match the approved two-character input policy.
-4. **Security:** no new findings from source inspection. Queries are parameterized; no application network calls or player-data logging found. Dependency additions are justified.
-5. **Explanations and task reports:** no new material mismatch with the implementation.
-6. **Simplicity, clarity and efficiency:** no findings.
+Validation: TypeScript, ESLint, formatting, traceability, focused/skipped-test detection, diff whitespace and Gitleaks passed. With Jest cache writes disabled only in memory, **2,830 tests passed**; **233 tests across 16 suites were blocked by temporary-file permissions**. Five direct checks of the new npm-audit filter also passed.
 
-Validation: types, lint, source/configuration formatting, traceability, focused/skipped-test detection and Gitleaks passed. With Jest cache writes disabled only in memory, **2,821 tests passed**; **218 tests were blocked by temporary-file permissions** across 15 suites.
-
-Full verification, coverage, mutation testing, fresh dependency scans and native behaviour were not independently confirmed. Maestro, device checks, backup/transfer verification and CI evidence remain pending as documented; this review does **not** establish completion of T061.
+Full verification, coverage, mutation testing, fresh dependency scans and native behavior were not independently confirmed. Maestro, device layout, backup/transfer checks, production permissions and CI evidence remain pending as documented. **T061 and the full specification are therefore not established as complete by this review.**
 
 No repository files were changed.

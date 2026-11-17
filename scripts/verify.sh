@@ -81,7 +81,10 @@ else
 fi
 
 step "Dependencies"
-npm audit --omit=dev --audit-level=high
+AUDIT_JSON="$(mktemp)"
+npm audit --omit=dev --json >"$AUDIT_JSON" || true # a non-zero exit only means "found something"
+node scripts/check-npm-audit.mjs <"$AUDIT_JSON" || { rm -f "$AUDIT_JSON"; exit 1; }
+rm -f "$AUDIT_JSON"
 osv-scanner scan source --lockfile=package-lock.json
 
 step "Secrets"
