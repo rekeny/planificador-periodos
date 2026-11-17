@@ -56,3 +56,5 @@ If a vulnerability cannot be fixed, it is recorded in `osv-scanner.toml` with:
 - the developer's approval.
 
 Without those three, there is no exception.
+
+The same list also covers `npm audit` (high and critical advisories) through `scripts/check-npm-audit.mjs`.

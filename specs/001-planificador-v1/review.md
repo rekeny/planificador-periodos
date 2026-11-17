@@ -822,3 +822,63 @@ SEC-D2-3 (silent splash when the database fails) is closed by T087. SEC-D2-1 sta
 
 - **Blocking:** none. **Important:** one, for the release and not for D2 (SEC-D2-7). **Minor:** two (SEC-D2-8 fixed, SEC-D2-9 for the device test).
 - From a security standpoint D2 can be published (merged and used in development builds). Files changed by this audit: this section and `docs/security.md`.
+
+## Security · Expo SDK 58 patch updates (2026-11-17)
+
+Scope: the uncommitted change to `package.json` and `package-lock.json` on branch `fix/expo-sdk58-patches`, made with `npx expo install --fix` after `npx expo-doctor` failed on "packages match SDK versions". Fernando approved it in the chat on 2026-11-17. Method: read the `package.json` and lock diffs, compared the lock before (`HEAD`) and after (a script over both JSON files), read the `sdk-58` changelogs of the bumped packages, grepped `src/`, ran `npm audit --omit=dev`, `npm audit` and `osv-scanner scan source --lockfile=package-lock.json` as `scripts/verify.sh` runs them, and compared the audit with a copy of the `HEAD` lock. Nothing in the code was changed and no dependency was installed.
+
+### What changed
+
+| Package            | Before  | After   | Kind  | Changelog, in security terms                                                                                                                                                                |
+| ------------------ | ------- | ------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@expo/ui`         | 58.0.28 | 58.0.29 | patch | iOS `BottomSheet` text wrapping, Android `MenuView` items. UI only.                                                                                                                         |
+| `expo`             | 58.0.25 | 58.0.26 | patch | iOS dev-server socket on port 443 for `https` bundle URLs (dev tunnel only); updated dependencies (`@expo/cli`, `@expo/metro-config`, `babel-preset-expo`, `expo-file-system`).             |
+| `expo-dev-client`  | 58.0.20 | 58.0.21 | patch | Only "updated dependencies" (`expo-dev-launcher` 58.0.21, the same dev-server socket change). Development builds only.                                                                      |
+| `expo-router`      | 58.0.31 | 58.0.32 | patch | `NativeTabs` fixes and warnings. Peer range of `react-native-screens` is now `^4.30.1 \|\| ^5.0.0-beta.1`; installed 4.30.1 still satisfies it. No route-parameter or link-handling change. |
+| `expo-sqlite`      | 58.0.17 | 58.0.18 | patch | Web worker only (WebAssembly load). No native, path or backup change; `defaultDatabaseDirectory` is untouched, so the `Documents/SQLite` exclusion still holds.                             |
+| `expo-web-browser` | 58.0.8  | 58.1.0  | minor | New optional HTTP headers for authentication sessions (Android, iOS 17.4+). Additive; no new permission.                                                                                    |
+| `jest-expo`        | 58.0.14 | 58.0.15 | patch | Development only.                                                                                                                                                                           |
+
+### Lock diff
+
+- **Added or removed packages: none.** The set of lock entries is the same before and after (checked by script). 25 entries changed version: the 7 above plus their Expo companions (`expo-dev-launcher`, `expo-file-system`, `@expo/cli`, `@expo/metro-config`, `@expo/router-server`, `babel-preset-expo`) and unchanged-owner transitives: `noxcturnal` and its 8 platform binaries `0.1.12 -> 0.1.14` (pulled by `@expo/metro-config`, already there before), `ws` `8.22.2 -> 8.23.0` (Expo CLI), `postcss` `8.5.32 -> 8.5.33` and `@babel/plugin-transform-class-static-block` `7.29.7 -> 7.29.14` (plus a raised dependency range on `@babel/helper-create-class-features-plugin`, same installed version).
+- **Install scripts:** no entry gained `hasInstallScript`. **Resolved URLs:** every `resolved` is `https://registry.npmjs.org/`. **Integrity:** present on every entry. **Licences:** all MIT.
+- **Permissions and native config:** none of the changelogs mention a permission, a manifest or `Info.plist` key, or a config plugin option. `app.json` is not touched in the diff, so `allowBackup: false`, the blocked permissions and `./plugins/with-backup-exclusion.js` are as audited before.
+- **Network:** the only network-related entry is the `expo` / `expo-dev-launcher` change for the development server socket (port 443 when the bundle URL is `https` with no port). It runs in development builds only; the production app has no dev launcher and no network use (principle 3 unchanged).
+
+### `expo-web-browser` minor bump
+
+- Not imported anywhere in `src/`, `tests/`, `plugins/` or `app.config.js` (grep for `expo-web-browser` and `WebBrowser`). It appears in `app.json` `plugins` (template entry, no options) and as a peer dependency of `expo-router`. The new auth-session headers are an opt-in argument of `openAuthSessionAsync`, which the app never calls. Its `package.json` has no `scripts`, and its plugin (`withWebBrowser`) adds no permission. Impact on the app: none.
+- Minor point, not caused by this change: the package is in the app's dependencies only through the template and `expo-router`. Whether to drop it from `package.json` and `app.json` is a clean-up for the developer to decide; it is not a security finding.
+
+### Scanners (as `scripts/verify.sh` runs them)
+
+| Step                                                   | Before (`HEAD` lock)             | After (this change)                                                              |
+| ------------------------------------------------------ | -------------------------------- | -------------------------------------------------------------------------------- |
+| `npm audit --omit=dev --audit-level=high`              | exit 1: 68 (6 moderate, 62 high) | exit 1: 68 (6 moderate, 62 high)                                                 |
+| `npm audit` (all)                                      | 94 (20 moderate, 74 high)        | 93 (19 moderate, 74 high)                                                        |
+| `osv-scanner scan source --lockfile=package-lock.json` | same 2 findings (picomatch)      | exit 1: 2 High, `picomatch` 2.3.2 and 4.0.7, both GHSA-fc5q-39xc-vjpf (CVSS 8.7) |
+
+The change adds no vulnerability and removes one (`eslint-config-expo` no longer appears in the full audit). Both gates fail because of a **new advisory that is not caused by this change and that the earlier audits did not see** (they ran `npm audit --omit=dev --audit-level=high` at exit 0 on 2026-11-14 and 2026-11-12):
+
+- **GHSA-fc5q-39xc-vjpf**, `picomatch` "ReDoS through single-branch repeated extglobs", high, CVSS 3.1 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H` (denial of service only), range `<=4.0.7`, **no patched version exists** (`first_patched_version` is null; npm's suggested fix is a downgrade to `expo@52`, which is not an option). The `HEAD` lock holds the same versions (`4.0.7` at the root, `2.3.2` under `anymatch`, `jest-util` and `micromatch`), so the old lock fails in the same way. The 62 "high" entries of `npm audit --omit=dev` are this one advisory propagated up the dependency tree (`expo`, `react-native`, `expo-router`, `jest`... all "depend on vulnerable versions of picomatch" or, for `react-native` and `@react-native/*`, of `tinyglobby`, which uses it).
+- **Reach:** `picomatch` is a glob matcher used by Metro, Expo CLI, Jest and `anymatch` to match file paths against our own patterns, at build, test and bundle time. It is not in the application bundle that runs on the device, and no attacker controls a pattern. The risk to the app and to the children's data is none; the exposure is a slow build or test run.
+- **The other findings** (glob GHSA-3g3m-2fjr-6pw4, minimatch GHSA-g3hv-75wg-m249, the four `qs` ones, esbuild GHSA-67mh-4wv8-2f99) are the existing exceptions in `osv-scanner.toml`, filtered as before (9 filtered). `GHSA-gcqx-w48m-w2h4` (deepmerge) is now reported by OSV-Scanner as an unused ignore: harmless, it can stay until its expiry or be removed.
+
+### Findings
+
+| ID          | Severity                                                  | Finding                                                                                                                                                                                                                                                                                                                    | Action                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SEC-SDK58-1 | None for the bump                                         | The seven bumps and their transitive updates: no new or removed package, no install script, registry URLs and integrity present, MIT, no permission, no network use in the app, no native config change. `expo-web-browser` is unused in `src/`.                                                                           | No action. Accept the change.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| SEC-SDK58-2 | Blocking for `scripts/verify.sh` and CI, not for the bump | The new picomatch advisory (high, no fix) makes `npm audit --omit=dev --audit-level=high` and `osv-scanner` exit 1, with or without this change, so `verify.sh` fails at "Dependencies" even when everything else is green. There is no exception yet, and `docs/security.md` and the role forbid ignoring it without one. | Needs Fernando's decision, not a silent fix. For OSV-Scanner: add `GHSA-fc5q-39xc-vjpf` to `osv-scanner.toml` with the reason above, an expiry of at most 90 days (2027-02-15) and his approval. `npm audit` has no exception file, so `scripts/verify.sh` line 84 would also need a temporary, recorded change (for example a documented `--audit-level=critical`, or an allowlist step) approved by him, and reverted when picomatch is fixed. |
+
+### What I could NOT verify
+
+- That the three Expo changelog summaries are complete: I read the `CHANGELOG.md` of each package on the `sdk-58` branch, not the diff of each published tarball. No tarball was unpacked beyond reading `expo-web-browser`'s `package.json` and plugin in `node_modules`.
+- Runtime behaviour on a device (the dev-server socket change, `@expo/ui` pickers).
+- Whether the advisory has a fix in a pre-release `picomatch`; the advisory database says none is published.
+
+### Verdict (Security · Expo SDK 58 patch updates)
+
+- **Blocking:** none for the dependency change itself (SEC-SDK58-1). **Blocking for the verification gate:** SEC-SDK58-2, independent of this change; the branch cannot go green until Fernando approves an exception for it. **Important / minor:** none.
+- Files changed by this audit: this section and the "New dependencies" note in `plan.md`.
