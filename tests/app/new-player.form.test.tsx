@@ -131,7 +131,7 @@ describe("new-player form, the numbers of E-021", () => {
       await openPlayerForm();
       await addViaForm("Luis", number);
       expect(
-        await screen.findByRole("button", { name: "Editar" }),
+        await screen.findByRole("button", { name: "Editar equipo" }),
       ).toBeTruthy();
       expect(screen).toHavePathname(`/teams/${alevin}`);
       expect(playerOrder()).toContain(`${number} Luis`);
@@ -161,7 +161,9 @@ describe("new-player form, a number over the limit", () => {
     await screen.findByRole("button", { name: "Nuevo jugador" });
     await openPlayerForm();
     await addViaForm("Luis", "100");
-    expect(await screen.findByRole("button", { name: "Editar" })).toBeTruthy();
+    expect(
+      await screen.findByRole("button", { name: "Editar equipo" }),
+    ).toBeTruthy();
     expect(screen).toHavePathname(`/teams/${alevin}`);
     expect(playerOrder()).toContain("10 Luis");
     expect(savedPlayers(db, alevin)).toContainEqual({
