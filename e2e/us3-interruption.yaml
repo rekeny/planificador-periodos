@@ -1,0 +1,140 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, Undo starts empty, a call-up change survives too, and a link to a match that does not exist shows not-found"
+---
+# Interruptions of US3 (T056). Written WITHOUT running it: Maestro is not installed here (developer
+# decision of 2026-11-13). Same device assumption as us3-planning.yaml: a phone in portrait.
+# The state is cleared only once, here. Every other start is stopApp then launchApp, which keeps the
+# data: the app opens on the list of teams (RF-073) and the match, number 1, is reached only with
+# its deep link, because D2 has no match list (review D2-A-01).
+- launchApp:
+    clearState: true
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Alevín A"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Ana"
+- tapOn: "Dorsal"
+- inputText: "1"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Bea"
+- tapOn: "Dorsal"
+- inputText: "2"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Carla"
+- tapOn: "Dorsal"
+- inputText: "3"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+# Marks in P1, P2 and P3, and an overtime with a mark.
+- tapOn: "Ana, P1: casilla vacía"
+- assertVisible: "Ana, P1: X, titular"
+- tapOn: "Bea, P1: casilla vacía"
+- assertVisible: "Bea, P1: X, titular"
+- tapOn: "Ana, P2: casilla vacía"
+- assertVisible: "Ana, P2: X, titular"
+- tapOn: "Bea, P3: casilla vacía"
+- assertVisible: "Bea, P3: X, titular"
+- tapOn: "Añadir prórroga"
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- tapOn: "Ana, PR1: casilla vacía"
+- assertVisible: "Ana, PR1: X, titular"
+
+# E-019 (RF-082): the app is closed and opened again. Nothing is cleared.
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertVisible: "Alevín A"
+- assertNotVisible: "Ana, P1: X, titular"
+- openLink: planificadorperiodos://matches/1
+- assertVisible: "Ana, P1: X, titular"
+- assertVisible: "Bea, P1: X, titular"
+- assertVisible: "Ana, P2: X, titular"
+- assertVisible: "Bea, P3: X, titular"
+- assertVisible: "Carla, P1: casilla vacía"
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- assertVisible: "PR1"
+- assertVisible: "Ana, PR1: X, titular"
+# RF-057: the history is lost when the app closes, so Undo has nothing to undo.
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+- tapOn: "Deshacer"
+- assertVisible: "Ana, PR1: X, titular"
+- assertVisible: "Ana, P1: X, titular"
+
+# Second interruption: a call-up change is saved at once. Carla has no marks, so she goes with no
+# question (RF-033); then the app is closed (RF-082).
+- tapOn: "Convocatoria"
+- tapOn:
+    text: "Quitar de la convocatoria"
+    index: 2
+- assertNotVisible: "¿Quitar a Carla de la convocatoria?"
+- assertVisible:
+    text: "Carla"
+    below: "Añadir a la convocatoria"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 2."
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- openLink: planificadorperiodos://matches/1
+- tapOn: "Convocatoria"
+- assertVisible:
+    text: "Carla"
+    below: "Añadir a la convocatoria"
+- assertVisible:
+    text: "Ana"
+    above: "Añadir a la convocatoria"
+- assertVisible:
+    text: "Bea"
+    above: "Añadir a la convocatoria"
+- assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 2."
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 70%, 50%
+- assertVisible: "Ana, P1: X, titular"
+- assertVisible: "Bea, P3: X, titular"
+- assertNotVisible: "Carla, P1: casilla vacía"
+
+# T032: only the canonical text of a positive integer is a match number. Each link starts from a
+# fresh launch of the app. Match 1 exists, so «01» proves the strictness.
+- stopApp
+- launchApp
+- openLink: planificadorperiodos://matches/99
+- assertVisible: "No se ha encontrado: puede que se haya borrado."
+- stopApp
+- launchApp
+- openLink: planificadorperiodos://matches/abc
+- assertVisible: "No se ha encontrado: puede que se haya borrado."
+- stopApp
+- launchApp
+- openLink: planificadorperiodos://matches/01
+- assertVisible: "No se ha encontrado: puede que se haya borrado."
+- assertNotVisible: "Ana, P1: X, titular"

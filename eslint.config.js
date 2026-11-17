@@ -79,6 +79,7 @@ module.exports = defineConfig([
       "reports/",
       ".stryker-tmp/",
       ".expo/",
+      "src/data/migrations/",
     ],
   },
   {
@@ -149,6 +150,16 @@ module.exports = defineConfig([
       "max-params": ["error", 4],
       "max-depth": ["error", 3],
       "import/no-default-export": "error",
+    },
+  },
+  {
+    // The same 250-line limit for the tests, the scripts and the plugins (T080).
+    files: ["tests/**/*.{ts,tsx}", "scripts/**/*.{js,mjs}", "plugins/**/*.js"],
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 250, skipBlankLines: true, skipComments: true },
+      ],
     },
   },
   {

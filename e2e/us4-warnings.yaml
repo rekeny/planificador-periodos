@@ -1,0 +1,503 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 E-007 E-008 E-009: the rule warnings appear and disappear as the coach taps, with the legend, the general warning and the marks in the headers, and they come back after the app is closed"
+---
+# Journey of US4 on a clean install (T060). Written WITHOUT running it: Maestro is not installed
+# here (developer decision of 2026-11-13), so the first real run will need adjustments, like the
+# swipes of the US1 flows. Nothing here uses the network.
+# Maestro checks TEXT only, never colours or screenshots (answer of 2026-11-12). The light red
+# cells and the players in red are proven by their legend lines (RF-087); the colours themselves
+# are tested in Jest (T058, T059) and checked by eye on the three devices (T057).
+# E-027 (the situation of E-002, with a circled X) cannot be built in D2: it is in T066.
+# Device assumption: a TABLET, where 12 player rows, the banners and the legend fit with no
+# vertical scroll (T057: the iPad in landscape) and «Deshacer» sits in the header. On a phone in
+# portrait the lower rows would need a vertical swipe that this flow does not do. Maestro does not
+# scroll by itself before a tap, so on a phone this flow is expected to fail at the lower rows.
+# The cells are buttons «Juan, P1: casilla vacía» (T054). The legend lines and the general
+# warning are plain texts. A header mark is a Text «!» under the period name, in the same column,
+# so each period is told apart by its position: «!» to the right of the title of the previous
+# period and to the left of the title of the next one is the mark of that period (unverified:
+# the relative selectors depend on how each platform reports the bounds).
+# The team has 12 players. A match that the examples want with 10 leaves Hugo and Iker out.
+# Matches are created in order, so they are 1 to 6; match 1 is opened again with the deep link.
+#
+# PERFORMANCE (manual, for Fernando; not automated: Maestro has no timer fine enough for 100 ms).
+# On the 5th-generation iPad, with a Release build, 12 players and an 8-period match: a tap on a
+# cell must repaint under 100 ms. Film the iPad with a phone in slow motion at 240 fps while
+# tapping 20 different cells, count the frames between the finger touching the glass and the cell
+# changing (under 24 frames is under 100 ms) and write the worst of the 20 in review.md with the
+# iPad model, the iOS version and the build. The steps are in the Pending of T060 in tasks.md.
+- launchApp:
+    clearState: true
+- tapOn: "Nuevo equipo"
+- tapOn: "Nombre"
+- inputText: "Alevín A"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Juan"
+- tapOn: "Dorsal"
+- inputText: "1"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Pedro"
+- tapOn: "Dorsal"
+- inputText: "2"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Luis"
+- tapOn: "Dorsal"
+- inputText: "3"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Ana"
+- tapOn: "Dorsal"
+- inputText: "4"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Bea"
+- tapOn: "Dorsal"
+- inputText: "5"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Carla"
+- tapOn: "Dorsal"
+- inputText: "6"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Dani"
+- tapOn: "Dorsal"
+- inputText: "7"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Eva"
+- tapOn: "Dorsal"
+- inputText: "8"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Fran"
+- tapOn: "Dorsal"
+- inputText: "9"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Gala"
+- tapOn: "Dorsal"
+- inputText: "10"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Hugo"
+- tapOn: "Dorsal"
+- inputText: "11"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn: "Nombre"
+- inputText: "Iker"
+- tapOn: "Dorsal"
+- inputText: "12"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Iker"
+
+# MATCH 1 (ID 1), 6 periods, 10 players (Hugo and Iker left out). E-001: Juan has X in P1, P2 and P3.
+# The legend explains the light red cell and «!»; no player in red, no general warning.
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: ".*Iker.*"
+- tapOn: ".*Hugo.*"
+- tapOn: ".*Iker.*"
+- assertVisible: "10 convocados"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- tapOn: "Juan, P1: casilla vacía"
+- tapOn: "Juan, P2: casilla vacía"
+- tapOn: "Juan, P3: casilla vacía"
+- assertVisible: "Juan, P3: X, titular"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertVisible:
+    text: "!"
+    leftOf: "P2"
+- assertVisible:
+    text: "!"
+    rightOf: "P4"
+    leftOf: "P6"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P5"
+# E-003 (RF-063, RF-067): a fourth X is accepted, never blocked (RF-060). Juan is in red, P5 stays light red.
+- tapOn: "Juan, P4: casilla vacía"
+- assertVisible: "Juan, P4: X, titular"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertVisible: "No cumple la regla del tramo."
+- assertVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+# Fill P5: no empty window cell of Juan is left, so the light red line goes; the red and the general warning stay.
+- tapOn: "Juan, P5: casilla vacía"
+- assertNotVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertVisible: "No cumple la regla del tramo."
+- assertVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+# «Deshacer» brings the light red cell back; a tap on the X removes it again and then puts it back.
+- tapOn: "Deshacer"
+- assertVisible: "Juan, P5: casilla vacía"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertVisible: "No cumple la regla del tramo."
+- assertVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- tapOn: "Juan, P5: casilla vacía"
+- assertNotVisible: "Si la marcas, no descansará el mínimo del tramo."
+- tapOn: "Juan, P5: X, titular"
+- assertVisible: "Juan, P5: casilla vacía"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertVisible: "No cumple la regla del tramo."
+- assertVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: "Nuevo partido"
+
+# MATCH 2 (ID 2), 6 periods, 12 players. E-006: P1-P4 with 5 X, P5 with 4 X; Pedro and Luis 1 X each, neither in P5.
+- tapOn: "Nuevo partido"
+- assertVisible: "12 convocados"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- tapOn: "Pedro, P1: casilla vacía"
+- tapOn: "Juan, P1: casilla vacía"
+- tapOn: "Ana, P1: casilla vacía"
+- tapOn: "Bea, P1: casilla vacía"
+- tapOn: "Carla, P1: casilla vacía"
+- tapOn: "Luis, P2: casilla vacía"
+- tapOn: "Dani, P2: casilla vacía"
+- tapOn: "Eva, P2: casilla vacía"
+- tapOn: "Fran, P2: casilla vacía"
+- tapOn: "Gala, P2: casilla vacía"
+- tapOn: "Hugo, P3: casilla vacía"
+- tapOn: "Iker, P3: casilla vacía"
+- tapOn: "Juan, P3: casilla vacía"
+- tapOn: "Ana, P3: casilla vacía"
+- tapOn: "Bea, P3: casilla vacía"
+- tapOn: "Carla, P4: casilla vacía"
+- tapOn: "Dani, P4: casilla vacía"
+- tapOn: "Eva, P4: casilla vacía"
+- tapOn: "Fran, P4: casilla vacía"
+- tapOn: "Gala, P4: casilla vacía"
+- tapOn: "Hugo, P5: casilla vacía"
+- tapOn: "Iker, P5: casilla vacía"
+- tapOn: "Juan, P5: casilla vacía"
+- tapOn: "Ana, P5: casilla vacía"
+- assertVisible: "Ana, P5: X, titular"
+- assertVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+# A window period with 4 X shows «!» and the four with 5 X do not (RF-065).
+- assertVisible:
+    text: "!"
+    rightOf: "P4"
+    leftOf: "P6"
+- assertNotVisible:
+    text: "!"
+    leftOf: "P5"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P5"
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: "Nuevo partido"
+
+# MATCH 3 (ID 3), 6 periods, 10 players. E-007: P1-P4 with two X each, P5 and P6 empty: only «!» on P5.
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: ".*Iker.*"
+- tapOn: ".*Hugo.*"
+- tapOn: ".*Iker.*"
+- assertVisible: "10 convocados"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- tapOn: "Juan, P1: casilla vacía"
+- tapOn: "Pedro, P1: casilla vacía"
+- tapOn: "Luis, P1: casilla vacía"
+- tapOn: "Ana, P1: casilla vacía"
+- tapOn: "Bea, P1: casilla vacía"
+- tapOn: "Carla, P2: casilla vacía"
+- tapOn: "Dani, P2: casilla vacía"
+- tapOn: "Eva, P2: casilla vacía"
+- tapOn: "Fran, P2: casilla vacía"
+- tapOn: "Gala, P2: casilla vacía"
+- tapOn: "Juan, P3: casilla vacía"
+- tapOn: "Pedro, P3: casilla vacía"
+- tapOn: "Luis, P3: casilla vacía"
+- tapOn: "Ana, P3: casilla vacía"
+- tapOn: "Bea, P3: casilla vacía"
+- tapOn: "Carla, P4: casilla vacía"
+- tapOn: "Dani, P4: casilla vacía"
+- tapOn: "Eva, P4: casilla vacía"
+- tapOn: "Fran, P4: casilla vacía"
+- tapOn: "Gala, P4: casilla vacía"
+- assertVisible: "Gala, P4: X, titular"
+- assertVisible:
+    text: "!"
+    rightOf: "P4"
+    leftOf: "P6"
+- assertNotVisible:
+    text: "!"
+    leftOf: "P5"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P5"
+- assertNotVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: "Nuevo partido"
+
+# MATCH 4 (ID 4), 6 periods, 12 players. E-005: P5 has 3 X and Pedro only one in P1: he is NOT in red.
+- tapOn: "Nuevo partido"
+- assertVisible: "12 convocados"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- tapOn: "Pedro, P1: casilla vacía"
+- tapOn: "Juan, P1: casilla vacía"
+- tapOn: "Luis, P1: casilla vacía"
+- tapOn: "Ana, P1: casilla vacía"
+- tapOn: "Bea, P1: casilla vacía"
+- tapOn: "Carla, P2: casilla vacía"
+- tapOn: "Dani, P2: casilla vacía"
+- tapOn: "Eva, P2: casilla vacía"
+- tapOn: "Fran, P2: casilla vacía"
+- tapOn: "Gala, P2: casilla vacía"
+- tapOn: "Hugo, P3: casilla vacía"
+- tapOn: "Iker, P3: casilla vacía"
+- tapOn: "Juan, P3: casilla vacía"
+- tapOn: "Luis, P3: casilla vacía"
+- tapOn: "Ana, P3: casilla vacía"
+- tapOn: "Bea, P4: casilla vacía"
+- tapOn: "Carla, P4: casilla vacía"
+- tapOn: "Dani, P4: casilla vacía"
+- tapOn: "Eva, P4: casilla vacía"
+- tapOn: "Fran, P4: casilla vacía"
+- tapOn: "Gala, P5: casilla vacía"
+- tapOn: "Hugo, P5: casilla vacía"
+- tapOn: "Iker, P5: casilla vacía"
+- assertVisible: "Iker, P5: X, titular"
+- assertVisible:
+    text: "!"
+    rightOf: "P4"
+    leftOf: "P6"
+- assertNotVisible:
+    text: "!"
+    leftOf: "P5"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P5"
+- assertNotVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: "Nuevo partido"
+
+# MATCH 5 (ID 5), 8 periods, 10 players. E-008: Juan has X in P1-P4; P5 and P6 light red, P7 and P8 free.
+- tapOn: "Nuevo partido"
+- tapOn: "8 periodos"
+- scrollUntilVisible:
+    element:
+      text: ".*Iker.*"
+- tapOn: ".*Hugo.*"
+- tapOn: ".*Iker.*"
+- assertVisible: "10 convocados"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- tapOn: "Juan, P1: casilla vacía"
+- tapOn: "Juan, P2: casilla vacía"
+- tapOn: "Juan, P3: casilla vacía"
+- tapOn: "Juan, P4: casilla vacía"
+- assertVisible: "Juan, P4: X, titular"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible:
+    text: "!"
+    rightOf: "P5"
+    leftOf: "P7"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P6"
+# Marks in the free periods P7 and P8 change no legend line and add no «!» (RF-006, RF-072).
+- tapOn: "Juan, P7: casilla vacía"
+- tapOn: "Bea, P8: casilla vacía"
+- assertVisible: "Bea, P8: X, titular"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertNotVisible:
+    text: "!"
+    rightOf: "P6"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: "Nuevo partido"
+
+# MATCH 6 (ID 6), 4 periods, 10 players. E-009: Juan has X in P1 and P2; P3 light red, P4 free.
+- tapOn: "Nuevo partido"
+- tapOn: "4 periodos"
+- scrollUntilVisible:
+    element:
+      text: ".*Iker.*"
+- tapOn: ".*Hugo.*"
+- tapOn: ".*Iker.*"
+- assertVisible: "10 convocados"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- tapOn: "Juan, P1: casilla vacía"
+- tapOn: "Juan, P2: casilla vacía"
+- assertVisible: "Juan, P2: X, titular"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible:
+    text: "!"
+    rightOf: "P2"
+    leftOf: "P4"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P3"
+- tapOn: "Juan, P4: casilla vacía"
+- assertVisible: "Juan, P4: X, titular"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P3"
+
+# Interruption: the app is closed and opened again with nothing cleared; the list of teams comes first (RF-073)
+# and match 1 is opened with its deep link. The warnings are computed again from the saved marks: the E-003
+# situation (Juan with X in P1-P4, general warning, player in red, light red P5, «!» on P1-P5).
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertNotVisible: "Juan, P4: X, titular"
+- openLink: planificadorperiodos://matches/1
+- assertVisible: "Juan, P4: X, titular"
+- assertVisible: "Juan, P5: casilla vacía"
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- assertVisible: "No cumple la regla del tramo."
+- assertVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertVisible:
+    text: "!"
+    leftOf: "P2"
+- assertVisible:
+    text: "!"
+    rightOf: "P4"
+    leftOf: "P6"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P5"
