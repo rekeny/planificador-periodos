@@ -10,7 +10,7 @@ Three deliveries (ADR-004, `plan.md` "Deliveries"): **D1** T001–T023 on `001-p
 
 **New tasks on 2026-11-14 (D2 close), without renumbering.** Two D2 tasks were added after the Codex rounds and the Security audit of D2, approved by Fernando on 2026-11-14 (chat): T087 (message and «Reintentar» when the database fails to open, Security finding SEC-D2-3) and T088 (unused Android permissions blocked, SEC-D2-1). They are placed at the end of the D2 list, just before the close T061, so that T061 stays the last D2 task and closes them too.
 
-**New tasks on 2026-11-18 (time field without a time), without renumbering.** A medium change of RF-083 after Fernando's iPhone test of 2026-11-17 adds T089–T092, on branch `fix/match-time-empty-state` from `main` after D2 (`plan.md` "Change of 2026-11-18"; approval pending). They are placed in their own section between D2 and D3.
+**New tasks on 2026-11-18 (time field without a time), without renumbering.** A medium change of RF-083 after Fernando's iPhone test of 2026-11-17 adds T089–T092, on branch `fix/match-time-empty-state` from `main` after D2 (`plan.md` "Change of 2026-11-18"; approved by Fernando on 2026-11-18). They are placed in their own section between D2 and D3.
 
 **Renumbered on 2026-11-11 (review P-27).** Five tasks were split in two: the old T001 (now T001 and T002), T019 (now T020 and T021), T023 (now T025 and T026), T030 (now T033 and T034) and T037 (now T041 and T042). The findings in `review.md` quote the old numbers. Old to new: T002–T018 → T003–T019; T020–T022 → T022–T024; T024–T029 → T027–T032; T031–T036 → T035–T040; T038–T074 → T043–T079.
 
@@ -1019,7 +1019,7 @@ Added on 2026-11-14, after the Codex rounds, from the Security audit of D2 (`rev
 
 # Change of 2026-11-18 · Time field without a time (RF-083)
 
-Branch `fix/match-time-empty-state`, from `main` after D2 (medium change; `plan.md` "Change of 2026-11-18"). Approval pending. Tasks T089–T092, done in this order. Rules for these tasks:
+Branch `fix/match-time-empty-state`, from `main` after D2 (medium change; `plan.md` "Change of 2026-11-18"). Approved by Fernando on 2026-11-18. Tasks T089–T092, done in this order. Rules for these tasks:
 
 1. **Layers.** No file changes in `src/domain/`, `src/data/` or `src/state/`. The 12:00 of «Añadir hora» is `ADDED_TIME` in `src/ui/date-time-field-shared.ts`, and it reaches the draft only through the existing `setTime`. If a task seems to need a change in another layer, the Implementer stops and asks.
 2. **Mutation testing.** `src/domain/` does not change, so `verify.sh` runs no Stryker. The helpers changed in `tests/support/` are used only by screen tests.
@@ -1197,6 +1197,7 @@ Branch `fix/match-time-empty-state`, from `main` after D2 (medium change; `plan.
   - Layer and files: `review.md`, `codex-review.md`, `summary.md`, `plan.md` ("Approved by" and "Deviations"), `tasks.md`.
   - Done when: T089–T091 are ticked; `scripts/verify.sh` is green and its output is in `review.md`; `scripts/review.sh specs/001-planificador-v1` has run, its output is in `codex-review.md`, and there is no blocking finding (a blocking one sends the work back to phase 6); Security is not required, because the change touches no dependency, data, navigation or configuration (rule 16 of `AGENTS.md`), unless the phase 4 review says otherwise; `summary.md` has a section "Change of 2026-11-18 · Time field without a time" with the after explanation (what, how, why, to learn with the real code, to check it, pending); Fernando has done the iPhone and Android checks of `plan.md` "Change of 2026-11-18", "To check it"; the PR from `fix/match-time-empty-state` uses the template and Fernando merges it with a merge commit.
   - Scenarios: pending (phase 5), as checks of the close.
+  - State on 2026-11-18: verification green (`review.md`, de83c6d); Codex 0 blocking, 1 important (F-01) and 2 minor (F-02, F-03), all in code this branch does not change and accepted by Fernando as pending (F-01 and F-03 for their own `fix/` branches); `summary.md` written; PR opened. Still open: Fernando's iPhone and Android checks and the merge, so T092 stays unticked.
 
 # D3 · Rest of v1 (US5–US7)
 
