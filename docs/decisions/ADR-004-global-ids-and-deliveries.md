@@ -14,7 +14,7 @@
 
 1. **Global, three-digit requirement and example IDs.**
    - Requirements are `RF-NNN` and examples `E-NNN`, always with three digits.
-   - IDs are unique across the whole repository, not per spec. Spec 001 starts at `RF-001` and `E-001`; the next spec continues after the highest ID used so far (today the highest are `RF-088` and `E-032`, so the next spec starts at `RF-089` and `E-033`). The Specifier looks up the highest `RF` and `E` in `specs/` before numbering.
+   - IDs are unique across the whole repository, not per spec. Spec 001 starts at `RF-001` and `E-001`; the next spec continues after the highest ID used so far (today the highest are `RF-088` and `E-033`, so the next spec starts at `RF-089` and `E-034`; counter updated on 2026-11-18, approved by Fernando in chat). The Specifier looks up the highest `RF` and `E` in `specs/` before numbering.
    - An ID is never reused. A retired requirement or example keeps its line in its spec, marked "retired", and its number is not given to anything else.
    - `scripts/check-traceability.mjs` reads three-digit IDs and fails when the same ID is defined in more than one `spec.md`. Because IDs are unique, a test name that carries an ID can only belong to one spec, which resolves C-10.
    - Task IDs (`T001`…) stay per spec, as today: they never appear in test names.
