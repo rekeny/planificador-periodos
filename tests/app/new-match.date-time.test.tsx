@@ -19,6 +19,7 @@ import {
 import {
   freshDraft,
   openFormAlone,
+  pressAddTime,
   pressClearTime,
   seedTeams,
   shownTimes,
@@ -91,13 +92,15 @@ describe("new-match form, date and time by default (RF-026, RF-083, E-023)", () 
     expect(texts.match?.clearTime).toBe("Quitar hora");
   });
 
-  it("RF-026 RF-083 E-023: a new form shows the labels «Fecha» and «Hora», today as «11/11/2026», no time and the button «Quitar hora»", async () => {
+  it("RF-026 RF-083 E-023: a new form shows the labels «Fecha» and «Hora», today as «11/11/2026», no time, «Sin hora» and «Añadir hora», and no button «Quitar hora»", async () => {
     await openFormAlone(alevin);
     expect(screen.getByText("Fecha")).toBeTruthy();
     expect(screen.getByText("Hora")).toBeTruthy();
     expect(screen.getByText("11/11/2026")).toBeTruthy();
     expect(shownTimes()).toEqual([]);
-    expect(screen.getByRole("button", { name: "Quitar hora" })).toBeTruthy();
+    expect(screen.getByText("Sin hora")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Añadir hora" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Quitar hora" })).toBeNull();
     expect(draft.getState()).toMatchObject({ date: "2026-11-11", time: null });
   });
 
@@ -106,7 +109,9 @@ describe("new-match form, date and time by default (RF-026, RF-083, E-023)", () 
     expect(localParts(await pickerValue("date")).slice(0, 3)).toEqual([
       2026, 11, 11,
     ]);
-    expect(await pickerValue("time")).toBeInstanceOf(Date);
+    await pressAddTime();
+    const time = await pickerValue("time");
+    expect(localParts(time)).toEqual([2026, 11, 11, 12, 0]);
   });
 });
 
@@ -121,6 +126,8 @@ describe("new-match form, choosing the date (RF-026, RF-083)", () => {
       2026, 11, 14,
     ]);
     expect(shownTimes()).toEqual([]);
+    expect(screen.getByText("Sin hora")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Añadir hora" })).toBeTruthy();
   });
 
   it.each(DATES)(
@@ -147,6 +154,7 @@ describe("new-match form, choosing the time (RF-083)", () => {
     "RF-083: picking the time «%s» (the day boundaries and the 24-hour format) shows it with two digits and the draft keeps it",
     async (shown, hour, minute) => {
       await openFormAlone(alevin);
+      await pressAddTime();
       await pickTime(hour, minute);
       expect(shownTimes()).toEqual([shown]);
       expect(draft.getState().time).toBe(shown);
@@ -159,17 +167,20 @@ describe("new-match form, several choices in a row (RF-026, RF-083, E-032)", () 
   it("RF-083 E-032: 1 March 2026 at 18:30 shows «01/03/2026» and «18:30», then «Quitar hora» leaves the date and no time", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 3, 1);
+    await pressAddTime();
     await pickTime(18, 30);
     expect(screen.getByText("01/03/2026")).toBeTruthy();
     expect(shownTimes()).toEqual(["18:30"]);
     await pressClearTime();
     expect(shownTimes()).toEqual([]);
+    expect(screen.getByText("Sin hora")).toBeTruthy();
     expect(screen.getByText("01/03/2026")).toBeTruthy();
     expect(draft.getState()).toMatchObject({ date: "2026-03-01", time: null });
   });
 
   it("RF-083: choosing a time and then changing the date keeps the time", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(9, 5);
     await pickDate(2026, 11, 14);
     await pickDate(2030, 1, 31);
@@ -182,18 +193,23 @@ describe("new-match form, several choices in a row (RF-026, RF-083, E-032)", () 
 
   it("RF-083 E-032: choosing a time, «Quitar hora» and choosing another time shows the new one", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(18, 30);
     await pressClearTime();
+    await pressAddTime();
+    expect(shownTimes()).toEqual(["12:00"]);
     await pickTime(10, 0);
     expect(shownTimes()).toEqual(["10:00"]);
     expect(draft.getState().time).toBe("10:00");
   });
 
-  it("RF-083: after «Quitar hora» the time picker still works and a second «Quitar hora» changes nothing more", async () => {
+  it("RF-083: after «Quitar hora» no «Quitar hora» is offered, and «Añadir hora» brings the picker back and it still works", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(7, 45);
     await pressClearTime();
-    await pressClearTime();
+    expect(screen.queryByRole("button", { name: "Quitar hora" })).toBeNull();
+    await pressAddTime();
     await pickTime(7, 45);
     expect(shownTimes()).toEqual(["07:45"]);
   });
@@ -203,6 +219,7 @@ describe("new-match form, what is saved (RF-025, RF-026, RF-083, E-032)", () => 
   it("RF-025 RF-026 RF-083: the match created after picking 14 November 2026 at 09:05 is saved with that date and time", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 11, 14);
+    await pressAddTime();
     await pickTime(9, 5);
     expect(draft.getState().create().kind).toBe("saved");
     expect(savedMatches(db)).toMatchObject([
@@ -212,6 +229,7 @@ describe("new-match form, what is saved (RF-025, RF-026, RF-083, E-032)", () => 
 
   it("RF-025 RF-083 E-032: the match created after «Quitar hora» is saved with its date and no time, and one created with no time chosen has none", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(18, 30);
     await pickDate(2026, 3, 1);
     await pressClearTime();
