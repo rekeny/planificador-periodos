@@ -4,6 +4,7 @@ import {
   useLocalSearchParams,
   useRouter,
 } from "expo-router";
+import { SymbolView } from "expo-symbols";
 import { useCallback, useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,26 @@ function useOpenTeam(id: number | null, store: Store): void {
   );
 }
 
+// Material symbol on Android, SF Symbol on iOS: one icon, no new dependency.
+function EditButton({ teamId }: { teamId: number }): ReactElement {
+  const { t } = useTranslation();
+  const router = useRouter();
+  return (
+    <Pressable
+      accessibilityLabel={t("teams.edit")}
+      accessibilityRole="button"
+      onPress={() => router.push(`/teams/${teamId}/edit`)}
+      style={styles.editIcon}
+    >
+      <SymbolView
+        name={{ ios: "pencil", android: "edit", web: "edit" }}
+        size={22}
+        tintColor="#1d4ed8"
+      />
+    </Pressable>
+  );
+}
+
 export default function TeamScreen(): ReactElement {
   const { t } = useTranslation();
   const router = useRouter();
@@ -47,28 +68,30 @@ export default function TeamScreen(): ReactElement {
   return (
     <View style={styles.screen}>
       {/* Inside the screen, not in the layout: only here is the team's name known. */}
-      <Stack.Screen options={{ title: team.name }} />
+      <Stack.Screen
+        options={{
+          title: team.name,
+          headerRight: () => <EditButton teamId={id} />,
+        }}
+      />
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push(`/teams/${id}/edit`)}
-          style={styles.action}
+          onPress={() => router.push(`/teams/${id}/matches/new`)}
+          style={[styles.action, styles.primary]}
         >
-          <Text style={styles.actionText}>{t("common.edit")}</Text>
+          <Text numberOfLines={1} style={styles.primaryText}>
+            {t("matches.new")}
+          </Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push(`/teams/${id}/players/new`)}
-          style={styles.action}
+          style={[styles.action, styles.secondary]}
         >
-          <Text style={styles.actionText}>{t("players.new")}</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push(`/teams/${id}/matches/new`)}
-          style={styles.action}
-        >
-          <Text style={styles.actionText}>{t("matches.new")}</Text>
+          <Text numberOfLines={1} style={styles.secondaryText}>
+            {t("players.new")}
+          </Text>
         </Pressable>
       </View>
       <DuplicateNumberBanner numbers={duplicates} />
@@ -91,14 +114,26 @@ export default function TeamScreen(): ReactElement {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   actions: { flexDirection: "row", gap: 8, padding: 16 },
+  editIcon: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   action: {
     flex: 1,
+    minHeight: 44,
     alignItems: "center",
-    padding: 12,
+    justifyContent: "center",
+    paddingHorizontal: 8,
     borderRadius: 8,
-    backgroundColor: "#1d4ed8",
+    borderWidth: 2,
+    borderColor: "#1d4ed8",
   },
-  actionText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
+  primary: { backgroundColor: "#1d4ed8" },
+  secondary: { backgroundColor: "transparent" },
+  primaryText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
+  secondaryText: { color: "#1d4ed8", fontSize: 16, fontWeight: "600" },
   row: {
     flexDirection: "row",
     gap: 12,

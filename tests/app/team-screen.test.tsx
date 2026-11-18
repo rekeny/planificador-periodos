@@ -108,9 +108,9 @@ describe("team screen, header and links", () => {
     expect(presentations()).toEqual(["push"]);
   });
 
-  it("RF-016 RF-012: the screen has the buttons «Editar» and «Nuevo jugador» and the players", async () => {
+  it("RF-016 RF-012: the screen has the buttons «Editar equipo» and «Nuevo jugador» and the players", async () => {
     await openTeamAlone(alevin);
-    expect(screen.getByRole("button", { name: "Editar" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Editar equipo" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Nuevo jugador" })).toBeTruthy();
     expect(playerOrder()).toBe("4 Ana 9 Luis");
   });
@@ -131,9 +131,11 @@ describe("team screen, header and links", () => {
     expect(fields.number).toBe("Dorsal");
   });
 
-  it("RF-013 RF-016: «Editar» opens the edit modal of that team with its saved data", async () => {
+  it("RF-013 RF-016: «Editar equipo» opens the edit modal of that team with its saved data", async () => {
     await openTeamAlone(alevin);
-    await fireEvent.press(screen.getByRole("button", { name: "Editar" }));
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Editar equipo" }),
+    );
     expect(await screen.findByLabelText("Nombre")).toHaveDisplayValue(
       "Alevín A",
     );
@@ -143,7 +145,9 @@ describe("team screen, header and links", () => {
 
   it("RF-013 RF-016: after editing the name from the team screen, its header and its players are the new ones", async () => {
     await openTeamAlone(alevin);
-    await fireEvent.press(screen.getByRole("button", { name: "Editar" }));
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Editar equipo" }),
+    );
     await screen.findByLabelText("Nombre");
     await typeName("Alevín B");
     await pressSave();
@@ -170,7 +174,9 @@ describe("team screen, a team that cannot be shown", () => {
       await renderRouter("./src/app", { initialUrl: `/teams/${id}` });
       expect(await screen.findByText(NOT_FOUND)).toBeTruthy();
       expect(screenTexts()).toEqual([NOT_FOUND]);
-      expect(screen.queryByRole("button", { name: "Editar" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Editar equipo" }),
+      ).toBeNull();
       expect(
         screen.queryByRole("button", { name: "Nuevo jugador" }),
       ).toBeNull();

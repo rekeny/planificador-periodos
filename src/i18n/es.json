@@ -5,7 +5,8 @@
   "teams": {
     "title": "Equipos",
     "empty": "Todavía no hay equipos. Crea el primero.",
-    "new": "Nuevo equipo"
+    "new": "Nuevo equipo",
+    "edit": "Editar equipo"
   },
   "team": {
     "field": {

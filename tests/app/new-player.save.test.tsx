@@ -197,7 +197,9 @@ describe("new-player form, when saving fails", () => {
     await screen.findByText(SAVE_FAILED);
     allowWrites(db, "players", "INSERT");
     await pressSave();
-    expect(await screen.findByRole("button", { name: "Editar" })).toBeTruthy();
+    expect(
+      await screen.findByRole("button", { name: "Editar equipo" }),
+    ).toBeTruthy();
     expect(playerOrder()).toBe("4 Ana 5 Eva");
     expect(screen.queryByText(SAVE_FAILED)).toBeNull();
     expect(screen).toHavePathname(`/teams/${alevin}`);
