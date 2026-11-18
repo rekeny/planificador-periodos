@@ -107,10 +107,10 @@ describe("T048 Maestro US2 flow", () => {
     const all = lines();
     const clear = all.indexOf(`- tapOn: "${es.match.clearTime}"`);
     expect(clear).toBeGreaterThan(0);
-    expect(all.slice(clear + 1, clear + 3)).toEqual([
-      '- assertNotVisible: "18:30"',
-      '- assertVisible: "01/03/2026"',
-    ]);
+    // T091 adds the checks of «Sin hora» and «Añadir hora» after these two (see us2-flow.time.test.ts).
+    const next = all.slice(clear + 1, clear + 6);
+    expect(next).toContain('- assertNotVisible: "18:30"');
+    expect(next).toContain('- assertVisible: "01/03/2026"');
     expect(all.indexOf('- assertVisible: "18:30"')).toBeLessThan(clear);
   });
 

@@ -1,5 +1,5 @@
 appId: com.fernando.planificadorperiodos
-name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-084 E-015 E-022 E-023 E-024 E-030 E-032: a match is created with the native pickers, the call-up is chosen, edited and warned about, and the grid opens"
+name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-084 E-015 E-022 E-023 E-024 E-030 E-032 E-033: a match is created with the native pickers, the call-up is chosen, edited and warned about, and the grid opens"
 ---
 # Journey of US2 on a clean install (T048). Written WITHOUT running it: Maestro is not installed
 # here (developer decision of 2026-11-13). The first real run will need the adjustments marked
@@ -162,23 +162,41 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - scrollUntilVisible:
     element:
       text: "Hora"
+# E-033: a form without a time shows «Sin hora» and «Añadir hora», and no «Quitar hora». «Añadir hora»
+# gives 12:00: iOS shows it in the field at once; Android opens the dialog on 12:00 (D52), so only iOS
+# asserts «12:00» here and Android closes the dialog with «Aceptar» after choosing 18:30 below, because
+# «Cancelar» is never tapped in this flow.
+- assertVisible: "Sin hora"
+- assertVisible: "Añadir hora"
+- assertNotVisible: "Quitar hora"
+- tapOn: "Añadir hora"
 - runFlow:
     when:
       platform: iOS
     commands:
+      - assertVisible: "12:00"
       - tapOn: "(?i)[0-9]+[^/0-9][0-9][0-9].*"
 - tapOn: "18"
 - tapOn: "30"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Aceptar"
 - runFlow:
     when:
       platform: iOS
     commands:
       - tapOn: "Hora"
 - assertVisible: "18:30"
-# E-032: «Quitar hora» leaves no time and keeps the date. The match is saved without a time.
+# E-032, E-033: «Quitar hora» leaves no time and keeps the date, and the field goes back to «Sin hora»
+# and «Añadir hora». The match is saved without a time.
 - tapOn: "Quitar hora"
 - assertNotVisible: "18:30"
 - assertVisible: "01/03/2026"
+- assertVisible: "Sin hora"
+- assertVisible: "Añadir hora"
+- assertNotVisible: "Quitar hora"
 # The quick option writes the team name, which is then edited. E-022: a 41st character is not
 # accepted and shows no message.
 - scrollUntilVisible:
