@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { shownDate, shownTime } from "@/state/match-date-text";
-import { toLocalDate } from "./date-time-field-shared";
+import { NoTime } from "./no-time";
+import { ADDED_TIME, toLocalDate } from "./date-time-field-shared";
 import type { DateTimeFieldProps } from "./date-time-field-shared";
 
 type Mode = "date" | "time";
@@ -49,6 +50,51 @@ function PickerDialog({
   );
 }
 
+interface TimePartProps {
+  readonly time: string | null;
+  readonly onAdd: () => void;
+  readonly onOpen: () => void;
+  readonly onClearTime: () => void;
+}
+
+// Derived from the props only: no time shows «Sin hora» and «Añadir hora»; a time shows its button.
+function TimePart({
+  time,
+  onAdd,
+  onOpen,
+  onClearTime,
+}: TimePartProps): ReactElement {
+  const { t } = useTranslation();
+  const timeText = shownTime(time);
+  if (timeText === null) {
+    return (
+      <>
+        <Text style={styles.label}>{t("match.field.time")}</Text>
+        <NoTime onAdd={onAdd} />
+      </>
+    );
+  }
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onOpen}
+        style={styles.button}
+      >
+        <Text style={styles.label}>{t("match.field.time")}</Text>
+        <Text>{timeText}</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => onClearTime()}
+        style={styles.button}
+      >
+        <Text>{t("match.clearTime")}</Text>
+      </Pressable>
+    </>
+  );
+}
+
 export function DateTimeFieldAndroid({
   date,
   time,
@@ -58,7 +104,6 @@ export function DateTimeFieldAndroid({
 }: DateTimeFieldProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState<Mode | null>(null);
-  const timeText = shownTime(time);
   const close = (): void => setOpen(null);
   return (
     <View style={styles.field}>
@@ -70,14 +115,15 @@ export function DateTimeFieldAndroid({
         <Text style={styles.label}>{t("match.field.date")}</Text>
         <Text>{shownDate(date)}</Text>
       </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => setOpen("time")}
-        style={styles.button}
-      >
-        <Text style={styles.label}>{t("match.field.time")}</Text>
-        {timeText === null ? null : <Text>{timeText}</Text>}
-      </Pressable>
+      <TimePart
+        time={time}
+        onAdd={() => {
+          onTimeChange(ADDED_TIME);
+          setOpen("time");
+        }}
+        onOpen={() => setOpen("time")}
+        onClearTime={onClearTime}
+      />
       {open === null ? null : (
         <PickerDialog
           mode={open}
@@ -97,13 +143,6 @@ export function DateTimeFieldAndroid({
           }
         />
       )}
-      <Pressable
-        accessibilityRole="button"
-        onPress={onClearTime}
-        style={styles.button}
-      >
-        <Text>{t("match.clearTime")}</Text>
-      </Pressable>
     </View>
   );
 }

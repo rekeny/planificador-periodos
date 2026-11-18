@@ -102,6 +102,9 @@ describe("the native pickers speak Spanish", () => {
     async (mode) => {
       platform = jest.replaceProperty(Platform, "OS", "android");
       await openFormAlone(alevin);
+      if (mode === "time") {
+        await pressAddTime();
+      }
       const props = await labelled(mode);
       expect(props.positiveButton?.label).toBe("Aceptar");
       expect(props.negativeButton?.label).toBe("Cancelar");

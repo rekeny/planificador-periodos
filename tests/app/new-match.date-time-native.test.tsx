@@ -1,7 +1,7 @@
 // T082 (Codex re-run, blocking finding «Android assigns a time without user selection»): on Android
-// the date and time pickers are dialogs the coach opens with the buttons «Fecha» and «Hora», only a
-// CONFIRMED choice reaches the draft and the dialog is gone afterwards (RF-025, RF-026, RF-083,
-// E-023, E-032). The double of tests/support/date-time-picker-native-double.ts reports the initial
+// the date and time pickers are dialogs the coach opens, the date with the button «Fecha» and the
+// time with «Añadir hora» (T090) or, with a time, «Hora»; only a CONFIRMED choice reaches the draft
+// and the dialog is gone afterwards (RF-025, RF-026, RF-083, E-023, E-032, E-033, D52). The double of tests/support/date-time-picker-native-double.ts reports the initial
 // value on mount of an inline picker, as the installed Android component does. Platform.OS is
 // «android». Real src/app routes and the real draft on the in-memory database.
 import { act, screen } from "expo-router/testing-library";
@@ -14,8 +14,10 @@ import { savedMatches } from "../support/new-match-fixtures";
 import type { NewMatchDraft } from "../support/new-match-fixtures";
 import {
   dismissPicker,
+  localParts,
   pickDate,
   pickTime,
+  pickerValue,
 } from "../support/date-time-picker-double";
 import {
   isPickerOpen,
@@ -25,6 +27,7 @@ import {
   chooseFormatInForm,
   freshDraft,
   openFormAlone,
+  pressAddTime,
   pressClearTime,
   seedTeams,
   shownTimes,
@@ -99,23 +102,28 @@ describe("Android, nothing chosen (RF-025, RF-026, RF-083, E-023)", () => {
     ]);
   });
 
-  it("RF-083: both fields show a button «Fecha» and a button «Hora», and no dialog is open until one is pressed", async () => {
+  it("RF-083: the form shows a button «Fecha», «Sin hora» and «Añadir hora», no «Hora» button, and no dialog is open until one is pressed", async () => {
     await openFormAlone(alevin);
     expect(screen.getByRole("button", { name: /^Fecha/ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /^Hora/ })).toBeTruthy();
+    expect(screen.getByText("Sin hora")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Añadir hora" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^Hora/ })).toBeNull();
     expect(isPickerOpen("date")).toBe(false);
     expect(isPickerOpen("time")).toBe(false);
   });
 
-  it("RF-025 RF-083: opening «Hora» and «Fecha» only opens the dialogs and changes nothing in the draft", async () => {
+  it("RF-025 RF-083: opening «Fecha» only opens the date dialog and changes nothing, and «Añadir hora», the only way to the time dialog, opens it and sets 12:00", async () => {
     await openFormAlone(alevin);
-    await openPicker("time");
-    expect(isPickerOpen("time")).toBe(true);
-    expect(shownTimes()).toEqual([]);
-    expect(draft.getState().time).toBeNull();
     await openPicker("date");
     expect(isPickerOpen("date")).toBe(true);
     expect(draft.getState()).toMatchObject({ date: "2026-11-11", time: null });
+    await dismissPicker("date");
+    await pressAddTime();
+    expect(isPickerOpen("time")).toBe(true);
+    expect(draft.getState()).toMatchObject({
+      date: "2026-11-11",
+      time: "12:00",
+    });
   });
 
   it("RF-083: no editable text field is labelled «Fecha» or «Hora» on Android either", async () => {
@@ -131,8 +139,9 @@ describe("Android, nothing chosen (RF-025, RF-026, RF-083, E-023)", () => {
 });
 
 describe("Android, confirming a choice (RF-025, RF-026, RF-083)", () => {
-  it("RF-025 RF-083: opening «Hora» and confirming 09:05 shows 09:05, closes the dialog and saves 09:05", async () => {
+  it("RF-025 RF-083: «Añadir hora» and confirming 09:05 shows 09:05, closes the dialog and saves 09:05", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(9, 5);
     expect(shownTimes()).toEqual(["09:05"]);
     expect(draft.getState().time).toBe("09:05");
@@ -155,6 +164,7 @@ describe("Android, confirming a choice (RF-025, RF-026, RF-083)", () => {
   it("RF-026 RF-083: confirming a date and then a time keeps both, and the match is saved with them", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 3, 1);
+    await pressAddTime();
     await pickTime(18, 30);
     expect(screen.getByText("01/03/2026")).toBeTruthy();
     expect(shownTimes()).toEqual(["18:30"]);
@@ -166,18 +176,20 @@ describe("Android, confirming a choice (RF-025, RF-026, RF-083)", () => {
 });
 
 describe("Android, dismissing a dialog (RF-025, RF-026, RF-083)", () => {
-  it("RF-025 RF-083: opening «Hora» and dismissing it keeps no time, closes the dialog and saves no time", async () => {
+  it("RF-025 RF-083: «Añadir hora» and «Cancelar» close the dialog, keep 12:00 and save 12:00 (D52)", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await dismissPicker("time");
     expect(isPickerOpen("time")).toBe(false);
-    expect(shownTimes()).toEqual([]);
-    expect(draft.getState().time).toBeNull();
+    expect(shownTimes()).toEqual(["12:00"]);
+    expect(draft.getState().time).toBe("12:00");
     expect(draft.getState().create().kind).toBe("saved");
-    expect(savedMatches(db)).toMatchObject([{ time: null }]);
+    expect(savedMatches(db)).toMatchObject([{ time: "12:00" }]);
   });
 
   it("RF-083: dismissing «Hora» after confirming 18:30 keeps 18:30", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(18, 30);
     await dismissPicker("time");
     expect(isPickerOpen("time")).toBe(false);
@@ -202,6 +214,7 @@ describe("Android, «Quitar hora» (RF-083, E-032)", () => {
   it("RF-083 E-032: «Quitar hora» after confirming 18:30 leaves no time, the date stays and the match is saved with no time", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 3, 1);
+    await pressAddTime();
     await pickTime(18, 30);
     await pressClearTime();
     expect(shownTimes()).toEqual([]);
@@ -214,6 +227,7 @@ describe("Android, «Quitar hora» (RF-083, E-032)", () => {
 
   it("RF-083 E-032: after «Quitar hora» a format change, a rotation and a date choice do not bring a time back", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(18, 30);
     await pressClearTime();
     await chooseFormatInForm(8);
@@ -221,16 +235,21 @@ describe("Android, «Quitar hora» (RF-083, E-032)", () => {
     await rotate();
     expect(draft.getState().time).toBeNull();
     await pickDate(2026, 11, 14);
+    expect(screen.getByText("Sin hora")).toBeTruthy();
     expect(shownTimes()).toEqual([]);
     expect(draft.getState()).toMatchObject({ date: "2026-11-14", time: null });
   });
 
-  it("RF-083 E-032: after «Quitar hora» the dialog of «Hora» can be opened, dismissed and confirmed again", async () => {
+  it("RF-083 E-032: after «Quitar hora», «Añadir hora» opens the dialog on 12:00, «Cancelar» keeps 12:00 and a confirmed 10:00 is kept", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(18, 30);
     await pressClearTime();
+    await pressAddTime();
+    expect(isPickerOpen("time")).toBe(true);
+    expect(localParts(await pickerValue("time")).slice(3)).toEqual([12, 0]);
     await dismissPicker("time");
-    expect(draft.getState().time).toBeNull();
+    expect(draft.getState().time).toBe("12:00");
     await pickTime(10, 0);
     expect(shownTimes()).toEqual(["10:00"]);
     expect(draft.getState().time).toBe("10:00");
