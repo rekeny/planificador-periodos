@@ -1,27 +1,37 @@
 # Codex review
 
-- Date: 2026-11-17 23:07
-- Branch: fix/team-screen-actions against main
-- Commit: d5d9846
+- Date: 2026-11-18 09:07
+- Branch: fix/match-time-empty-state against main
+- Commit: de83c6d
 
-Reviewed `git diff main...HEAD` at `d5d9846`.
+Reviewed `git diff main...HEAD` at `de83c6d`.
 
-**Findings: 0 BLOCKING, 0 IMPORTANT, 1 MINOR.**
+**Findings: 0 BLOCKING, 1 IMPORTANT, 2 MINOR.**
 
-**MINOR — Move shared-store updates out of render.**  
-[edit.tsx:19](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/app/teams/[teamId]/edit.tsx:19) and [players/new.tsx:19](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/app/teams/[teamId]/players/new.tsx:19) call `openTeam()` inside a `useState` initializer. This publishes Zustand updates while rendering. Opening either form reproduced React’s “Cannot update a component (`TeamScreen`) while rendering a different component” warning.
+1. **IMPORTANT — Keyboard avoidance omits the form’s screen offset.**  
+   [form-scroll.tsx:23](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/ui/form-scroll.tsx:23)  
+   Forms sit below native headers, but `keyboardVerticalOffset` defaults to zero. React Native therefore underestimates keyboard overlap, leaving lower controls partly obscured at maximum scroll in short landscape views. Current tests check component structure, so they miss this geometry.  
+   **Fix:** supply the actual top offset, accounting for headers and modal positioning; add a keyboard-geometry regression and verify «Guardar» on an iPhone in landscape. This follows the [documented offset semantics](https://reactnative.dev/docs/keyboardavoidingview#keyboardverticaloffset). Native verification remains pending.
 
-**Concrete fix:** perform initialization in the existing focus effect, guard rendering until the route owns the loaded team, and assert that these navigation tests emit no React warning. Apply the same cleanup to `useOpenTeam()` in the team screen.
+2. **MINOR — Daylight-saving normalization can make the picker disagree with saved time.**  
+   [date-time-field-shared.ts:26](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/ui/date-time-field-shared.ts:26)  
+   Under `Europe/Madrid`, selecting 02:30 and then changing the date to 29 March 2026 feeds **03:30** to the picker, while the draft, displayed text and saved value retain **02:30**. Verified directly with the current conversion.  
+   **Fix:** use an independent reference date for the time-only picker and add a DST regression covering date changes.
 
-| Category                                       | Result                                                                                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| RF/E implementation and scope                  | No findings within approved D1/D2 scope. D3 remains deferred.                                                                        |
-| Constitution, layers, conventions and glossary | Minor finding above; no additional findings.                                                                                         |
-| Test integrity and effectiveness               | No unapproved deletion, skipping or weakening found.                                                                                 |
-| Security                                       | No new findings: parameterized queries, no application network calls or player-data logging, justified dependencies and permissions. |
-| Explanation accuracy                           | No material mismatch found.                                                                                                          |
-| Simplicity, clarity and efficiency             | Minor finding above; no additional findings.                                                                                         |
+3. **MINOR — Shared-store updates still occur during render (existing M-01).**  
+   [edit.tsx:19](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/app/teams/[teamId]/edit.tsx:19)  
+   The `useState` initializer calls `openTeam()`, publishing Zustand updates during render and triggering React’s cross-component update warning. The new-player route and `useOpenTeam()` repeat this pattern.  
+   **Fix:** initialize through the existing focus effects, guard rendering by team ownership, and assert that navigation emits no React warnings.
 
-Validation: **2,838 tests passed** with cache writes suppressed in memory; **233 tests across 16 suites were blocked by filesystem permissions**. Types, lint, committed-file formatting, traceability, focused-test detection, diff whitespace and Gitleaks passed.
+| Review category                             | Result                                                                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| RF/E implementation and scope               | Findings 1–2. D3 remains explicitly deferred; no unrelated additions found.                                                           |
+| Constitution, layers, conventions, glossary | Finding 3; no additional findings.                                                                                                    |
+| Test integrity and effectiveness            | Coverage gaps above. No unapproved deletion, skipping or weakening found.                                                             |
+| Security                                    | No new findings: parameterized queries, no application network calls or player-data logging, documented dependencies and permissions. |
+| Explanation accuracy                        | Form-reachability assurances overstate finding 1; no additional material mismatch.                                                    |
+| Simplicity, clarity, efficiency             | Finding 3; no additional findings.                                                                                                    |
 
-Full verification, coverage, mutation testing, fresh dependency scans and native behavior remain unconfirmed. Device checks and T061 remain pending. No repository files changed.
+Validation: types, lint, source formatting, traceability, focused/skipped-test detection and Gitleaks passed. With Jest cache writes suppressed in memory, **2,930 tests passed**; **233 tests across 16 suites were blocked by temporary-file permissions**.
+
+Full verification, coverage, mutation testing, fresh dependency scans and native behavior were not independently confirmed. D3, Maestro and documented device checks remain pending; this review does not establish full-spec completion.
