@@ -16,6 +16,7 @@ import { isPickerOpen } from "../support/date-time-picker-native-double";
 import {
   freshDraft,
   openFormAlone,
+  pressAddTime,
   pressClearTime,
   seedTeams,
   shownTimes,
@@ -70,10 +71,12 @@ describe("iOS, inline pickers with the native-equivalent double (RF-025, RF-026,
     expect(Platform.OS).toBe("ios");
   });
 
-  it("RF-025 RF-083 E-023: an untouched form shows both pickers, has no time and saves 2026-11-11 with no time", async () => {
+  it("RF-025 RF-083 E-023: an untouched form shows only the date picker, «Sin hora» and «Añadir hora», has no time and saves 2026-11-11 with no time", async () => {
     await openFormAlone(alevin);
     expect(isPickerOpen("date")).toBe(true);
-    expect(isPickerOpen("time")).toBe(true);
+    expect(isPickerOpen("time")).toBe(false);
+    expect(screen.getByText("Sin hora")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Añadir hora" })).toBeTruthy();
     expect(shownTimes()).toEqual([]);
     expect(draft.getState().create().kind).toBe("saved");
     expect(savedMatches(db)).toMatchObject([
@@ -84,6 +87,7 @@ describe("iOS, inline pickers with the native-equivalent double (RF-025, RF-026,
   it("RF-026 RF-083: picking 1 March 2026 and 18:30 in the inline pickers is kept and saved", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 3, 1);
+    await pressAddTime();
     await pickTime(18, 30);
     expect(screen.getByText("01/03/2026")).toBeTruthy();
     expect(shownTimes()).toEqual(["18:30"]);
@@ -95,6 +99,7 @@ describe("iOS, inline pickers with the native-equivalent double (RF-025, RF-026,
 
   it("RF-083 E-032: «Quitar hora» after picking 18:30 leaves no time and nothing brings it back", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(18, 30);
     await pressClearTime();
     expect(shownTimes()).toEqual([]);

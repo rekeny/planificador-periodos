@@ -5,7 +5,8 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { shownDate, shownTime } from "@/state/match-date-text";
 import { DateTimeFieldAndroid } from "./date-time-field-android";
-import { toLocalDate } from "./date-time-field-shared";
+import { NoTime } from "./no-time";
+import { ADDED_TIME, toLocalDate } from "./date-time-field-shared";
 import type { DateTimeFieldProps } from "./date-time-field-shared";
 
 // iOS keeps both pickers inline (they report nothing on mount); Android opens dialogs from buttons
@@ -26,7 +27,6 @@ function DateTimeFieldInline({
   onClearTime,
 }: DateTimeFieldProps): ReactElement {
   const { t } = useTranslation();
-  const timeText = shownTime(time);
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{t("match.field.date")}</Text>
@@ -44,28 +44,60 @@ function DateTimeFieldInline({
           })
         }
       />
-      <Text style={styles.label}>{t("match.field.time")}</Text>
-      {timeText === null ? null : <Text>{timeText}</Text>}
-      <DateTimePicker
-        mode="time"
-        presentation="inline"
-        locale="es-ES"
-        value={toLocalDate(date, time)}
-        onValueChange={(_event, picked) =>
-          onTimeChange({
-            hour: picked.getHours(),
-            minute: picked.getMinutes(),
-          })
-        }
+      <TimePart
+        date={date}
+        time={time}
+        onTimeChange={onTimeChange}
+        onClearTime={onClearTime}
       />
-      <Pressable
-        accessibilityRole="button"
-        onPress={onClearTime}
-        style={styles.clear}
-      >
-        <Text>{t("match.clearTime")}</Text>
-      </Pressable>
     </View>
+  );
+}
+
+type TimePartProps = Pick<
+  DateTimeFieldProps,
+  "date" | "time" | "onTimeChange" | "onClearTime"
+>;
+
+// Derived from the props only: no time shows «Sin hora» and no picker; a time shows the picker.
+function TimePart({
+  date,
+  time,
+  onTimeChange,
+  onClearTime,
+}: TimePartProps): ReactElement {
+  const { t } = useTranslation();
+  const timeText = shownTime(time);
+  return (
+    <>
+      <Text style={styles.label}>{t("match.field.time")}</Text>
+      {timeText === null ? (
+        <NoTime onAdd={() => onTimeChange(ADDED_TIME)} />
+      ) : (
+        <>
+          <Text>{timeText}</Text>
+          <DateTimePicker
+            mode="time"
+            presentation="inline"
+            locale="es-ES"
+            value={toLocalDate(date, time)}
+            onValueChange={(_event, picked) =>
+              onTimeChange({
+                hour: picked.getHours(),
+                minute: picked.getMinutes(),
+              })
+            }
+          />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onClearTime()}
+            style={styles.clear}
+          >
+            <Text>{t("match.clearTime")}</Text>
+          </Pressable>
+        </>
+      )}
+    </>
   );
 }
 

@@ -348,3 +348,54 @@ Not done or not verified:
 **Codex rounds 6 and 7 (2026-11-15).** Round 6 asked for the landscape-phone buttons in the header and the bounded warning strip on every phone (fixed in `864302a`; the tablet threshold is 768 pt, approved by Fernando on 2026-11-15, and the earlier 600 pt and toolbar decisions are historical). Round 7 found that two new-match forms of the same team shared one draft: after saving the later form and going Back, the earlier form reopened the saved match instead of creating its own. Fix: the draft now records which mounted form owns it (`formId`, from React `useId`), and a form that regains focus while the draft belongs to another form starts a fresh draft. Seen on a device: still for Fernando (T057). The seventh run's minor finding was these outdated statements, now corrected here and in T053.
 
 **Codex round 8 (2026-11-15).** No blocking findings. One important finding, fixed by amending E-021 (decided by Fernando on 2026-11-15): the number field stops at two characters (D42), so typing or pasting 100 leaves "10", with no message, and 10 is saved; 07 and a missing number still show the message. One minor finding (two outdated passages in this summary: landscape-phone header buttons and draft ownership by mounted form), fixed.
+
+## Change of 2026-11-18 · Time field without a time (RF-083, E-032, E-033)
+
+Branch `fix/match-time-empty-state`, medium change, approved by Fernando on 2026-11-18. Tasks T089–T091 done; T092 (close) waits for the device checks and the merge.
+
+### What was done and what changes for the user
+
+On the iPhone, «Quitar hora» seemed to do nothing: the match had no time, but the time wheel still showed 12:00. Now the time field of the new-match form has two clear states, on iPhone and Android. Without a time it shows «Sin hora» and an «Añadir hora» button, and no wheel. «Añadir hora» gives the match 12:00 and shows the wheel and «Quitar hora»; «Quitar hora» goes back to «Sin hora». On Android, «Añadir hora» also opens the time dialog at 12:00, and «Cancelar» keeps 12:00. Adding the time again after clearing it always gives 12:00 (D51).
+
+### How: files and new pieces
+
+- `src/ui/no-time.tsx` (new): `NoTime`, the «Sin hora» text and the «Añadir hora» button (44 pt touch target).
+- `src/ui/date-time-field-shared.ts`: `ADDED_TIME = { hour: 12, minute: 0 }`.
+- `src/ui/date-time-field.tsx` (iOS) and `src/ui/date-time-field-android.tsx` (Android): a `TimePart` component that draws the time part from the `time` prop only.
+- `src/i18n/es.json`: `match.noTime` «Sin hora» and `match.addTime` «Añadir hora».
+- Tests: `tests/app/new-match.time-states.*` (iOS, Android, sequences and the real «Guardar»), `src/ui/*.test.tsx` for the field pieces, `tests/e2e/us2-flow.time.test.ts`; the Android picker double gained `setDialogReportsOnMount` to test the dialog's mount guard. The US2 Maestro flow learns «Añadir hora».
+- Not touched: `src/domain/`, `src/state/`, `src/data/`, `match-form.tsx`.
+
+### Why: decisions along the way
+
+- **The data decides.** The field shows «Sin hora» when the draft's `time` is `null`, and «Añadir hora» writes 12:00 through the existing `setTime`. The screen and what «Guardar» saves can no longer disagree, which was the iPhone bug. A local "picker shown" `useState` was discarded for that reason.
+- **12:00 lives in `src/ui/`**: it is the value the picker offers, not a regulation rule.
+- **«Quitar hora» calls `onClearTime()` with no arguments** (`onPress={() => onClearTime()}`), so the press event is not passed on.
+- **The Android mount guard** (`armed` in `PickerDialog`) stays: with it removed, exactly the two mount-guard tests go red (checked on the real file, then restored).
+- Lint's 60-line limit led to the separate `TimePart` component in both fields.
+
+### To learn, with the real code
+
+- **Derived state:** `time === null ? <NoTime onAdd={() => onTimeChange(ADDED_TIME)} /> : …` — the component keeps no copy of the time, it just follows its props.
+- **Arrow wrappers for callbacks:** `onPress={onClearTime}` would call it with the press event; `() => onClearTime()` calls it with nothing.
+- **Tests proving absence:** `queryByText("Quitar hora")` returning `null`; `jest.replaceProperty(Platform, "OS", "android")` to test the Android field.
+- **Tests that start green:** the whole-form tests of T091 passed at once because T089 and T090 were done; they were checked against copies of the code with planted bugs (for example saving `draft.time ?? "12:00"`), and each bug was caught.
+
+### To check it
+
+```bash
+npm run verify
+```
+
+- **iPhone:** new match → «Sin hora» and «Añadir hora», no wheel. «Añadir hora» → 12:00, wheel and «Quitar hora». Wheel to 18:30, then «Quitar hora» → «Sin hora». «Añadir hora» again → 12:00, not 18:30.
+- **Android:** «Añadir hora» → the dialog opens on 12:00; «Cancelar» keeps 12:00; the «Hora» button reopens it; choose 18:30 and «Aceptar».
+
+### Pending
+
+- Fernando's checks on iPhone and Android, and the merge (T092).
+- The Maestro flow was updated but not run (T048); its iOS «12:00» check and Android «Aceptar» tap are unverified.
+- The match details half of E-032 is in T072 and T073 (D3).
+- Codex found 0 blocking findings. Its other three findings are in code this branch does not change, and Fernando accepted them as pending on 2026-11-18:
+  - **F-01, important:** the keyboard offset in `form-scroll.tsx`; «Guardar» may stay partly hidden on an iPhone in landscape. It gets its own `fix/` branch.
+  - **F-02, minor:** a picker drift on the March daylight-saving day.
+  - **F-03, minor:** M-01, `openTeam()` in a `useState` initialiser. It gets its own `fix/` branch.

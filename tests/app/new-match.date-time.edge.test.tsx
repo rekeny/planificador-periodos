@@ -21,6 +21,7 @@ import {
   freshDraft,
   openFormAlone,
   openFormFromTeam,
+  pressAddTime,
   pressClearTime,
   pressNewMatch,
   seedTeams,
@@ -83,11 +84,12 @@ describe("new-match form, dismissing a picker (RF-026, RF-083)", () => {
     expect(draft.getState().date).toBe("2026-03-01");
   });
 
-  it("RF-083: dismissing the time picker without choosing leaves no time, and after choosing 18:30 keeps 18:30", async () => {
+  it("RF-083: with no time there is no time picker to dismiss, and after «Añadir hora» and 18:30 dismissing it keeps 18:30", async () => {
     await openFormAlone(alevin);
-    await dismissPicker("time");
+    expect(screen.queryByTestId("date-time-picker-time")).toBeNull();
     expect(shownTimes()).toEqual([]);
     expect(draft.getState().time).toBeNull();
+    await pressAddTime();
     await pickTime(18, 30);
     await dismissPicker("time");
     expect(shownTimes()).toEqual(["18:30"]);
@@ -96,20 +98,22 @@ describe("new-match form, dismissing a picker (RF-026, RF-083)", () => {
 
   it("RF-083 E-032: dismissing a picker after «Quitar hora» does not bring the cleared time back", async () => {
     await openFormAlone(alevin);
+    await pressAddTime();
     await pickTime(18, 30);
     await pressClearTime();
-    await dismissPicker("time");
     await dismissPicker("date");
+    expect(screen.queryByTestId("date-time-picker-time")).toBeNull();
+    expect(screen.getByText("Sin hora")).toBeTruthy();
     expect(shownTimes()).toEqual([]);
     expect(draft.getState().time).toBeNull();
   });
 });
 
-describe("new-match form, «Quitar hora» with no time (RF-083, E-032)", () => {
-  it("RF-083 E-032: «Quitar hora» with no time chosen changes nothing, the date included, and the form saves with no time", async () => {
+describe("new-match form, no «Quitar hora» with no time (RF-083, E-032)", () => {
+  it("RF-083 E-032: with no time chosen no «Quitar hora» is offered, the date is kept and the form saves with no time", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 11, 14);
-    await pressClearTime();
+    expect(screen.queryByRole("button", { name: "Quitar hora" })).toBeNull();
     expect(shownTimes()).toEqual([]);
     expect(screen.getByText("14/11/2026")).toBeTruthy();
     expect(draft.getState()).toMatchObject({ date: "2026-11-14", time: null });
@@ -124,6 +128,7 @@ describe("new-match form, no text for the date or the time (RF-083)", () => {
   it("RF-083: no editable text field is labelled «Fecha» or «Hora», and none shows a date or a time as its text", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 3, 1);
+    await pressAddTime();
     await pickTime(18, 30);
     const typed = screen
       .queryAllByLabelText(/^(Fecha|Hora)/)
@@ -156,6 +161,7 @@ describe("new-match form, interruptions (RF-082, RF-083, RF-084)", () => {
   it("RF-083: rotating the device keeps the chosen date and time, in the texts and in the pickers", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 3, 1);
+    await pressAddTime();
     await pickTime(18, 30);
     await act(() => {
       Dimensions.set({
@@ -173,6 +179,7 @@ describe("new-match form, interruptions (RF-082, RF-083, RF-084)", () => {
   it("RF-084 RF-083: changing the format keeps the chosen date and time", async () => {
     await openFormAlone(alevin);
     await pickDate(2026, 3, 1);
+    await pressAddTime();
     await pickTime(18, 30);
     await chooseFormatInForm(8);
     expect(screen.getByText("01/03/2026")).toBeTruthy();
@@ -182,6 +189,7 @@ describe("new-match form, interruptions (RF-082, RF-083, RF-084)", () => {
   it("RF-082 RF-083: leaving the form with Back drops the chosen date and time, and opening it again shows today and no time", async () => {
     await openFormFromTeam("Alevín A");
     await pickDate(2030, 1, 31);
+    await pressAddTime();
     await pickTime(9, 5);
     await testRouter.back();
     expect(screen).toHavePathname(`/teams/${alevin}`);
@@ -189,6 +197,8 @@ describe("new-match form, interruptions (RF-082, RF-083, RF-084)", () => {
     await pressNewMatch();
     expect(screen.getByText("11/11/2026")).toBeTruthy();
     expect(shownTimes()).toEqual([]);
+    expect(screen.getByText("Sin hora")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Añadir hora" })).toBeTruthy();
     expect(draft.getState()).toMatchObject({ date: "2026-11-11", time: null });
   });
 });

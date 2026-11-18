@@ -161,8 +161,12 @@ export const NATIVE_PICKER_TEXTS: readonly string[] = [
   "(?i)[0-9]+[^/0-9][0-9][0-9].*",
 ];
 
-/** What the pickers show once a date and a time are chosen: formatted by the app, not in es.json. */
-export const PICKED_AND_SHOWN: readonly string[] = ["01/03/2026", "18:30"];
+/** What the pickers show once a date and a time are chosen or added («Añadir hora» gives 12:00): formatted by the app, not in es.json. */
+export const PICKED_AND_SHOWN: readonly string[] = [
+  "01/03/2026",
+  "12:00",
+  "18:30",
+];
 
 /** The date of today, which the flow computes itself with `evalScript` and then asserts. */
 export const TODAY_VARIABLE = "${output.today}";

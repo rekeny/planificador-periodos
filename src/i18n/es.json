@@ -33,6 +33,8 @@
       "time": "Hora"
     },
     "clearTime": "Quitar hora",
+    "noTime": "Sin hora",
+    "addTime": "Añadir hora",
     "quickHome": "Mi equipo es local",
     "quickAway": "Mi equipo es visitante"
   },

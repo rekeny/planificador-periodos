@@ -12,7 +12,8 @@
 //   and 567) builds a new state. DateTimePicker.android.tsx (lines 82-90) turns it into `onValueChange(event, date)`.
 // - Android dialog (`presentation="dialog"`, the default of the Android component): the dialogs only
 //   report from the confirm button (DatePickerView.kt lines 397 and 461) and call `onDismiss` when
-//   cancelled; nothing is reported on mount.
+//   cancelled; nothing is reported on mount. `setDialogReportsOnMount(true)` makes the double report
+//   the initial value once at mount anyway, to prove that the form ignores a dialog that does (T090).
 // - iOS (DatePickerView.swift lines 19-21): `onDateChange` fires only when the date differs from the
 //   `selection` prop, so mounting the picker reports nothing.
 import { createElement, useEffect, useRef } from "react";
@@ -27,6 +28,26 @@ const Base = dateTimePickerModule().default;
 type NativeProps = Parameters<typeof Base>[0] & {
   readonly presentation?: "inline" | "dialog";
 };
+
+// Off by default; a test that turns it on turns it off in `afterEach`.
+let dialogReportsOnMount = false;
+
+/** With `on`, an Android `presentation="dialog"` reports its initial value once, at mount (T090). */
+export function setDialogReportsOnMount(on: boolean): void {
+  dialogReportsOnMount = on;
+}
+
+function reportInitialValue({ value, onValueChange }: NativeProps): void {
+  onValueChange?.(
+    {
+      nativeEvent: {
+        timestamp: value.getTime(),
+        utcOffset: -value.getTimezoneOffset(),
+      },
+    },
+    value,
+  );
+}
 
 function reportsOnMount(
   presentation: "inline" | "dialog" | undefined,
@@ -51,19 +72,22 @@ function NativePickerDouble(props: NativeProps): ReactElement {
   const key = stateKey(props);
   const presentation = props.presentation;
   useEffect(() => {
-    const { value, onValueChange } = latest.current;
     if (reportsOnMount(presentation)) {
-      onValueChange?.(
-        {
-          nativeEvent: {
-            timestamp: value.getTime(),
-            utcOffset: -value.getTimezoneOffset(),
-          },
-        },
-        value,
-      );
+      reportInitialValue(latest.current);
     }
   }, [key, presentation]);
+  // A dialog is not an inline picker: it reports once at mount and never on a later `value`. This
+  // effect belongs to the child, so it runs before the effect of the component that mounted it.
+  useEffect(() => {
+    const current = latest.current;
+    if (
+      dialogReportsOnMount &&
+      Platform.OS === "android" &&
+      current.presentation === "dialog"
+    ) {
+      reportInitialValue(current);
+    }
+  }, []);
   return createElement(Base, props);
 }
 

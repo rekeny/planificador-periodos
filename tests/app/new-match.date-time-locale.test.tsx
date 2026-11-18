@@ -18,6 +18,7 @@ import type { PickerMode } from "../support/date-time-picker-double";
 import {
   freshDraft,
   openFormAlone,
+  pressAddTime,
   seedTeams,
 } from "../support/new-match-form";
 
@@ -89,6 +90,9 @@ describe("the native pickers speak Spanish", () => {
     async (mode) => {
       expect(Platform.OS).toBe("ios");
       await openFormAlone(alevin);
+      if (mode === "time") {
+        await pressAddTime();
+      }
       expect((await labelled(mode)).locale).toMatch(SPANISH);
     },
   );
@@ -98,6 +102,9 @@ describe("the native pickers speak Spanish", () => {
     async (mode) => {
       platform = jest.replaceProperty(Platform, "OS", "android");
       await openFormAlone(alevin);
+      if (mode === "time") {
+        await pressAddTime();
+      }
       const props = await labelled(mode);
       expect(props.positiveButton?.label).toBe("Aceptar");
       expect(props.negativeButton?.label).toBe("Cancelar");

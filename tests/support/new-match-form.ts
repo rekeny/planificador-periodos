@@ -98,6 +98,11 @@ export async function pressClearTime(): Promise<void> {
   await fireEvent.press(screen.getByRole("button", { name: "Quitar hora" }));
 }
 
+/** «Añadir hora» of the date and time slot (T089): the only way to a time on a form without one. */
+export async function pressAddTime(): Promise<void> {
+  await fireEvent.press(screen.getByRole("button", { name: "Añadir hora" }));
+}
+
 /** Every text on screen that looks like a time, «HH:MM» (T082): empty when no time is chosen. */
 export function shownTimes(): string[] {
   return screen

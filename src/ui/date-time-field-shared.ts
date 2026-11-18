@@ -11,6 +11,12 @@ export interface DateTimeFieldProps {
   readonly onClearTime: () => void;
 }
 
+// What «Añadir hora» puts in the draft: always noon, never a time chosen earlier (D51).
+export const ADDED_TIME: Parameters<DateTimeFieldProps["onTimeChange"]>[0] = {
+  hour: 12,
+  minute: 0,
+};
+
 // The native picker works with a Date; the draft's strings are turned into one in local time.
 // This is plumbing, not a rule: what is shown comes from displayDate and displayTime.
 export function toLocalDate(date: string, time: string | null): Date {
