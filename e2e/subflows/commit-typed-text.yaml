@@ -1,0 +1,12 @@
+appId: com.fernando.planificadorperiodos
+---
+# Android only: Gboard keeps the word being typed in its suggestion strip, and Maestro counts that
+# strip as visible, so a «not visible» check of a 41st character (E-022) would fail while the
+# keyboard is open (the field itself holds 40; checked on an Android 17 emulator, 2026-11-20).
+# Hiding the keyboard ends the word and removes the strip. The form stays open, and `eraseText` and
+# the next tap still work. iOS has no such strip, and `hideKeyboard` can close the whole modal there.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard

@@ -8,6 +8,8 @@ import { US2_FILE, flowLiterals, lines, spec } from "../support/us2-flow";
 const ADD = `- tapOn: "${es.match.addTime}"`;
 const CLEAR = `- tapOn: "${es.match.clearTime}"`;
 const FIRST_TIME_SHOWN = '- assertVisible: "18:30"';
+const HOUR_18 = '- tapOn: "(?i)18 hours?|18 horas?"';
+const MINUTES_30 = '- tapOn: "(?i)30 minutes?|30 minutos?"';
 
 /** The index of the `scrollUntilVisible` that reaches the «Hora» label, the start of the time steps. */
 function timeStepsStart(all: readonly string[]): number {
@@ -35,6 +37,22 @@ function branchOf(line: string, occurrence = 0): "iOS" | "Android" | null {
 }
 
 describe("T091 Maestro US2 flow, the time field without a time (RF-083, E-032, E-033)", () => {
+  it("RF-083 E-032: on Android the flow opens the date dialog with «Fecha», goes back to March 2026, taps March 1 and closes it with «Aceptar» before asserting 01/03/2026", () => {
+    const all = lines();
+    const open = '- tapOn: "Fecha"';
+    const day = '- tapOn: "(?i).*(march 1, 2026|1 de marzo de 2026).*"';
+    const accept = `- tapOn: "${es.common.accept}"`;
+    const checked = all.indexOf('- assertVisible: "01/03/2026"');
+    expect(all.indexOf(open)).toBeGreaterThan(0);
+    expect(all.indexOf(day)).toBeGreaterThan(all.indexOf(open));
+    expect(all.indexOf(accept)).toBeGreaterThan(all.indexOf(day));
+    expect(checked).toBeGreaterThan(all.indexOf(accept));
+    expect(branchOf(open)).toBe("Android");
+    expect(branchOf(day)).toBe("Android");
+    expect(branchOf('- tapOn: "1"')).toBe("iOS");
+    expect(all).not.toContain("- swipe:");
+  });
+
   it("RF-083 E-033: the flow name carries E-033", () => {
     const name = headerValue(readFlow(US2_FILE), "name") ?? "";
     expect(idsIn(name)).toContain("E-033");
@@ -55,7 +73,7 @@ describe("T091 Maestro US2 flow, the time field without a time (RF-083, E-032, E
     const at = steps.map((step) => all.indexOf(step, start));
     expect(at.every((index) => index > start && index < firstTime)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
-    expect(all.indexOf('- tapOn: "18"', start)).toBeGreaterThan(at[3] ?? 0);
+    expect(all.indexOf(HOUR_18, start)).toBeGreaterThan(at[3] ?? 0);
   });
 
   it("RF-083 E-033: on iOS the flow asserts «12:00» after «Añadir hora» and before 18:30, and 12:00 is a text the pickers show, not one that is typed", () => {
@@ -84,14 +102,14 @@ describe("T091 Maestro US2 flow, the time field without a time (RF-083, E-032, E
     // No loop that turns the wheels until the field reads 18 hours or 30 minutes.
     expect(text).not.toMatch(/notVisible: "(?:18:|\.\.:30)/);
     expect(branchOf('- assertVisible: "18:30"')).toBe("Android");
-    expect(branchOf('- tapOn: "18"')).toBe("Android");
-    expect(branchOf('- tapOn: "30"')).toBe("Android");
+    expect(branchOf(HOUR_18)).toBe("Android");
+    expect(branchOf(MINUTES_30)).toBe("Android");
   });
 
   it("RF-083 E-033: on Android the flow closes the time dialog with «Aceptar» after 18 and 30 and before checking 18:30, never with «Cancelar»", () => {
     const all = lines();
     const accept = `- tapOn: "${es.common.accept}"`;
-    const thirty = all.indexOf('- tapOn: "30"');
+    const thirty = all.indexOf(MINUTES_30);
     expect(all.indexOf(ADD)).toBeGreaterThan(0);
     expect(thirty).toBeGreaterThan(all.indexOf(ADD));
     expect(all.indexOf(accept, thirty)).toBeGreaterThan(thirty);

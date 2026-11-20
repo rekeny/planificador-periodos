@@ -162,11 +162,12 @@ describe("T056 Maestro US3 interruptions", () => {
     );
   });
 
-  it("RF-082: the links to match 99, abc and 01 each start from a fresh launch and show the not-found message, and nothing of match 1 is shown", () => {
+  it("RF-082: the links to match 99, abc and 01 each start from a fresh launch, wait for the list of teams (on Android a link sent while the app starts is lost) and show the not-found message, and nothing of match 1 is shown", () => {
     for (const path of ["matches/99", "matches/abc", "matches/01"]) {
       run(interruption, [
         "- stopApp",
         "- launchApp",
+        see(es.teams.new),
         link(path),
         see(es.notFound.message),
       ]);

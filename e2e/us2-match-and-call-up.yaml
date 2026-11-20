@@ -231,22 +231,26 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
             notVisible: "(?i).*mar.* 2026.*"
           commands:
             - tapOn: "(?i)previous.*|anterior.*"
+# On Android (checked on an Android 17 emulator, 2026-11-20) the date is the button «Fecha», which
+# opens a Material calendar. Its month and day names follow the device language, so both are matched.
 - runFlow:
     when:
       platform: Android
     commands:
+      - tapOn: "Fecha"
       - repeat:
           times: 14
           while:
             notVisible: "(?i).*mar.* 2026.*"
           commands:
-            - swipe:
-                direction: RIGHT
-- tapOn: "1"
+            - tapOn: "(?i)change to previous month|mes anterior"
+      - tapOn: "(?i).*(march 1, 2026|1 de marzo de 2026).*"
+      - tapOn: "Aceptar"
 - runFlow:
     when:
       platform: iOS
     commands:
+      - tapOn: "1"
       - tapOn:
           point: "50%, 15%"
 - assertVisible: "01/03/2026"
@@ -275,8 +279,8 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
     when:
       platform: Android
     commands:
-      - tapOn: "18"
-      - tapOn: "30"
+      - tapOn: "(?i)18 hours?|18 horas?"
+      - tapOn: "(?i)30 minutes?|30 minutos?"
       - tapOn: "Aceptar"
       - assertVisible: "18:30"
 # E-032, E-033: «Quitar hora» leaves no time and keeps the date, and the field goes back to «Sin hora»
@@ -298,6 +302,7 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - eraseText
 - inputText: "mnopqrstuvmnopqrstuvmnopqrstuvmnopqrstuvw"
 - assertVisible: "mnopqrstuvmnopqrstuvmnopqrstuvmnopqrstuv"
+- runFlow: subflows/commit-typed-text.yaml
 - assertNotVisible: "mnopqrstuvmnopqrstuvmnopqrstuvmnopqrstuvw"
 - eraseText
 - inputText: "Alevín A B"
@@ -321,6 +326,7 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
     index: 0
 - inputText: "1234"
 - assertVisible: "123"
+- runFlow: subflows/commit-typed-text.yaml
 - assertNotVisible: "1234"
 - runFlow: subflows/close-number-keyboard.yaml
 - scrollUntilVisible:

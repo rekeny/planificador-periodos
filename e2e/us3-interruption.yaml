@@ -156,9 +156,12 @@ name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, 
 - assertNotVisible: "Carla, P1: casilla vacía"
 
 # T032: only the canonical text of a positive integer is a match number. Each link starts from a
-# fresh launch of the app. Match 1 exists, so «01» proves the strictness.
+# fresh launch of the app. Match 1 exists, so «01» proves the strictness. The link waits for the list of
+# teams: on Android a link that arrives while the app is still starting is lost (checked on an Android 17
+# emulator, 2026-11-20).
 - stopApp
 - launchApp
+- assertVisible: "Nuevo equipo"
 - openLink: planificadorperiodos://matches/99
 # iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
 # simulator's language decides the button. Android opens it straight away.
@@ -170,6 +173,7 @@ name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, 
 - assertVisible: "No se ha encontrado: puede que se haya borrado."
 - stopApp
 - launchApp
+- assertVisible: "Nuevo equipo"
 - openLink: planificadorperiodos://matches/abc
 # iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
 # simulator's language decides the button. Android opens it straight away.
@@ -181,6 +185,7 @@ name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, 
 - assertVisible: "No se ha encontrado: puede que se haya borrado."
 - stopApp
 - launchApp
+- assertVisible: "Nuevo equipo"
 - openLink: planificadorperiodos://matches/01
 # iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
 # simulator's language decides the button. Android opens it straight away.
