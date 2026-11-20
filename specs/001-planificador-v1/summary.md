@@ -396,6 +396,51 @@ npm run verify
 - The Maestro flow was updated on 2026-11-18 and run on an iPhone 17 simulator on 2026-11-20: its iOS «12:00» check passes. Its Android «Aceptar» tap is still unverified (no Android run yet).
 - The match details half of E-032 is in T072 and T073 (D3).
 - Codex found 0 blocking findings. Its other three findings are in code this branch does not change, and Fernando accepted them as pending on 2026-11-18:
-  - **F-01, important:** the keyboard offset in `form-scroll.tsx`; «Guardar» may stay partly hidden on an iPhone in landscape. It gets its own `fix/` branch.
+  - **F-01, important:** the keyboard offset in `form-scroll.tsx`; «Guardar» may stay partly hidden on an iPhone in landscape. Fixed on 2026-11-20 on `fix/form-keyboard-offset` (see the last section).
   - **F-02, minor:** a picker drift on the March daylight-saving day.
   - **F-03, minor:** M-01, `openTeam()` in a `useState` initialiser. It gets its own `fix/` branch.
+
+## Fix of 2026-11-20 · The keyboard no longer hides the focused field of a form (F-01, RF-076)
+
+Branch `fix/form-keyboard-offset`, small change, form approved by Fernando on 2026-11-20 (`small-change-form-keyboard-offset.md`). One commit holds the code and its tests (`c5f5df4`).
+
+### What was done and what changes for the user
+
+On the iPhone, opening the keyboard in the new-match, new-team or new-player form used to leave the form where it was: the field you were typing in, and everything below it, «Guardar» included, stayed under the keyboard. Now, when a text field gets the focus, the form scrolls so that the field sits above the keyboard, and «Guardar» can still be reached by scrolling. It was seen first in landscape and then also in portrait.
+
+### How: files and new pieces
+
+| Piece                                     | What it does                                                                                                                                                                             |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/ui/form-scroll.tsx`                  | The one component the three forms share. On iOS the `ScrollView` adjusts its own insets and the `KeyboardAvoidingView` adds no padding. On Android nothing changes: `behavior="height"`. |
+| `tests/app/form-scroll.keyboard.test.tsx` | Three tests: on iOS the scroll adjusts its insets, on iOS the avoiding view adds no padding, on Android it keeps `"height"` and the scroll does not adjust.                              |
+
+### Why: decisions along the way
+
+- **The cause.** `KeyboardAvoidingView` works out how much the keyboard overlaps from its own position on the screen. These forms sit under a native header and, on iOS, inside a modal sheet that does not start at the top, so its estimate was wrong (`keyboardVerticalOffset` is 0 by default).
+- **Why `automaticallyAdjustKeyboardInsets`.** The system itself knows where the keyboard is and where the focused field is, wherever the sheet sits, so there is no offset to guess. It needed no new dependency. I checked on the simulator that it works inside the sheet before accepting it, as the form said.
+- **Why not both.** Keeping the padding of `KeyboardAvoidingView` on iOS would adjust twice, so on iOS it gets no `behavior`.
+- **Discarded.** `react-native-keyboard-controller`: a new dependency with native code, a root provider and `react-native-reanimated`; that is a medium change with its own entry in `plan.md`. The fallback, a measured `keyboardVerticalOffset`, was not needed.
+- **Found along the way.** Rotating the device with the keyboard open does not scroll again until another field gets the focus. Left as it is: it needs a keyboard-event listener, and it was not asked.
+
+### To learn, with the real code
+
+- **`automaticallyAdjustKeyboardInsets`:** a `ScrollView` prop, only on iOS, that makes the scroll view add the keyboard's height to its bottom inset and scroll the focused field into view: `automaticallyAdjustKeyboardInsets={ios}` in `form-scroll.tsx`. On Android the prop does nothing, so the shared component passes `ios` and keeps the other mechanism there.
+- **`KeyboardAvoidingView` without `behavior`:** with `behavior` undefined it does nothing, which is what we want on iOS now.
+- **Testing a component you cannot see inside:** RNTL 14 only sees host elements, so the `behavior` prop is read by replacing the React Native module with a spy through `jest.mock` and reading `jest.requireMock(...).default.mock.calls.at(-1)`. The platform is switched with `jest.replaceProperty(Platform, "OS", "android")`.
+
+### To check it
+
+```bash
+npm run verify
+```
+
+- **iPhone, portrait:** new match → tap «Notas». The form scrolls and the field stays above the keyboard; scroll down and reach «Guardar». Do the same in the new-team and new-player forms.
+- **iPhone, landscape:** the same; the field you type in stays above the keyboard and «Guardar» can be reached.
+- **Android:** open a form, tap the last field, and check that «Guardar» can still be reached (not checked by me).
+
+### Pending
+
+- Not checked: Android, the iPad and a real device. The team and player forms share the component but were not opened on the simulator.
+- Rotating the device with the keyboard open does not scroll again until another field gets the focus.
+- Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`, «Verification and Codex review · fix/form-keyboard-offset, F-01»).

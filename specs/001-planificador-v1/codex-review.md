@@ -1,29 +1,25 @@
 # Codex review
 
-- Date: 2026-11-20 16:43
-- Branch: fix/maestro-ios-flows against origin/main
-- Commit: 7a5a4fe
+- Date: 2026-11-20 21:40
+- Branch: fix/form-keyboard-offset against origin/main
+- Commit: c5f5df4
 
-Reviewed `git diff origin/main...HEAD` at `7a5a4fe`.
+Reviewed `c5f5df4` using `git diff origin/main...HEAD`.
 
-**BLOCKING: No findings.**
+**0 BLOCKING · 1 IMPORTANT · 0 MINOR**
 
-**IMPORTANT — F1: Record the claimed verification results and update the reports.**  
-[small-change-maestro-ios-flows.md:39](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/specs/001-planificador-v1/small-change-maestro-ios-flows.md:39) claims successful verification and six simulator flows, but their output is absent from `review.md`. Meanwhile, `summary.md:333` and the affected task reports still say the flows have never run on iOS.
+**R1 — IMPORTANT: Record verification and the completed-change explanation.**  
+[small-change-form-keyboard-offset.md:37](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/specs/001-planificador-v1/small-change-form-keyboard-offset.md:37) still says simulator verification is “To be run”, although the commit declares it passed. There is no verification entry for this revision in `review.md`, and `summary.md:399` still lists F-01 as pending.
 
-Concrete fix: append the verification and Maestro outputs to `review.md`, identifying the tested commit, build and simulator. Update the summary and task reports to distinguish completed iOS runs from pending Android, orientation and performance checks. Keep incomplete tasks unchecked.
+**Concrete fix:** append this change’s `scripts/verify.sh` results and simulator results to `review.md`; add the required after explanation to `summary.md`; update F-01’s status and the form’s verification wording. Distinguish completed iPhone checks from pending Android, iPad and physical-device checks.
 
-**MINOR: No findings.**
+| Review category                                | Result                                                                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RF/E implementation and scope                  | No new findings. The change addresses RF-076. Full v1 remains incomplete through documented D3 deferrals.                                                |
+| Constitution, layers, conventions and glossary | Reporting gap R1; no additional code findings.                                                                                                           |
+| Test integrity and effectiveness               | No tests deleted, skipped or weakened. The three new tests pass and fail against the previous component. They verify configuration, not native geometry. |
+| Security                                       | No findings in the diff: no network calls, logging, queries, dependencies or permissions added.                                                          |
+| Explanation accuracy                           | R1.                                                                                                                                                      |
+| Simplicity, clarity and efficiency             | No findings. The change is small and shared by all forms.                                                                                                |
 
-Results against the six review criteria:
-
-1. **RF/E coverage and scope:** No new scope violation or requirement omission found in this diff. Full-spec completion remains unproven: D3 is pending, 11 RFs have no test names, and device-dependent examples remain outstanding.
-2. **Constitution, layers, conventions and glossary:** No findings in the changed code.
-3. **Test integrity:** No test cases were deleted or skipped. The reduced iOS time-picker coverage is explicitly documented as approved. Static flow checks cannot establish native behavior.
-4. **Security:** No findings. The changes introduce no network calls, player-data logging, database queries, dependencies or permissions.
-5. **Explanation accuracy:** F1 above.
-6. **Simplicity, clarity and efficiency:** No findings.
-
-Validation passed: TypeScript, ESLint, traceability, focused/skipped-test detection, diff whitespace, formatting of committed changes, and **76 static tests**. Jest required suppression of cache writes in this read-only environment. Repository-wide formatting failed only on the existing uncommitted `codex-review.md`.
-
-Full verification and simulator execution were not independently confirmed. No files were changed.
+Validation: types, lint, changed-file formatting, traceability, focused-test checks and diff whitespace passed. With cache writes suppressed in memory, 11 targeted tests passed. Eight existing route tests failed identically with both component versions. Full verification and simulator behavior were not independently confirmed.
