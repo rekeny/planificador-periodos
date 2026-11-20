@@ -40,9 +40,9 @@ function perPlayer(lines: string[]): Record<string, number> {
   return total;
 }
 const ONLY_P5 = [
-  mark("assertVisible", { rightOf: "P4", leftOf: "P6" }),
+  mark("assertVisible", { rightOf: "P5", leftOf: "P6" }),
   mark("assertNotVisible", { leftOf: "P5" }),
-  mark("assertNotVisible", { rightOf: "P5" }),
+  mark("assertNotVisible", { rightOf: "P6" }),
 ];
 const juan = (period: string): string => tap(cell("Juan", period, "empty"));
 const juanX = (period: string): string => see(cell("Juan", period, "starter"));
@@ -63,8 +63,8 @@ describe("T060 Maestro US4 journeys: the warnings and the legend by text", () =>
         NO_IMPOSSIBLE,
         NO_INCONSISTENT,
         mark("assertVisible", { leftOf: "P2" }),
-        mark("assertVisible", { rightOf: "P4", leftOf: "P6" }),
-        mark("assertNotVisible", { rightOf: "P5" }),
+        mark("assertVisible", { rightOf: "P5", leftOf: "P6" }),
+        mark("assertNotVisible", { rightOf: "P6" }),
       ],
     ]);
   });
@@ -124,7 +124,11 @@ describe("T060 Maestro US4 journeys: the warnings and the legend by text", () =>
 
   it("RF-064 RF-065 RF-067 E-005: with 12 players, Pedro's single X and P5 with 3 X, Pedro is not in red, there is no light red cell and no general warning, only «!» on P5", () => {
     const lines = section(4);
-    expect(lines).toContain(see("12 convocados"));
+    // Scrolled to, not just asserted: on a phone the count sits below the first screen, and
+    // scrollUntilVisible fails like an assertion when the text never shows.
+    expect(lines).toContain(
+      '- scrollUntilVisible:; element:; text: "12 convocados"',
+    );
     expect(perPeriod(lines)).toEqual([5, 5, 5, 5, 3, 0]);
     expect(tapsOf(lines, "P1")["Pedro"]).toBe(1);
     const totals = perPlayer(lines);
@@ -154,8 +158,8 @@ describe("T060 Maestro US4 journeys: the warnings and the legend by text", () =>
         INCOMPLETE,
         NO_IN_RED,
         NO_IMPOSSIBLE,
-        mark("assertVisible", { rightOf: "P5", leftOf: "P7" }),
-        mark("assertNotVisible", { rightOf: "P6" }),
+        mark("assertVisible", { rightOf: "P6", leftOf: "P7" }),
+        mark("assertNotVisible", { rightOf: "P7" }),
       ],
       juan("P7"),
       tap(cell("Bea", "P8", "empty")),
@@ -164,7 +168,7 @@ describe("T060 Maestro US4 journeys: the warnings and the legend by text", () =>
         LIGHT_RED,
         NO_IN_RED,
         NO_IMPOSSIBLE,
-        mark("assertNotVisible", { rightOf: "P6" }),
+        mark("assertNotVisible", { rightOf: "P7" }),
       ],
     ]);
   });
@@ -181,12 +185,12 @@ describe("T060 Maestro US4 journeys: the warnings and the legend by text", () =>
         INCOMPLETE,
         NO_IN_RED,
         NO_IMPOSSIBLE,
-        mark("assertVisible", { rightOf: "P2", leftOf: "P4" }),
-        mark("assertNotVisible", { rightOf: "P3" }),
+        mark("assertVisible", { rightOf: "P3", leftOf: "P4" }),
+        mark("assertNotVisible", { rightOf: "P4" }),
       ],
       juan("P4"),
       juanX("P4"),
-      [LIGHT_RED, NO_IN_RED, mark("assertNotVisible", { rightOf: "P3" })],
+      [LIGHT_RED, NO_IN_RED, mark("assertNotVisible", { rightOf: "P4" })],
     ]);
   });
 
@@ -204,8 +208,8 @@ describe("T060 Maestro US4 journeys: the warnings and the legend by text", () =>
         INCOMPLETE,
         NO_INCONSISTENT,
         mark("assertVisible", { leftOf: "P2" }),
-        mark("assertVisible", { rightOf: "P4", leftOf: "P6" }),
-        mark("assertNotVisible", { rightOf: "P5" }),
+        mark("assertVisible", { rightOf: "P5", leftOf: "P6" }),
+        mark("assertNotVisible", { rightOf: "P6" }),
       ],
     ];
     inOrder(all, steps, all.indexOf("- stopApp"));

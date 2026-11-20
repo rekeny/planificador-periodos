@@ -52,7 +52,39 @@ export function readFlow(file: string): Flow {
       last.block += `\n${line}`;
     }
   }
-  return { file, text, header, commands };
+  return { file, text, header, commands: withoutOpenLinkQuestions(commands) };
+}
+
+/** True when `text` (the lines right after a deep link) starts with the tap on the iOS question
+ * «¿Abrir en …?»: a `runFlow` shown only while its button is visible, which taps that button. */
+export function isOpenLinkQuestion(text: string): boolean {
+  const [run, when, visible, commands, tap] = text.split("\n");
+  return (
+    run === "- runFlow:" &&
+    when?.trim() === "when:" &&
+    visible?.trim() === `visible: "${IOS_OPEN_LINK_BUTTON}"` &&
+    commands?.trim() === "commands:" &&
+    tap?.trim() === `- tapOn: "${IOS_OPEN_LINK_BUTTON}"`
+  );
+}
+
+// The question belongs to `openLink` on iOS, so the commands after a link are read as if it were
+// not there (its `runFlow` and the nested tap): the checks of what each link shows stay the same.
+function withoutOpenLinkQuestions(
+  commands: readonly { name: string; block: string }[],
+): { name: string; block: string }[] {
+  const kept: { name: string; block: string }[] = [];
+  for (let index = 0; index < commands.length; index += 1) {
+    const question = [commands[index], commands[index + 1]]
+      .map((command) => command?.block ?? "")
+      .join("\n");
+    if (kept.at(-1)?.name === "openLink" && isOpenLinkQuestion(question)) {
+      index += 1;
+    } else {
+      kept.push(commands[index] as { name: string; block: string });
+    }
+  }
+  return kept;
 }
 
 /** The value of a `key: value` line of the header, without quotes. */
@@ -114,6 +146,15 @@ export function isSpanishText(text: string): boolean {
   return TEMPLATES.some((template) => template.test(text));
 }
 
+/** The button of the iOS question «¿Abrir en …?» shown before a deep link from outside the app opens
+ * it, in Spanish or English as the simulator is set. It is iOS's text, not the app's. */
+export const IOS_OPEN_LINK_BUTTON = "Abrir|Open";
+
+/** True when the text is a system text the flows tap, not one of the app. */
+export function isSystemText(text: string): boolean {
+  return text === IOS_OPEN_LINK_BUTTON;
+}
+
 /** The text is a value the flow types itself, or the start of one (a field that stops at its limit). */
 export function isTypedHere(text: string, typed: readonly string[]): boolean {
   return typed.some((value) => value.startsWith(text));
@@ -158,7 +199,7 @@ export const NATIVE_PICKER_TEXTS: readonly string[] = [
   "18",
   "30",
   "(?i)previous.*|anterior.*",
-  "(?i)[0-9]+[^/0-9][0-9][0-9].*",
+  "(?i)date picker|selector de fecha",
 ];
 
 /** What the pickers show once a date and a time are chosen or added («Añadir hora» gives 12:00): formatted by the app, not in es.json. */

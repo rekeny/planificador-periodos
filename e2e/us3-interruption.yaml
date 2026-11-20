@@ -9,31 +9,49 @@ name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, 
 - launchApp:
     clearState: true
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Alevín A"
-- hideKeyboard
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Alevín A"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Ana"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "1"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Bea"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "2"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Carla"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "3"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo partido"
 - scrollUntilVisible:
@@ -63,6 +81,13 @@ name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, 
 - assertVisible: "Alevín A"
 - assertNotVisible: "Ana, P1: X, titular"
 - openLink: planificadorperiodos://matches/1
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
 - assertVisible: "Ana, P1: X, titular"
 - assertVisible: "Bea, P1: X, titular"
 - assertVisible: "Ana, P2: X, titular"
@@ -89,16 +114,23 @@ name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, 
     index: 2
 - assertNotVisible: "¿Quitar a Carla de la convocatoria?"
 - assertVisible:
-    text: "Carla"
+    text: ".*Carla.*"
     below: "Añadir a la convocatoria"
 - assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 2."
 - stopApp
 - launchApp
 - assertVisible: "Nuevo equipo"
 - openLink: planificadorperiodos://matches/1
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
 - tapOn: "Convocatoria"
 - assertVisible:
-    text: "Carla"
+    text: ".*Carla.*"
     below: "Añadir a la convocatoria"
 - assertVisible:
     text: "Ana"
@@ -128,13 +160,34 @@ name: "RF-057 RF-082 E-019: marks and an overtime survive the app being closed, 
 - stopApp
 - launchApp
 - openLink: planificadorperiodos://matches/99
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
 - assertVisible: "No se ha encontrado: puede que se haya borrado."
 - stopApp
 - launchApp
 - openLink: planificadorperiodos://matches/abc
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
 - assertVisible: "No se ha encontrado: puede que se haya borrado."
 - stopApp
 - launchApp
 - openLink: planificadorperiodos://matches/01
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
 - assertVisible: "No se ha encontrado: puede que se haya borrado."
 - assertNotVisible: "Ana, P1: X, titular"

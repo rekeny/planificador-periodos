@@ -13,90 +13,125 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 - assertVisible: "8 periodos"
 # E-022: a 41st character is not accepted and no message appears. Jest cannot prove it, because
 # changeText does not apply maxLength.
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "abcdefghijabcdefghijabcdefghijabcdefghijk"
 - assertVisible: "abcdefghijabcdefghijabcdefghijabcdefghij"
 - assertNotVisible: "abcdefghijabcdefghijabcdefghijabcdefghijk"
 - assertNotVisible: "Escribe un nombre."
 - eraseText
-- tapOn: "Categoría"
+- tapOn:
+    text: "Categoría"
+    below: "Categoría"
 - inputText: "klmnopqrstklmnopqrstklmnopqrstklmnopqrstu"
 - assertVisible: "klmnopqrstklmnopqrstklmnopqrstklmnopqrst"
 - assertNotVisible: "klmnopqrstklmnopqrstklmnopqrstklmnopqrstu"
 - assertNotVisible: "Escribe un nombre."
 - eraseText
 # A blank name cannot be saved.
-- hideKeyboard
+- tapOn: "Categoría"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Escribe un nombre."
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Cadete B"
-- hideKeyboard
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "8 periodos"
 - tapOn: "Guardar"
 - assertVisible: "Cadete B"
 
 # Second team, with a category and the default format (6 periods).
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Alevín A"
-- tapOn: "Categoría"
+- tapOn:
+    text: "Categoría"
+    below: "Categoría"
 - inputText: "2015"
-- hideKeyboard
+- tapOn: "Categoría"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Alevín A"
-- assertVisible: "2015"
+# On iOS the row is one accessibility element read as «Alevín A, 2015»; on Android name and category
+# are two texts. The wildcards match both.
+- assertVisible: "Alevín A.*"
+- assertVisible: ".*2015"
 # RF-073 RF-014: both teams are listed, «Alevín A» first.
 - assertVisible:
     text: "Cadete B"
-    below: "Alevín A"
+    below: "Alevín A.*"
 - assertNotVisible:
-    text: "Alevín A"
+    text: "Alevín A.*"
     below: "Cadete B"
 
 # Players of «Alevín A». The first form checks the limits, the number message and the blank name.
-- tapOn: "Alevín A"
+- tapOn: "Alevín A.*"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcde"
 - assertVisible: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcd"
 - assertNotVisible: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcde"
 - assertNotVisible: "Escribe un nombre."
 - eraseText
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "100"
 - assertVisible: "10"
 - assertNotVisible: "100"
 - eraseText
 - inputText: "07"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda."
 - assertVisible: "Escribe un nombre."
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Eva"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - eraseText
 - inputText: "9"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Eva"
 
 # RF-016: three players added one after the other without leaving the team screen, shown 4, 7, 9.
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Bea"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "4"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Bea"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Carla"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "7"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Carla"
 - assertVisible:
@@ -109,11 +144,16 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 
 # RF-017 RF-069: a second number 7 is saved and the warning appears. Same number: sorted by name.
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Luis"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "7"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Luis"
 - assertVisible: "Hay jugadores con el mismo dorsal: 7."
@@ -123,19 +163,29 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 
 # Odd numbers: "0" is listed before "00", and both before 4.
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Zoe"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "0"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Zoe"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Ana"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "00"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Ana"
 - assertVisible:

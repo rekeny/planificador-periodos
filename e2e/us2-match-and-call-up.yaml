@@ -12,106 +12,174 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 
 # Two teams, both with the default format (6 periods): «Alevín A» gets 12 players, «Infantil» none.
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Alevín A"
-- hideKeyboard
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Infantil"
-- hideKeyboard
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Alevín A"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Ana"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "1"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Bea"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "2"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Carla"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "3"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Dani"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "4"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Eva"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "5"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Fran"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "6"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Gala"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "7"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Hugo"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "8"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Iker"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "9"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Jon"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "10"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Kira"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "11"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Luis"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "12"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Luis"
 
 # RF-082: the form half-filled and the app closed. No match is created: D2 has no match list, so
 # the deep link of the first match, which would be number 1, must show the not-found message.
 - tapOn: "Nuevo partido"
-- tapOn: "Local"
+- tapOn:
+    text: "Local"
+    below: "Local"
 - inputText: "Rivales"
 - assertVisible: "Rivales"
 - stopApp
@@ -119,6 +187,13 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - assertVisible: "Nuevo equipo"
 - assertNotVisible: "Guardar"
 - openLink: planificadorperiodos://matches/1
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
 - assertVisible: "No se ha encontrado: puede que se haya borrado."
 - stopApp
 - launchApp
@@ -127,19 +202,29 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 # The form opened again has the defaults: nothing typed, everyone selected, today's date (E-023).
 - assertNotVisible: "Rivales"
 - assertVisible: ${output.today}
-- assertVisible: "12 convocados"
+# The call-up count and its warning sit under «Notas», below the first screen of a phone.
+- scrollUntilVisible:
+    element:
+      text: "12 convocados"
 - assertNotVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 12."
+- scrollUntilVisible:
+    element:
+      text: "8 periodos"
+    direction: UP
 
 # MATCH 1: format 8 (E-024), the pickers (RF-083, E-032), the field limits (E-022), the messages.
 - tapOn: "8 periodos"
 - assertNotVisible: "Cancelar"
 - assertNotVisible: "Convocatoria fuera del rango: con 8 periodos deben ser de 8 a 12 jugadores, y hay 12."
-# Unverified on a device: the native pickers differ by platform, version and language. Date: go
-# back month by month until March 2026 is shown, then choose day 1. Time: 18 and 30.
+# The native pickers differ by platform, version and language. Date: go back month by month until
+# March 2026 is shown, then choose day 1. Time: 18 and 30. On iOS (checked on an iPhone 17 simulator,
+# iOS 27.2, 2026-11-20) the date is a compact button, «Date Picker» in English, that opens the
+# calendar in a popup; a tap outside the popup closes it.
 - runFlow:
     when:
       platform: iOS
     commands:
+      - tapOn: "(?i)date picker|selector de fecha"
       - repeat:
           times: 14
           while:
@@ -158,6 +243,12 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
             - swipe:
                 direction: RIGHT
 - tapOn: "1"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: "50%, 15%"
 - assertVisible: "01/03/2026"
 - scrollUntilVisible:
     element:
@@ -170,25 +261,24 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - assertVisible: "Añadir hora"
 - assertNotVisible: "Quitar hora"
 - tapOn: "Añadir hora"
+# iOS: «Añadir hora» shows 12:00 in the field at once, and the flow stops there. The wheels that
+# change the time open in a popup that Maestro cannot see, so choosing 18:30 by position landed on
+# 21:45, 15:15 and 18:10 in three runs on an iPhone 17 simulator (iOS 27.2, 2026-11-20) and is not
+# run. Changing the time on iOS is checked by the Jest tests of the field and by hand on the device
+# (decision of Fernando, 2026-11-20). Android picks 18:30 in its dialog and closes it with «Aceptar».
 - runFlow:
     when:
       platform: iOS
     commands:
       - assertVisible: "12:00"
-      - tapOn: "(?i)[0-9]+[^/0-9][0-9][0-9].*"
-- tapOn: "18"
-- tapOn: "30"
 - runFlow:
     when:
       platform: Android
     commands:
+      - tapOn: "18"
+      - tapOn: "30"
       - tapOn: "Aceptar"
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - tapOn: "Hora"
-- assertVisible: "18:30"
+      - assertVisible: "18:30"
 # E-032, E-033: «Quitar hora» leaves no time and keeps the date, and the field goes back to «Sin hora»
 # and «Añadir hora». The match is saved without a time.
 - tapOn: "Quitar hora"
@@ -211,37 +301,70 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - assertNotVisible: "mnopqrstuvmnopqrstuvmnopqrstuvmnopqrstuvw"
 - eraseText
 - inputText: "Alevín A B"
-- tapOn: "Visitante"
+- tapOn:
+    text: "Visitante"
+    below: "Visitante"
 - inputText: "Rivales B"
-- hideKeyboard
+# «Visitante» is a single-line field: Enter closes the keyboard. A tap on its label would tap the
+# field again, because the label and the field share the text.
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
 # One score only: the message; the second score makes it go away. A fourth digit is not accepted.
+# The two score fields share the label «Resultado final»: below it, index 0 is the home score and
+# index 1 the away one.
 - scrollUntilVisible:
     element:
       text: "Notas"
 - tapOn:
     text: "Resultado final"
-    index: 1
+    below: "Resultado final"
+    index: 0
 - inputText: "1234"
 - assertVisible: "123"
 - assertNotVisible: "1234"
-- hideKeyboard
+- runFlow: subflows/close-number-keyboard.yaml
 - scrollUntilVisible:
     element:
       text: "Guardar"
 - tapOn: "Guardar"
 - assertVisible: "Escribe los dos resultados o ninguno."
+# «Guardar» left the form scrolled to the bottom, so the score fields are out of view: scroll back up
+# before tapping the away score. The scroll goes up to «Variante», the first label: stopping at
+# «Resultado final» left it, and the field under it, behind the header of the sheet, where Maestro
+# still counts them as visible and the tap and the typing were lost.
+- scrollUntilVisible:
+    element:
+      text: "Variante"
+    direction: UP
+    visibilityPercentage: 100
 - tapOn:
     text: "Resultado final"
-    index: 2
+    below: "Resultado final"
+    index: 1
 - inputText: "45"
-- hideKeyboard
+- runFlow: subflows/close-number-keyboard.yaml
+# The message sits next to «Guardar», so it is only checked there: out of view, «not visible» would
+# pass without proving that the second score made it go away.
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
 - assertNotVisible: "Escribe los dos resultados o ninguno."
-- tapOn: "Notas"
+- scrollUntilVisible:
+    element:
+      text: "Notas"
+    direction: UP
+    visibilityPercentage: 100
+- tapOn:
+    text: "Notas"
+    below: "Notas"
 - inputText: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdez"
 - assertVisible: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcde"
 - assertNotVisible: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdez"
-- hideKeyboard
-# Everyone selected, 12 players: no warning. Guardar opens the grid.
+- runFlow: subflows/close-number-keyboard.yaml
+# Everyone selected, 12 players: no warning. Guardar opens the grid. The form is still moving while the
+# keyboard closes, so the flow waits before tapping.
+- waitForAnimationToEnd
 - scrollUntilVisible:
     element:
       text: "Guardar"
@@ -269,7 +392,9 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 # MATCH 2: the team's default is still 6 (E-024, RF-036, RF-037). Deselecting to 8 players warns
 # and «Guardar» still works (E-015, RF-010, RF-068).
 - tapOn: "Nuevo partido"
-- assertVisible: "12 convocados"
+- scrollUntilVisible:
+    element:
+      text: "12 convocados"
 - scrollUntilVisible:
     element:
       text: ".*Ana.*"
@@ -295,28 +420,54 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
     element:
       text: "Crear jugador nuevo"
 - tapOn: "Crear jugador nuevo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Nora"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "15"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible:
     text: "Nora"
     above: "Añadir a la convocatoria"
 - assertNotVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 8."
 # RF-033: a player with no marks is removed without a question and offered again below; adding
-# him puts him back in the call-up. The first «Quitar de la convocatoria» is Eva's row.
-- tapOn: "Quitar de la convocatoria"
-- assertNotVisible: "¿Quitar a Eva de la convocatoria?"
+# him puts him back in the call-up. The player removed is Fran, the second row: the second
+# «Quitar de la convocatoria». The first row (Eva) is not used because on iOS the strip under the
+# header does not take touches and the first button sits half inside it: a tap in its middle was lost
+# in four runs, and one that hit its lower part landed on the wrong row, on an iPhone 17 simulator
+# (iOS 27.2, 2026-11-20). A tap right after the new player was created was also lost once, so the
+# flow waits two seconds first (waiting, as optional, for a text that never appears is Maestro's
+# way to pause).
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "this text is never shown"
+    timeout: 2000
+    optional: true
+- tapOn:
+    text: "Quitar de la convocatoria"
+    index: 1
+- assertNotVisible: "¿Quitar a Fran de la convocatoria?"
+# Fran now sits in the list below, which may be under the fold of a phone.
+- scrollUntilVisible:
+    element:
+      text: ".*Fran.*"
 - assertVisible:
-    text: ".*Eva.*"
+    text: ".*Fran.*"
     below: "Añadir a la convocatoria"
 - tapOn:
-    text: ".*Eva.*"
+    text: ".*Fran.*"
     below: "Añadir a la convocatoria"
+- scrollUntilVisible:
+    element:
+      text: "Fran"
+    direction: UP
 - assertVisible:
-    text: "Eva"
+    text: "Fran"
     above: "Añadir a la convocatoria"
 - runFlow:
     when:
@@ -346,7 +497,9 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 # MATCH 3: the team now has 13 players, all selected: the warning shows and the match is created
 # (E-030, RF-010, RF-068).
 - tapOn: "Nuevo partido"
-- assertVisible: "13 convocados"
+- scrollUntilVisible:
+    element:
+      text: "13 convocados"
 - assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 13."
 - scrollUntilVisible:
     element:
@@ -370,7 +523,9 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 # MATCH 4: a team with no active players. The match is created with an empty call-up.
 - tapOn: "Infantil"
 - tapOn: "Nuevo partido"
-- assertVisible: "0 convocados"
+- scrollUntilVisible:
+    element:
+      text: "0 convocados"
 - assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 0."
 - scrollUntilVisible:
     element:

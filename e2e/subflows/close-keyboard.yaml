@@ -1,0 +1,12 @@
+appId: com.fernando.planificadorperiodos
+---
+# iPad only: a tap on a field label does not close the keyboard there, and the keyboard hides
+# «Guardar». The iPad keyboard has its own key, which iOS labels «Hide keyboard» (checked on an iPad
+# Pro 11-inch simulator, iOS 27.2, 2026-11-20). On an iPhone and on Android that key is not on screen
+# and this file does nothing.
+# `hideKeyboard` is not used on iOS: it can close the whole modal form instead of the keyboard.
+- runFlow:
+    when:
+      visible: "Hide keyboard|Ocultar teclado"
+    commands:
+      - tapOn: "Hide keyboard|Ocultar teclado"

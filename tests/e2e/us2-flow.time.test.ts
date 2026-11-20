@@ -75,6 +75,19 @@ describe("T091 Maestro US2 flow, the time field without a time (RF-083, E-032, E
     ).toEqual([]);
   });
 
+  it("RF-083 E-033: on iOS the flow does not choose a time on the wheels, only asserts «12:00» (decision of Fernando, 2026-11-20): the wheels are out of Maestro's reach", () => {
+    const text = readFlow(US2_FILE)
+      .text.split("\n")
+      .filter((entry) => !/^\s*#/.test(entry))
+      .join("\n");
+    expect(text).not.toMatch(/time picker|selector de hora/i);
+    // No loop that turns the wheels until the field reads 18 hours or 30 minutes.
+    expect(text).not.toMatch(/notVisible: "(?:18:|\.\.:30)/);
+    expect(branchOf('- assertVisible: "18:30"')).toBe("Android");
+    expect(branchOf('- tapOn: "18"')).toBe("Android");
+    expect(branchOf('- tapOn: "30"')).toBe("Android");
+  });
+
   it("RF-083 E-033: on Android the flow closes the time dialog with «Aceptar» after 18 and 30 and before checking 18:30, never with «Cancelar»", () => {
     const all = lines();
     const accept = `- tapOn: "${es.common.accept}"`;

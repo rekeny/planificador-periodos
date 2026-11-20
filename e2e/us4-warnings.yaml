@@ -14,9 +14,11 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 # scroll by itself before a tap, so on a phone this flow is expected to fail at the lower rows.
 # The cells are buttons «Juan, P1: casilla vacía» (T054). The legend lines and the general
 # warning are plain texts. A header mark is a Text «!» under the period name, in the same column,
-# so each period is told apart by its position: «!» to the right of the title of the previous
-# period and to the left of the title of the next one is the mark of that period (unverified:
-# the relative selectors depend on how each platform reports the bounds).
+# so each period is told apart by its position. Maestro compares the left edges: «rightOf: P5»
+# keeps what starts right of where «P5» starts, so it includes the mark under «P5» itself (checked
+# on an iPhone 17 simulator, 2026-11-20). The mark of a period is «!» right of its own title and
+# left of the next title; «!» not right of «P6» means no mark from P6 on; «!» not left of «P5»
+# means no mark on P1 to P4.
 # The team has 12 players. A match that the examples want with 10 leaves Hugo and Iker out.
 # Matches are created in order, so they are 1 to 6; match 1 is opened again with the deep link.
 #
@@ -29,94 +31,157 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - launchApp:
     clearState: true
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Alevín A"
-- hideKeyboard
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Alevín A"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Juan"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "1"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Pedro"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "2"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Luis"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "3"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Ana"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "4"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Bea"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "5"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Carla"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "6"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Dani"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "7"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Eva"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "8"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Fran"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "9"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Gala"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "10"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Hugo"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "11"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Iker"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "12"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Iker"
 
@@ -148,11 +213,11 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
     leftOf: "P2"
 - assertVisible:
     text: "!"
-    rightOf: "P4"
+    rightOf: "P5"
     leftOf: "P6"
 - assertNotVisible:
     text: "!"
-    rightOf: "P5"
+    rightOf: "P6"
 # E-003 (RF-063, RF-067): a fourth X is accepted, never blocked (RF-060). Juan is in red, P5 stays light red.
 - tapOn: "Juan, P4: casilla vacía"
 - assertVisible: "Juan, P4: X, titular"
@@ -199,7 +264,10 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 
 # MATCH 2 (ID 2), 6 periods, 12 players. E-006: P1-P4 with 5 X, P5 with 4 X; Pedro and Luis 1 X each, neither in P5.
 - tapOn: "Nuevo partido"
-- assertVisible: "12 convocados"
+# On a phone the call-up count sits below the first screen; on a tablet it is already in view.
+- scrollUntilVisible:
+    element:
+      text: "12 convocados"
 - scrollUntilVisible:
     element:
       text: "Guardar"
@@ -234,14 +302,14 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 # A window period with 4 X shows «!» and the four with 5 X do not (RF-065).
 - assertVisible:
     text: "!"
-    rightOf: "P4"
+    rightOf: "P5"
     leftOf: "P6"
 - assertNotVisible:
     text: "!"
     leftOf: "P5"
 - assertNotVisible:
     text: "!"
-    rightOf: "P5"
+    rightOf: "P6"
 - assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
 - assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
 - runFlow:
@@ -292,14 +360,14 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - assertVisible: "Gala, P4: X, titular"
 - assertVisible:
     text: "!"
-    rightOf: "P4"
+    rightOf: "P5"
     leftOf: "P6"
 - assertNotVisible:
     text: "!"
     leftOf: "P5"
 - assertNotVisible:
     text: "!"
-    rightOf: "P5"
+    rightOf: "P6"
 - assertNotVisible: "Si la marcas, no descansará el mínimo del tramo."
 - assertNotVisible: "No cumple la regla del tramo."
 - assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
@@ -320,7 +388,10 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 
 # MATCH 4 (ID 4), 6 periods, 12 players. E-005: P5 has 3 X and Pedro only one in P1: he is NOT in red.
 - tapOn: "Nuevo partido"
-- assertVisible: "12 convocados"
+# On a phone the call-up count sits below the first screen; on a tablet it is already in view.
+- scrollUntilVisible:
+    element:
+      text: "12 convocados"
 - scrollUntilVisible:
     element:
       text: "Guardar"
@@ -352,14 +423,14 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - assertVisible: "Iker, P5: X, titular"
 - assertVisible:
     text: "!"
-    rightOf: "P4"
+    rightOf: "P5"
     leftOf: "P6"
 - assertNotVisible:
     text: "!"
     leftOf: "P5"
 - assertNotVisible:
     text: "!"
-    rightOf: "P5"
+    rightOf: "P6"
 - assertNotVisible: "Si la marcas, no descansará el mínimo del tramo."
 - assertNotVisible: "No cumple la regla del tramo."
 - assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
@@ -405,11 +476,11 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
 - assertVisible:
     text: "!"
-    rightOf: "P5"
+    rightOf: "P6"
     leftOf: "P7"
 - assertNotVisible:
     text: "!"
-    rightOf: "P6"
+    rightOf: "P7"
 # Marks in the free periods P7 and P8 change no legend line and add no «!» (RF-006, RF-072).
 - tapOn: "Juan, P7: casilla vacía"
 - tapOn: "Bea, P8: casilla vacía"
@@ -422,7 +493,7 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
 - assertNotVisible:
     text: "!"
-    rightOf: "P6"
+    rightOf: "P7"
 - runFlow:
     when:
       platform: Android
@@ -460,11 +531,11 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
 - assertVisible:
     text: "!"
-    rightOf: "P2"
+    rightOf: "P3"
     leftOf: "P4"
 - assertNotVisible:
     text: "!"
-    rightOf: "P3"
+    rightOf: "P4"
 - tapOn: "Juan, P4: casilla vacía"
 - assertVisible: "Juan, P4: X, titular"
 - assertVisible: "Si la marcas, no descansará el mínimo del tramo."
@@ -474,7 +545,7 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - assertNotVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
 - assertNotVisible:
     text: "!"
-    rightOf: "P3"
+    rightOf: "P4"
 
 # Interruption: the app is closed and opened again with nothing cleared; the list of teams comes first (RF-073)
 # and match 1 is opened with its deep link. The warnings are computed again from the saved marks: the E-003
@@ -484,6 +555,18 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
 - assertVisible: "Nuevo equipo"
 - assertNotVisible: "Juan, P4: X, titular"
 - openLink: planificadorperiodos://matches/1
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
+# The match is read from the database after the link: on a busy machine the grid takes longer than
+# the default wait of a check, so the first check waits up to 20 seconds.
+- extendedWaitUntil:
+    visible: "Juan, P4: X, titular"
+    timeout: 20000
 - assertVisible: "Juan, P4: X, titular"
 - assertVisible: "Juan, P5: casilla vacía"
 - assertVisible: "Si la marcas, no descansará el mínimo del tramo."
@@ -496,8 +579,8 @@ name: "RF-060 RF-062 RF-063 RF-064 RF-065 RF-067 RF-087 E-001 E-003 E-005 E-006 
     leftOf: "P2"
 - assertVisible:
     text: "!"
-    rightOf: "P4"
+    rightOf: "P5"
     leftOf: "P6"
 - assertNotVisible:
     text: "!"
-    rightOf: "P5"
+    rightOf: "P6"

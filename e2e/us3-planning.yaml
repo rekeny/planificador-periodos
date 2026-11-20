@@ -13,52 +13,85 @@ name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth
 - launchApp:
     clearState: true
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Alevín A"
-- hideKeyboard
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Alevín A"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Ana"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "1"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Bea"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "2"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Carla"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "3"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Dani"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "4"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Eva"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "5"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Fran"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "6"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Fran"
 - tapOn: "Nuevo partido"
@@ -263,7 +296,7 @@ name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth
     below: "¿Quitar a Ana de la convocatoria?"
 - assertNotVisible: "¿Quitar a Ana de la convocatoria?"
 - assertVisible:
-    text: "Ana"
+    text: ".*Ana.*"
     below: "Añadir a la convocatoria"
 - runFlow:
     when:
@@ -304,6 +337,13 @@ name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth
       - tapOn: "Alevín A"
 - assertVisible: "Nuevo partido"
 - openLink: planificadorperiodos://matches/1
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
 - assertVisible: "Bea, P1: X, titular"
 - assertVisible:
     text: "Deshacer"

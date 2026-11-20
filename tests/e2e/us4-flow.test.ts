@@ -8,6 +8,7 @@ import {
   idsIn,
   inlineStructures,
   isSpanishText,
+  isSystemText,
   isTypedHere,
   literalsOf,
   readFlow,
@@ -53,7 +54,10 @@ describe("T060 Maestro US4 flow", () => {
       .map(({ value }) => withoutWildcards(value));
     expect(
       shown.filter(
-        (value) => !isSpanishText(value) && !isTypedHere(value, typed),
+        (value) =>
+          !isSpanishText(value) &&
+          !isSystemText(value) &&
+          !isTypedHere(value, typed),
       ),
     ).toEqual([]);
     const players = typed

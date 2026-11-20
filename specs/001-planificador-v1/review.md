@@ -993,3 +993,49 @@ Codex's category results: RF/E implementation and scope (only F-01 and F-02; D3 
 Codex's validation: types, lint, source formatting, traceability, focused or skipped-test detection and Gitleaks passed. With Jest cache writes suppressed in memory, **2,930 tests passed**; **233 tests across 16 suites were blocked by temporary-file permissions**. Codex did not confirm full verification, coverage, mutation testing, fresh dependency scans or native behaviour. Maestro, D3 and the documented device checks remain pending, so this review does not establish full-spec completion.
 
 **Verdict as stated by Codex:** 0 BLOCKING, 1 IMPORTANT (F-01), 2 MINOR (F-02, F-03). No blocking finding is open, so the phase 8 gate is met. F-01 must be fixed, or the developer must accept recording it as pending, before the close. **Decision (Fernando, 2026-11-18, chat):** F-01 «Pendiente, rama fix/ (Recomendado)»: recorded as pending and fixed on its own `fix/` branch after checking «Guardar» on an iPhone in landscape; F-02 and F-03 «Pendientes (Recomendado)»: recorded as pending (F-03 is M-01 and gets its own `fix/` branch). All three are in code this branch does not change. Open for the orchestrator: the 233 tests blocked by permissions in Codex's run were not exercised by that review, although phase 7 ran them green in `npm run verify`.
+
+## Maestro run on the iOS simulators · fix/maestro-ios-flows (2026-11-20)
+
+First real run of the six Maestro flows (T036, T048, T056, T060). Flows at commit `59f1bb7`, form `small-change-maestro-ios-flows.md` (approved by Fernando, 2026-11-20).
+
+- **Tools:** Maestro 2.12.1; iPhone 17 (`26CB0B49-2377-485C-A49E-798122576A27`) and iPad Pro 11-inch (M5) (`9507BB90-40DB-4B28-987F-5409E82EA72D`), both on iOS 27.2.
+- **Build:** the app already installed on the two simulators, bundle `com.fernando.planificadorperiodos`. Whether it was a Release or a Debug build was not recorded in this session, and the simulators were shut down afterwards, so it cannot be read back now. Treat the run as a simulator run, not as a Release-build check.
+
+| Flow                    | Device                      | Result                                                            |
+| ----------------------- | --------------------------- | ----------------------------------------------------------------- |
+| `us1-teams-and-players` | iPhone 17, portrait         | passes, no failed step                                            |
+| `us1-form-interruption` | iPhone 17, portrait         | passes, no failed step                                            |
+| `us2-match-and-call-up` | iPhone 17, portrait         | passes, 274 steps completed (the last run, after the final edits) |
+| `us3-planning`          | iPhone 17, portrait         | passes, no failed step                                            |
+| `us3-interruption`      | iPhone 17, portrait         | passes, no failed step                                            |
+| `us4-warnings`          | iPad Pro 11-inch, landscape | passes, no failed step                                            |
+
+`us1-*`, `us3-*` and `us4-warnings` were last run before the final edits of `us2-match-and-call-up.yaml`; those edits touch only that flow and its static tests.
+
+**Verification:** `npm run verify` on `59f1bb7`: "All checks passed", exit code 0 (types, lint, formatting, static tests, Expo Doctor, dependency scan, secrets, static analysis). Mutation testing did not run: nothing in `src/domain/` changed. `osv-scanner` warns that two exceptions in `osv-scanner.toml` are unused (`GHSA-gcqx-w48m-w2h4`, `GHSA-fc5q-39xc-vjpf`); not part of this change.
+
+**What this run does NOT cover:**
+
+- Android: no flow was run on an emulator, so the Android «Aceptar» tap and the pencil icon of the team screen are unverified.
+- On iOS the time of the match form is only checked up to «12:00» (decision of Fernando, 2026-11-20): the wheels are not in Maestro's view and choosing 18:30 by position was not repeatable.
+- iPad in portrait, iPhone in landscape, and a Release build on a real device.
+- T057 and the iPad 100 ms measurement (device checks by hand).
+
+**Findings about the app, outside this change** (to be handled in their own branches):
+
+1. On iOS the strip under the navigation header takes no touches, and the first «Quitar de la convocatoria» button of the call-up sits half inside it: a tap in its middle was lost in four runs.
+2. On the match form in portrait the number keyboard covers the fields below and «Guardar»; the form does not scroll to avoid it (related to F-01 of the Codex review of 2026-11-18, `keyboardVerticalOffset` in `src/ui/form-scroll.tsx`).
+
+**Tasks:** T036, T048, T056 and T060 stay unticked until the Android runs are recorded; T057 and T061 stay unticked too.
+
+## Codex review · fix/maestro-ios-flows (2026-11-20)
+
+Run: `scripts/review.sh specs/001-planificador-v1 origin/main` at commit `7a5a4fe` (the local `main` was behind `origin/main`). Full output: [codex-review.md](codex-review.md), which replaces the previous one; the review of 2026-11-18 stays in this file and in git history.
+
+**Verdict as stated by Codex:** 0 BLOCKING, 1 IMPORTANT, 0 MINOR. No blocking finding, so the phase 8 gate is met.
+
+| #   | Finding                                                                                                                                                                   | Decision                                                                                                                                                                  |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F1  | **IMPORTANT. The verification and Maestro results claimed in the form are not in `review.md`, and `summary.md` and the task reports still say the flows were never run.** | Fixed in this branch: the section above records the run; `summary.md` and the "Pending" lines of T036, T048, T056, T060 and T091 say what ran on iOS and what is pending. |
+
+Codex's other category results: no new scope violation, no constitution, layer or glossary finding, no test deleted or skipped (the reduced iOS time coverage is documented as approved), no security finding. Codex did not independently confirm the full verification or the simulator runs, and notes that static flow checks cannot prove native behaviour.

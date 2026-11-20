@@ -1,37 +1,29 @@
 # Codex review
 
-- Date: 2026-11-18 09:07
-- Branch: fix/match-time-empty-state against main
-- Commit: de83c6d
+- Date: 2026-11-20 16:43
+- Branch: fix/maestro-ios-flows against origin/main
+- Commit: 7a5a4fe
 
-Reviewed `git diff main...HEAD` at `de83c6d`.
+Reviewed `git diff origin/main...HEAD` at `7a5a4fe`.
 
-**Findings: 0 BLOCKING, 1 IMPORTANT, 2 MINOR.**
+**BLOCKING: No findings.**
 
-1. **IMPORTANT — Keyboard avoidance omits the form’s screen offset.**  
-   [form-scroll.tsx:23](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/ui/form-scroll.tsx:23)  
-   Forms sit below native headers, but `keyboardVerticalOffset` defaults to zero. React Native therefore underestimates keyboard overlap, leaving lower controls partly obscured at maximum scroll in short landscape views. Current tests check component structure, so they miss this geometry.  
-   **Fix:** supply the actual top offset, accounting for headers and modal positioning; add a keyboard-geometry regression and verify «Guardar» on an iPhone in landscape. This follows the [documented offset semantics](https://reactnative.dev/docs/keyboardavoidingview#keyboardverticaloffset). Native verification remains pending.
+**IMPORTANT — F1: Record the claimed verification results and update the reports.**  
+[small-change-maestro-ios-flows.md:39](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/specs/001-planificador-v1/small-change-maestro-ios-flows.md:39) claims successful verification and six simulator flows, but their output is absent from `review.md`. Meanwhile, `summary.md:333` and the affected task reports still say the flows have never run on iOS.
 
-2. **MINOR — Daylight-saving normalization can make the picker disagree with saved time.**  
-   [date-time-field-shared.ts:26](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/ui/date-time-field-shared.ts:26)  
-   Under `Europe/Madrid`, selecting 02:30 and then changing the date to 29 March 2026 feeds **03:30** to the picker, while the draft, displayed text and saved value retain **02:30**. Verified directly with the current conversion.  
-   **Fix:** use an independent reference date for the time-only picker and add a DST regression covering date changes.
+Concrete fix: append the verification and Maestro outputs to `review.md`, identifying the tested commit, build and simulator. Update the summary and task reports to distinguish completed iOS runs from pending Android, orientation and performance checks. Keep incomplete tasks unchecked.
 
-3. **MINOR — Shared-store updates still occur during render (existing M-01).**  
-   [edit.tsx:19](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-d2-review-3361ae/src/app/teams/[teamId]/edit.tsx:19)  
-   The `useState` initializer calls `openTeam()`, publishing Zustand updates during render and triggering React’s cross-component update warning. The new-player route and `useOpenTeam()` repeat this pattern.  
-   **Fix:** initialize through the existing focus effects, guard rendering by team ownership, and assert that navigation emits no React warnings.
+**MINOR: No findings.**
 
-| Review category                             | Result                                                                                                                                |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| RF/E implementation and scope               | Findings 1–2. D3 remains explicitly deferred; no unrelated additions found.                                                           |
-| Constitution, layers, conventions, glossary | Finding 3; no additional findings.                                                                                                    |
-| Test integrity and effectiveness            | Coverage gaps above. No unapproved deletion, skipping or weakening found.                                                             |
-| Security                                    | No new findings: parameterized queries, no application network calls or player-data logging, documented dependencies and permissions. |
-| Explanation accuracy                        | Form-reachability assurances overstate finding 1; no additional material mismatch.                                                    |
-| Simplicity, clarity, efficiency             | Finding 3; no additional findings.                                                                                                    |
+Results against the six review criteria:
 
-Validation: types, lint, source formatting, traceability, focused/skipped-test detection and Gitleaks passed. With Jest cache writes suppressed in memory, **2,930 tests passed**; **233 tests across 16 suites were blocked by temporary-file permissions**.
+1. **RF/E coverage and scope:** No new scope violation or requirement omission found in this diff. Full-spec completion remains unproven: D3 is pending, 11 RFs have no test names, and device-dependent examples remain outstanding.
+2. **Constitution, layers, conventions and glossary:** No findings in the changed code.
+3. **Test integrity:** No test cases were deleted or skipped. The reduced iOS time-picker coverage is explicitly documented as approved. Static flow checks cannot establish native behavior.
+4. **Security:** No findings. The changes introduce no network calls, player-data logging, database queries, dependencies or permissions.
+5. **Explanation accuracy:** F1 above.
+6. **Simplicity, clarity and efficiency:** No findings.
 
-Full verification, coverage, mutation testing, fresh dependency scans and native behavior were not independently confirmed. D3, Maestro and documented device checks remain pending; this review does not establish full-spec completion.
+Validation passed: TypeScript, ESLint, traceability, focused/skipped-test detection, diff whitespace, formatting of committed changes, and **76 static tests**. Jest required suppression of cache writes in this read-only environment. Repository-wide formatting failed only on the existing uncommitted `codex-review.md`.
+
+Full verification and simulator execution were not independently confirmed. No files were changed.
