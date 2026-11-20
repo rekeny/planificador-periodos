@@ -1,0 +1,21 @@
+appId: com.fernando.planificadorperiodos
+---
+# Closes the keyboard of a field that has no Return key (the number pad of the scores) or where
+# Return writes a new line (the notes), in the match form. On an iPhone neither a tap on a label nor
+# `hideKeyboard` is reliable there: the second can close the whole modal form. What works is to
+# focus «Local», a single-line field, and press Enter, which closes the keyboard (checked on an
+# iPhone 17 simulator, iOS 27.2, 2026-11-20). The field keeps its text. On an iPad the keyboard has
+# its own «Hide keyboard» key, tapped first.
+- runFlow:
+    when:
+      visible: "Hide keyboard|Ocultar teclado"
+    commands:
+      - tapOn: "Hide keyboard|Ocultar teclado"
+- scrollUntilVisible:
+    element:
+      text: "Local"
+    direction: UP
+- tapOn:
+    text: "Local"
+    below: "Local"
+- pressKey: Enter

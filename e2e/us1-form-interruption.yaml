@@ -8,17 +8,25 @@ name: "RF-073 RF-082 E-029: a form left half-filled is lost when the app closes 
 
 # Saved before any interruption: team «Alevín A» with player «Luis» (7).
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Alevín A"
-- hideKeyboard
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - tapOn: "Alevín A"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Luis"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "7"
-- hideKeyboard
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
 - assertVisible: "Luis"
 # The app is stopped and opened again WITHOUT clearState: what was saved survives.
@@ -29,7 +37,9 @@ name: "RF-073 RF-082 E-029: a form left half-filled is lost when the app closes 
 
 # Going back from a half-filled new-team form: no question and nothing saved.
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Cadete B"
 - assertVisible: "Cadete B"
 - runFlow:
@@ -53,7 +63,9 @@ name: "RF-073 RF-082 E-029: a form left half-filled is lost when the app closes 
 
 # E-029: «Cadete B» typed in the new-team form, the app closes and opens again.
 - tapOn: "Nuevo equipo"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Cadete B"
 - assertVisible: "Cadete B"
 - stopApp
@@ -66,9 +78,13 @@ name: "RF-073 RF-082 E-029: a form left half-filled is lost when the app closes 
 # The same with a half-filled new-player form: the team gets no new player.
 - tapOn: "Alevín A"
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Ana"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "9"
 - assertVisible: "Ana"
 - stopApp
@@ -81,9 +97,13 @@ name: "RF-073 RF-082 E-029: a form left half-filled is lost when the app closes 
 
 # Going back from a half-filled new-player form: no question and nothing saved.
 - tapOn: "Nuevo jugador"
-- tapOn: "Nombre"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
 - inputText: "Ana"
-- tapOn: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
 - inputText: "9"
 - runFlow:
     when:

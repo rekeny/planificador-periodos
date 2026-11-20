@@ -8,10 +8,13 @@ import {
   idsIn,
   inlineStructures,
   isSpanishText,
+  isOpenLinkQuestion,
+  isSystemText,
   isTypedHere,
   literalsOf,
   readFlow,
   specIds,
+  withoutWildcards,
 } from "../support/e2e-flows";
 import {
   INTERRUPTION,
@@ -74,7 +77,10 @@ describe("T056 Maestro US3 flows", () => {
       expect({
         file,
         unknown: shown.filter(
-          (value) => !isSpanishText(value) && !isTypedHere(value, typed),
+          (value) =>
+            !isSpanishText(value) &&
+            !isSystemText(value) &&
+            !isTypedHere(withoutWildcards(value), typed),
         ),
       }).toEqual({ file, unknown: [] });
       const players = typed.filter((value) => value !== "Alevín A").join("|");
@@ -109,6 +115,25 @@ describe("T056 Maestro US3 flows", () => {
           /^- openLink: planificadorperiodos:\/\/matches\//,
         );
       }
+    }
+  });
+
+  it("RF-082 E-019: every deep link of every flow is followed by the tap on the iOS question «¿Abrir en …?»", () => {
+    const linked = flowFiles("us").filter((file) =>
+      readFlow(file).text.includes("- openLink:"),
+    );
+    expect(linked.length).toBeGreaterThan(0);
+    for (const file of linked) {
+      const lines = readFlow(file)
+        .text.split("\n")
+        .filter((line) => !/^\s*#/.test(line));
+      const links = lines.flatMap((line, index) =>
+        line.startsWith("- openLink:") ? [index] : [],
+      );
+      const asked = links.filter((index) =>
+        isOpenLinkQuestion(lines.slice(index + 1, index + 6).join("\n")),
+      );
+      expect({ file, asked }).toEqual({ file, asked: links });
     }
   });
 

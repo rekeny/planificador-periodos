@@ -27,11 +27,20 @@ export function flowLiterals(): Literal[] {
   return literalsOf(readFlow(US2_FILE));
 }
 
-/** The texts the flow asserts are visible, in order. */
+/** The texts the flow asserts are visible: those of `assertVisible`, then those `scrollUntilVisible`
+ * looks for, which fails like an assertion when its text never shows (the call-up count sits below
+ * the first screen of a phone). */
 export function visible(): string[] {
-  return flowLiterals()
+  const asserted = flowLiterals()
     .filter((literal) => literal.key === "assertVisible")
     .map((literal) => literal.value);
+  const scrolledTo = readFlow(US2_FILE)
+    .commands.filter((command) => command.name === "scrollUntilVisible")
+    .flatMap((command) => {
+      const text = /^\s*text: "([^"]*)"$/m.exec(command.block)?.[1];
+      return text === undefined ? [] : [text];
+    });
+  return [...asserted, ...scrolledTo];
 }
 
 /** The command lines of the flow, trimmed, one per command (nested commands included). */

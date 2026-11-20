@@ -12,6 +12,7 @@ import {
   idsIn,
   inlineStructures,
   isSpanishText,
+  isSystemText,
   isTypedHere,
   literalsOf,
   readFlow,
@@ -68,6 +69,7 @@ describe("T048 Maestro US2 flow", () => {
       .filter(
         (value) =>
           !isSpanishText(value) &&
+          !isSystemText(value) &&
           !isTypedHere(withoutWildcards(value), typed) &&
           value !== TODAY_VARIABLE &&
           !NATIVE_PICKER_TEXTS.includes(value) &&
@@ -171,9 +173,16 @@ describe("T048 Maestro US2 flow", () => {
   it("RF-031 RF-033 RF-035: the flow creates a player from the match and removes and adds another with no confirmation", () => {
     const all = lines();
     expect(all).toContain(`- tapOn: "${es.callUp.createPlayer}"`);
-    expect(all).toContain(`- tapOn: "${es.callUp.remove}"`);
+    // The second remove button (Fran), not the first: the first sits under the iOS header strip.
+    expect(flowLiterals()).toContainEqual({
+      key: "text",
+      value: es.callUp.remove,
+    });
+    expect(lines().join("\n")).toMatch(
+      new RegExp(`text: "${es.callUp.remove}"\\s+index: 1`),
+    );
     expect(all).toContain(
-      `- assertNotVisible: "${es.confirm.removeFromCallUp.title.replace("{{name}}", "Eva")}"`,
+      `- assertNotVisible: "${es.confirm.removeFromCallUp.title.replace("{{name}}", "Fran")}"`,
     );
     expect(
       all.filter((line) => line === '- tapOn: "Nuevo jugador"'),

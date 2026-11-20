@@ -28,8 +28,10 @@ const empty = (name: string, period = "P1"): string =>
   see(cell(name, period, "empty"));
 const confirm = (title: string, label: string): string =>
   `- tapOn:; text: "${label}"; below: "${title}"`;
+// Under «Añadir a la convocatoria» each player is one button that iOS reads as «1, Ana», so the flow
+// matches the name inside it; above it, in the call-up, the name is a text of its own.
 const listed = (name: string, where: "above" | "below"): string =>
-  `- assertVisible:; text: "${name}"; ${where}: "${es.callUp.add}"`;
+  `- assertVisible:; text: "${where === "below" ? `.*${name}.*` : name}"; ${where}: "${es.callUp.add}"`;
 
 describe("T056 Maestro US3 journeys: confirmations and reopening", () => {
   it("RF-059: an overtime with marks asks first, outside and Back do nothing, Cancel keeps it and its marks, confirming deletes both", () => {
