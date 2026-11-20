@@ -120,7 +120,7 @@ D1 was the rules engine with no screens. D2 puts the app on top of it. With the 
 
 **Not in D2 (all D3):** substitutions and the long-press menu, the questions «sub or starter?» and «who leaves?», the list of a team's matches, editing or deleting a match, changing the format of a match, and squad upkeep. A tap that needs a question does nothing yet.
 
-**Important:** none of this was run on a device, a simulator or Maestro. What is proven is the Jest tests (about 2,870) and the local `verify`. CI has not run on this branch yet.
+**Important:** none of this was run on a device, a simulator or Maestro when it was written (2026-11-14). Update 2026-11-20: the six Maestro flows were run on iOS simulators (see below and `review.md`); Android and the device checks are still pending. What is proven is the Jest tests (about 2,870) and the local `verify`. CI has not run on this branch yet.
 
 ### How: files and new pieces
 
@@ -330,7 +330,7 @@ Known D2 limits (stated in the spec and tasks, not bugs to fix now):
 
 Not done or not verified:
 
-- **The six Maestro flows were written but NOT run.** T036, T048, T056 and T060 are unticked in `tasks.md` (flows written, not run) until their Maestro runs are recorded: those four tasks are NOT done (Codex F5). T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked too.
+- **Maestro: run on iOS simulators on 2026-11-20, not on Android.** The six flows pass on an iPhone 17 simulator (five of them) and an iPad Pro 11-inch in landscape (`us4-warnings`), with iOS 27.2 and Maestro 2.12.1; the details are in `review.md` and in `small-change-maestro-ios-flows.md`. On iOS the time of the match form is only checked up to «12:00» (decision of Fernando, 2026-11-20). NOT run: Android, iPad in portrait, iPhone in landscape. Before that run the flows had been written but not run. T036, T048, T056 and T060 are unticked in `tasks.md` (flows written, not run) until their Maestro runs are recorded: those four tasks are NOT done (Codex F5). T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked too.
 - **CI has not run yet** on this branch. The first full Stryker run on CI (about 25 minutes) and the incremental runs, with whether the cache was restored, are still to be recorded in `review.md`. A note: `tests/support/` and `tests/setup/` are part of the cache key, so changes there force a full run.
 - **Deviations:** FK columns NOT NULL, and the picker files (iOS inline, Android dialog) were approved by Fernando on 2026-11-14 and are recorded in `plan.md` "Deviations", with the later ones up to 2026-11-15.
 - **Security:** SEC-D2-1 (unused Android permissions) is done in T088 (`android.blockedPermissions`; `INTERNET` only for `APP_VARIANT=production`; the release needs an `eas.json` profile that sets it and a check with `aapt dump permissions`, listed in `docs/security.md`). SEC-D2-3 (the silent failure to open the database) is done in T087 (message and «Reintentar»). Still open for the release: SEC-D2-7 (the INTERNET block fails open if `APP_VARIANT` is forgotten), the dark-mode look of the failure message (SEC-D2-9) and the iOS `xattr` check.
@@ -393,7 +393,7 @@ npm run verify
 ### Pending
 
 - Fernando's checks on iPhone and Android, and the merge (T092).
-- The Maestro flow was updated but not run (T048); its iOS «12:00» check and Android «Aceptar» tap are unverified.
+- The Maestro flow was updated on 2026-11-18 and run on an iPhone 17 simulator on 2026-11-20: its iOS «12:00» check passes. Its Android «Aceptar» tap is still unverified (no Android run yet).
 - The match details half of E-032 is in T072 and T073 (D3).
 - Codex found 0 blocking findings. Its other three findings are in code this branch does not change, and Fernando accepted them as pending on 2026-11-18:
   - **F-01, important:** the keyboard offset in `form-scroll.tsx`; «Guardar» may stay partly hidden on an iPhone in landscape. It gets its own `fix/` branch.
