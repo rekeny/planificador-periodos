@@ -1088,7 +1088,7 @@ On the first Android run only `us1-form-interruption` passed. The flow problems 
 
 **Findings about the app, outside this change** (their own branches):
 
-- **F-A1 · IMPORTANT · Android keyboard covers the focused field.** Match form: after `scrollUntilVisible` of «Notas», a tap on «Notas» or on a score field opens the keyboard and the form does not scroll: the field and what is typed are under the keyboard (screenshot checked; typed «hola notas» in «Notas» and it is not visible). This is the problem of F-01 (fixed in PR 10 only for iOS: `automaticallyAdjustKeyboardInsets` is iOS only and Android keeps `behavior="height"`). RF-076.
+- **F-A1 · IMPORTANT · Android keyboard covers the focused field.** Match form: after `scrollUntilVisible` of «Notas», a tap on «Notas» or on a score field opens the keyboard and the form does not scroll: the field and what is typed are under the keyboard (screenshot checked; typed «hola notas» in «Notas» and it is not visible). This is the problem of F-01 (fixed in PR 10 only for iOS: `automaticallyAdjustKeyboardInsets` is iOS only and Android keeps `behavior="height"`). RF-076. **Fixed on `fix/android-keyboard-offset` (2026-11-21); see the last section.**
 - **F-A2 · IMPORTANT · Android grid stuck after removing the last overtime.** A mark in PR1 scrolls the grid sideways; removing the overtime leaves it scrolled, so P1 and P2 are behind the name column and a swipe does not bring them back. The cells are in the accessibility tree but off screen. RF-042, RF-057.
 - **F-A3 · MINOR · Android link lost right after the launch.** `launchApp` then `openLink` of `planificadorperiodos://matches/99` ends on the list of teams, with no «No se ha encontrado». The same link as the launch intent (`am start` on a stopped app) or to a running app works.
 - Also seen: on a phone the warning strip is bounded and shows only its first banner (known, RF-080), which is why `us4-warnings` needs a tablet.
@@ -1109,3 +1109,31 @@ Run: `scripts/review.sh specs/001-planificador-v1 origin/main` at commit `6dad74
 | 2   | **MINOR. `summary.md` says T037 to T060 stay unticked and line 333 still describes T036 as unticked.**                                                                           | Fixed in this branch: the Maestro tasks are listed explicitly (T036 ticked, T048, T056 and T060 not).                                                                                                                                                                                                                                                                                  |
 
 Codex's other category results: no scope violation, no constitution, layer or glossary finding, no test deleted or skipped, no security finding, no simplicity finding. Codex did not rerun Maestro or the full verification.
+
+## Verification and Codex review · fix/android-keyboard-offset, F-A1 (2026-11-21)
+
+Form: `small-change-form-android-keyboard.md` (approved by Fernando, 2026-11-21). Fix at commit `937b497`: `src/ui/form-scroll.tsx` and `tests/app/form-scroll.keyboard.test.tsx`. This fixes F-A1 of the Maestro run on Android (section above) and the Android half of F-01.
+
+**Verification:** `npm run verify` on `937b497`: 251 suites, 3176 tests, "20/20 checks passed", "All checks passed", exit code 0. A first run had one failed check, the React Native Directory check of Expo Doctor ("unexpected server response", a network answer); `npx expo-doctor` passed straight after and so did the full run again. Mutation testing did not run: nothing in `src/domain/` changed.
+
+**Tests:** six new tests in `tests/app/form-scroll.keyboard.test.tsx`. Three failed before the change for the right reasons (no scroll when the focused field is under the keyboard, no scroll with an existing offset, the keyboard listener not removed on unmount) and pass after it; the other three (a field already above the keyboard, no field focused, iOS) pass before and after, to keep those cases as they were. They give the form a keyboard event and a focused field at a chosen height: they check the scroll it asks for, not a real keyboard.
+
+**Emulator (the real proof):** Android 17 emulator `Medium_Phone_API_37.0`, 1080x2400, Release build (arm64) of the fix, Gboard.
+
+- Portrait, new-match form: scrolling to «Notas» and tapping it opens the keyboard and the form scrolls so that the field and its text («hola notas») sit above it. Before the change the form did not move and the field was under the keyboard (reproduced on 2026-11-21).
+- `us2-match-and-call-up` on Android now goes past the score fields: it taps «Local», «Visitante» and both score fields (number keyboard), moves from one to another with the keyboard open, scrolls down to «Guardar» and taps it (the message «Escribe los dos resultados o ninguno.» shows), and goes on until it types the notes. It stops there, at the 500-character notes (see below).
+- Landscape: «Notas» and what is typed are visible, in the keyboard's own full-screen editor (Android shows it for a text field in landscape; the form is not visible behind it).
+
+**What this does NOT cover:** reaching «Guardar» in landscape; the Android tablet; a real Android device; other Android versions; a keyboard other than Gboard; the team and player forms (they share the component and were not opened).
+
+**Found along the way (not part of this change):** `us2-match-and-call-up` on Android now stops when it types the 500-character notes: `inputText` took about 0.6 s per character on the emulator and Maestro gave up after 120 s (`DEADLINE_EXCEEDED`, "Device server died during inputText"). It is a limit of the flow on Android, not of the app. The flow needs the text in chunks or another way to fill the field. It stays open for its own branch.
+
+**Codex run:** `scripts/review.sh specs/001-planificador-v1 origin/main` on `937b497`. Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** 0 BLOCKING, 1 IMPORTANT, 0 MINOR. No blocking finding, so the phase 8 gate is met.
+
+| #   | Finding                                                                                                                        | Decision                                                                                                                                                                                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **IMPORTANT. The verification and the emulator results are not in `review.md`, and `summary.md` still lists F-A1 as pending.** | Fixed in this branch: this section records them (portrait, landscape, changing fields with the keyboard open, reaching «Guardar») and `summary.md` has the after explanation. Reaching «Guardar» in landscape is the one check not done. |
+
+Codex's other category results: no scope, constitution, layer or glossary finding, no test deleted, skipped or weakened (three new tests fail against the previous component), no security finding, no simplicity finding. Codex did not independently confirm the full verification or the native behaviour.

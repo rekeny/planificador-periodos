@@ -1,28 +1,27 @@
 # Codex review
 
-- Date: 2026-11-21 01:13
-- Branch: fix/maestro-android-flows against origin/main
-- Commit: 6dad746
+- Date: 2026-11-21 08:04
+- Branch: fix/android-keyboard-offset against origin/main
+- Commit: 937b497
 
-Reviewed `git diff origin/main...HEAD`.
+Reviewed `git diff origin/main...HEAD` at `937b497`.
 
-**No new BLOCKING findings. One IMPORTANT and one MINOR finding.**
+**0 BLOCKING · 1 IMPORTANT · 0 MINOR**
 
-1. **IMPORTANT — Spanish Android date selector cannot match.**  
-   [e2e/us2-match-and-call-up.yaml:246](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/e2e/us2-match-and-call-up.yaml:246) uses `mes anterior`, but Material3 exposes `Cambiar al mes anterior`. Maestro matches the complete text, so the US2 date flow stops on Spanish-configured Android. The static tests repeat the selector without validating its translations. See [Material3’s Spanish resources](https://raw.githubusercontent.com/androidx/androidx/androidx-main/compose/material3/material3/src/androidMain/res/values-es/strings.xml) and [Maestro’s matching rules](https://docs.maestro.dev/reference/selectors/core-selectors.md).  
-   **Fix:** use `(?i)change to previous month|cambiar al mes anterior`, update `NATIVE_PICKER_TEXTS`, and test full matches against both native labels.
+**IMPORTANT — Record the F-A1 verification and after-explanation.**  
+[small-change-form-android-keyboard.md:37](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/specs/001-planificador-v1/small-change-form-android-keyboard.md:37) describes successful native checks, also claimed in the commit message. However, `review.md` contains no verification results for this fix, and [summary.md:487](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/specs/001-planificador-v1/summary.md:487) still lists F-A1 as pending.
 
-2. **MINOR — Summary contradicts task completion.**  
-   [specs/001-planificador-v1/summary.md:490](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/specs/001-planificador-v1/summary.md:490) says T037–T060 remain unticked, although most are completed. Line 333 also still describes T036 as unticked.  
-   **Fix:** list the pending tasks explicitly and record T036 as completed.
+**Concrete fix:** record the commit’s `scripts/verify.sh` output and emulator results in `review.md`, including portrait, landscape, changing fields with the keyboard open and reaching «Guardar». Add the required after-explanation to `summary.md`, distinguishing completed checks from remaining limitations.
 
-| Requested category                             | Result                                                                                                             |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| RF/E implementation, tests and scope           | Finding 1. No out-of-scope product additions. The full spec remains incomplete under its documented delivery plan. |
-| Constitution, layers, conventions and glossary | No new findings.                                                                                                   |
-| Deleted, skipped or weakened tests             | None deleted or skipped. Finding 1 exposes a gap in the new selector checks.                                       |
-| Security                                       | No new findings; runtime code, queries, dependencies and permissions are unchanged.                                |
-| Explanations and reports                       | Finding 2.                                                                                                         |
-| Simplicity, clarity and efficiency             | No findings.                                                                                                       |
+| Review category                                | Result                                                                                                     |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| RF/E implementation and scope                  | No additional findings within this RF-076 fix. Full v1 remains incomplete through documented D3 deferrals. |
+| Constitution, layers, conventions and glossary | No additional findings.                                                                                    |
+| Test integrity and effectiveness               | No deleted, skipped or weakened tests. Three new regression tests fail against the previous component.     |
+| Security                                       | No findings in the diff: no network calls, logging, SQL, dependency or permission changes.                 |
+| Explanation accuracy                           | The IMPORTANT finding above.                                                                               |
+| Simplicity, clarity and efficiency             | No findings.                                                                                               |
 
-**Validation:** TypeScript, ESLint, traceability, focused/skipped-test checks and diff whitespace checks passed. Changed Markdown passed formatting. Full verification stopped on the pre-existing local modification to `codex-review.md`; targeted Jest execution separately failed before running tests because its cache requires writing in this read-only environment. Maestro was not rerun. No files were changed.
+Validation: TypeScript, ESLint, changed-file formatting, traceability, focused/skipped-test detection and diff whitespace passed. With cache writes suppressed only in memory, **17 tests passed**; eight route tests failed identically with both component versions.
+
+Full verification, coverage and native behaviour were not independently confirmed. The IMPORTANT finding requires correction or explicit acceptance before closing.
