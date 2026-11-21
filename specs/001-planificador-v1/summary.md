@@ -704,3 +704,46 @@ The first must end with «No issues found» and no «unused ignores» line.
 ### Pending
 
 - `osv-scanner.toml` still uses `ignoreUntil`, which osv-scanner reports as deprecated in favour of `effectiveUntil`; migrating it also changes `scripts/check-npm-audit.mjs` (line 20), so it is its own small change.
+
+## Fix of 2026-11-21 · The time picker shows the draft's time on a daylight-saving day (F-02, RF-083)
+
+Branch `fix/picker-dst-drift`, small change, form approved by Fernando on 2026-11-21 (`small-change-form-picker-dst-drift.md`). One commit holds the code and its tests (`21566a4`).
+
+### What was done and what changes for the user
+
+On the day the clocks go forward (in Spain, Sunday 29 March 2026) the hour from 02:00 to 02:59 does not exist. A coach who chose 02:30 for a match that day saw the time picker move to 03:30 and, on Android, the dialog saved 03:30 instead of 02:30. Now the time picker always shows the time the draft holds, and what the coach chooses is what is saved. On any other day nothing changes.
+
+### How: files and new pieces
+
+| Piece                                                | What it does                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `date-time-field-shared.ts`                          | New `toLocalTime(time)`: the `Date` for the time picker, built on a fixed reference day (15 January 2001), noon when there is no time. `toLocalDate(date, time)` stays for the date picker.                                                                   |
+| `date-time-field.tsx`, `date-time-field-android.tsx` | The iOS inline time picker and the Android dialog in time mode get `toLocalTime(time)`; the date picker is as before.                                                                                                                                         |
+| `date-time-field.dst.test.tsx` (new)                 | Nine tests in Europe/Madrid on iOS and on Android, driven through a parent that keeps the draft; six of them fail with the old conversion put back.                                                                                                           |
+| `date-time-field.zones.test.ts` (new)                | Six tests: the real helpers run in five child Node processes, each started with its own `TZ` (Madrid, New York, Sydney, Lord Howe, UTC), reading back the zone it used and checking every time of the day; plus a check that the suite itself runs in Madrid. |
+| `tests/setup/time-zone.js`, `jest.config.js`         | A Jest `globalSetup` that puts the whole suite in `Europe/Madrid`.                                                                                                                                                                                            |
+
+### Why: decisions along the way
+
+- **Why the fix was bigger than the finding.** F-02 said the picker disagreed with the text. On the emulator the dialog also saved the shifted time: the picker returns a `Date` built on the match's day, and JavaScript moves a time in the skipped hour to the next one. Giving the picker a day with no clock change fixes both.
+- **Why 15 January 2001.** The time of a match is a plain «HH:MM» with no time zone, so no date can change it. A day in the middle of January has no clock change in any zone in use today (the changes are in spring and autumn, in April and October in the Southern Hemisphere).
+- **Discarded.** Detecting the gap by hand and adjusting the time (it needs the rules of each zone), and giving the date picker noon (it never drifts, because it reads only the day).
+
+### To learn, with the real code
+
+- **JavaScript local dates:** `new Date(2026, 2, 29, 2, 30)` in Madrid is 03:30; the constructor never fails on a time that does not exist, it moves it. A function that only needs the time of day should not build a date on a real day.
+- **Testing a time zone:** the zone of a process is read when it starts, so assigning `process.env.TZ` inside a test does not change it (the first version of these tests did that, and passed only because the machine is in Spain; Codex found it). The suite sets it in a Jest `globalSetup`, before the workers start, and other zones are tried in child Node processes started with `TZ`, reading back the zone they used.
+
+### To check it
+
+```bash
+npm run verify
+TZ=UTC npx jest src/ui/date-time-field
+```
+
+- **Phone in the Madrid time zone:** new match, «Fecha» to 29 March 2026, «Añadir hora», choose 02:30: the field must show 02:30, and opening the dialog again must show 02:30.
+
+### Pending
+
+- Not checked: iOS (neither simulator nor device), a real phone, and time zones outside the five of the tests.
+- Codex's verdict is in `review.md`.

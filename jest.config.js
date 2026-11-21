@@ -22,6 +22,7 @@ const domainThreshold = {
 /** @type {import('jest').Config} */
 module.exports = {
   preset: "jest-expo",
+  globalSetup: "<rootDir>/tests/setup/time-zone.js",
   setupFiles: ["<rootDir>/tests/setup/fast-check.ts"],
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
   testPathIgnorePatterns: [

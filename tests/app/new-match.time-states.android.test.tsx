@@ -126,9 +126,7 @@ describe("Android time field, without a time and with one (RF-012, RF-083, E-032
       time: "12:00",
     });
     expect(isPickerOpen("time")).toBe(true);
-    expect(localParts(await pickerValue("time"))).toEqual([
-      2026, 11, 11, 12, 0,
-    ]);
+    expect(localParts(await pickerValue("time")).slice(3)).toEqual([12, 0]);
     const props = (await pickerProps("time")) as unknown as {
       presentation?: string;
       positiveButton?: { label?: string };
@@ -214,7 +212,7 @@ describe("Android time field, boundaries (RF-083, E-033)", () => {
       date: "2026-03-01",
       time: "12:00",
     });
-    expect(localParts(await pickerValue("time"))).toEqual([2026, 3, 1, 12, 0]);
+    expect(localParts(await pickerValue("time")).slice(3)).toEqual([12, 0]);
   });
 
   it.each(["00:00", "23:59", "09:05", "12:00"])(
