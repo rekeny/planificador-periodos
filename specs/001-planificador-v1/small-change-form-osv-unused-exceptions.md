@@ -12,10 +12,10 @@ Two exceptions are removed from `osv-scanner.toml`: `GHSA-gcqx-w48m-w2h4` (deepm
 
 Since 2026-11-20 `npm run verify` prints «osv-scanner.toml has unused ignores» for exactly these two (it was noted in the report of the Maestro run, `review.md`). The advisories were **withdrawn** by their publisher, so they no longer apply to anything, and `osv-scanner scan source --lockfile=package-lock.json` finds no issue without them:
 
-| Advisory | Package | What it said | Withdrawn |
-| --- | --- | --- | --- |
-| `GHSA-gcqx-w48m-w2h4` | deepmerge 4.3.1 (from jest-config, development only) | prototype poisoning in `mergeObject()` | 2026-11-16 |
-| `GHSA-fc5q-39xc-vjpf` | picomatch 2.3.2 and 4.0.7 (from Metro, Expo CLI and Jest) | ReDoS through repeated extglobs, high | 2026-11-18 |
+| Advisory              | Package                                                   | What it said                           | Withdrawn  |
+| --------------------- | --------------------------------------------------------- | -------------------------------------- | ---------- |
+| `GHSA-gcqx-w48m-w2h4` | deepmerge 4.3.1 (from jest-config, development only)      | prototype poisoning in `mergeObject()` | 2026-11-16 |
+| `GHSA-fc5q-39xc-vjpf` | picomatch 2.3.2 and 4.0.7 (from Metro, Expo CLI and Jest) | ReDoS through repeated extglobs, high  | 2026-11-18 |
 
 (Read from `https://api.osv.dev/v1/vulns/<id>` on 2026-11-21: both entries start with «Withdrawn Advisory» and carry a `withdrawn` date.) The installed versions did not change: `npm ls` still shows deepmerge 4.3.1 and picomatch 4.0.7.
 
