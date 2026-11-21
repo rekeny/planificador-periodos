@@ -6,7 +6,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { shownDate, shownTime } from "@/state/match-date-text";
 import { DateTimeFieldAndroid } from "./date-time-field-android";
 import { NoTime } from "./no-time";
-import { ADDED_TIME, toLocalDate } from "./date-time-field-shared";
+import { ADDED_TIME, toLocalDate, toLocalTime } from "./date-time-field-shared";
 import type { DateTimeFieldProps } from "./date-time-field-shared";
 
 // iOS keeps both pickers inline (they report nothing on mount); Android opens dialogs from buttons
@@ -80,7 +80,7 @@ function TimePart({
             mode="time"
             presentation="inline"
             locale="es-ES"
-            value={toLocalDate(date, time)}
+            value={toLocalTime(time)}
             onValueChange={(_event, picked) =>
               onTimeChange({
                 hour: picked.getHours(),

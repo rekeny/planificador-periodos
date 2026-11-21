@@ -117,9 +117,7 @@ describe("iOS time field, without a time and with one (RF-083, E-032, E-033)", (
       time: "12:00",
     });
     expectWithTime("12:00");
-    expect(localParts(await pickerValue("time"))).toEqual([
-      2026, 11, 11, 12, 0,
-    ]);
+    expect(localParts(await pickerValue("time")).slice(3)).toEqual([12, 0]);
     const props = (await pickerProps("time")) as unknown as { locale?: string };
     expect(props.locale).toMatch(/^es([-_]ES)?$/);
     expect(screen.queryByRole("alert")).toBeNull();
@@ -170,7 +168,7 @@ describe("iOS time field, boundaries (RF-083, E-033)", () => {
       date: "2026-03-01",
       time: "12:00",
     });
-    expect(localParts(await pickerValue("time"))).toEqual([2026, 3, 1, 12, 0]);
+    expect(localParts(await pickerValue("time")).slice(3)).toEqual([12, 0]);
   });
 
   it("RF-083: picking 12:00 with the picker right after «Añadir hora» keeps «12:00» and the state with a time", async () => {

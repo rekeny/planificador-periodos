@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { shownDate, shownTime } from "@/state/match-date-text";
 import { NoTime } from "./no-time";
-import { ADDED_TIME, toLocalDate } from "./date-time-field-shared";
+import { ADDED_TIME, toLocalDate, toLocalTime } from "./date-time-field-shared";
 import type { DateTimeFieldProps } from "./date-time-field-shared";
 
 type Mode = "date" | "time";
@@ -127,7 +127,7 @@ export function DateTimeFieldAndroid({
       {open === null ? null : (
         <PickerDialog
           mode={open}
-          value={toLocalDate(date, time)}
+          value={open === "time" ? toLocalTime(time) : toLocalDate(date, time)}
           onClose={close}
           onPick={(picked) =>
             open === "date"

@@ -1,24 +1,27 @@
 # Codex review
 
-- Date: 2026-11-21 18:17
-- Branch: fix/osv-unused-exceptions against origin/main
-- Commit: 61e5afc
+- Date: 2026-11-21 19:15
+- Branch: fix/picker-dst-drift against origin/main
+- Commit: 0c97c20
 
-Reviewed commit `61e5afc` using `git diff origin/main...HEAD`.
+Reviewed `git diff origin/main...HEAD` at `0c97c20`.
 
-**No new BLOCKING, IMPORTANT or MINOR findings.**
+**Verdict: one MINOR finding; no BLOCKING or IMPORTANT findings.**
 
-| Category                                       | Result                                                                                                                                                     |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RF/E coverage and scope                        | No findings in this configuration change. Full v1 remains incomplete through documented D3 deferrals and pending device checks.                            |
-| Constitution, layers, conventions and glossary | No findings. Application code is unchanged.                                                                                                                |
-| Test integrity and effectiveness               | No tests deleted, skipped or weakened. Direct audit-filter checks confirm the removed IDs are rejected.                                                    |
-| Security                                       | No findings in the diff. Exactly two exceptions are removed; the seven retained entries remain unchanged, with approval, reason and expiry within 90 days. |
-| Explanation accuracy                           | No material mismatch between the diff and the added reports.                                                                                               |
-| Simplicity, clarity and efficiency             | No findings.                                                                                                                                               |
+**MINOR — Test report describes an obsolete version.**  
+[summary.md:722](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/test-pr7-pr8-devices-482851/specs/001-planificador-v1/summary.md:722) claims eleven tests across five zones, with eight failing before the fix. The final component suite contains nine tests in Madrid; the separate zones suite contains six tests. Restoring the old picker conversion makes six component tests fail.
 
-Validation passed: TypeScript, ESLint, changed-document formatting, traceability, focused/skipped-test detection, diff whitespace, TOML validation and ten direct audit-filter checks.
+**Concrete fix:** update the table to describe both final suites and the six demonstrated regression failures.
 
-Fresh OSV verification failed because DNS could not resolve `api.osv.dev`; the reported advisory withdrawals and clean scan were therefore **not independently confirmed**. Full verification, Jest, coverage and native behavior were not rerun. This review does not establish completion of the full specification.
+| Review category                                | Result                                                                                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| RF/E implementation and scope                  | No new findings. RF-083/F-02 is addressed; approved D3 functionality remains pending.                                    |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                             |
+| Test integrity and effectiveness               | No findings. The five adjusted assertions remove an irrelevant date constraint while preserving time checks.             |
+| Security                                       | No findings introduced: no runtime network calls, player-data logging, query changes, dependencies or permissions added. |
+| Explanation accuracy                           | MINOR finding above.                                                                                                     |
+| Simplicity, clarity and efficiency             | No findings.                                                                                                             |
 
-No repository files were changed.
+Typecheck, lint, changed-file formatting, traceability and skipped-test checks passed. The 15 new tests passed with Jest cache writes disabled in memory; restoring the previous conversion triggered the six expected failures.
+
+Full verification remains unconfirmed: normal Jest execution was blocked by read-only cache permissions. A broader adapted run encountered route-mounting failures, also reproduced with the `origin/main` picker source. GitHub CI and native-device behavior were not independently verified.
