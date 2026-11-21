@@ -2,9 +2,12 @@
 // and time, and on the day the clocks go forward a time that does not exist (02:30 in Spain on
 // 29 March 2026) became 03:30, so the picker disagreed with the draft, the text and what is saved.
 // The time picker now gets its Date on a fixed reference day (small-change-form-picker-dst-drift.md).
-// Jest sets the time zone at run time and restores it after each test.
+// The suite runs in Europe/Madrid (tests/setup/time-zone.js); the other zones are in
+// date-time-field.zones.test.ts. The field is driven by a parent that keeps the draft, as the form does.
 import "@/i18n";
-import { render } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
+import { useState } from "react";
+import type { ReactElement } from "react";
 import { Platform } from "react-native";
 
 import { DateTimeField } from "@/ui/date-time-field";
@@ -12,6 +15,7 @@ import { toLocalDate, toLocalTime } from "@/ui/date-time-field-shared";
 import {
   localParts,
   pickDate,
+  pickTime,
   pickerValue,
 } from "../../tests/support/date-time-picker-double";
 
@@ -23,98 +27,88 @@ jest.mock("@expo/ui/community/datetime-picker", () =>
     .dateTimePickerModule(),
 );
 
-const ZONES = [
-  "Europe/Madrid",
-  "America/New_York",
-  "Australia/Sydney",
-  "Australia/Lord_Howe",
-  "UTC",
-];
+const two = (value: number): string => String(value).padStart(2, "0");
 
-let zone: string | undefined;
-
-beforeEach(() => {
-  zone = process.env.TZ;
-});
-
-afterEach(() => {
-  if (zone === undefined) {
-    delete process.env.TZ;
-  } else {
-    process.env.TZ = zone;
-  }
-  jest.restoreAllMocks();
-});
-
-function field(date: string, time: string | null) {
+/** The draft of the form: the field reports changes and this parent keeps them. */
+function Draft({
+  date: first,
+  time: firstTime,
+}: {
+  readonly date: string;
+  readonly time: string | null;
+}): ReactElement {
+  const [date, setDate] = useState(first);
+  const [time, setTime] = useState(firstTime);
   return (
     <DateTimeField
       date={date}
       time={time}
-      onDateChange={jest.fn()}
-      onTimeChange={jest.fn()}
-      onClearTime={jest.fn()}
+      onDateChange={({ year, month, day }) =>
+        setDate(`${year}-${two(month)}-${two(day)}`)
+      }
+      onTimeChange={({ hour, minute }) =>
+        setTime(`${two(hour)}:${two(minute)}`)
+      }
+      onClearTime={() => setTime(null)}
     />
   );
 }
 
+const platforms: [string, "ios" | "android"][] = [
+  ["iOS", "ios"],
+  ["Android", "android"],
+];
+
+async function timeOfDay(): Promise<number[]> {
+  return localParts(await pickerValue("time")).slice(3);
+}
+
 describe("the time picker on a daylight-saving day (F-02, RF-083)", () => {
-  it("RF-083 F-02: with TZ Europe/Madrid, the Date built from 29 March 2026 and 02:30 is still shifted for the date picker (the reason the time picker has its own)", () => {
-    process.env.TZ = "Europe/Madrid";
+  it("RF-083 F-02: the Date built from 29 March 2026 and 02:30 is shifted to 03:30 in Spain, the reason the time picker has its own Date", () => {
     expect(toLocalDate("2026-03-29", "02:30").getHours()).toBe(3);
+    expect(toLocalTime("02:30").getHours()).toBe(2);
   });
 
-  it.each(ZONES)(
-    "RF-083 F-02: in %s every time from 00:00 to 23:59 comes back from toLocalTime unchanged",
-    (name) => {
-      process.env.TZ = name;
-      const wrong: string[] = [];
-      for (let hour = 0; hour < 24; hour += 1) {
-        for (let minute = 0; minute < 60; minute += 1) {
-          const time = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-          const picked = toLocalTime(time);
-          if (picked.getHours() !== hour || picked.getMinutes() !== minute) {
-            wrong.push(time);
-          }
-        }
-      }
-      expect(wrong).toEqual([]);
+  it.each(platforms)(
+    "RF-083 F-02: on %s a draft of 29 March 2026 at 02:30 gives the time picker 02:30",
+    async (_name, os) => {
+      jest.replaceProperty(Platform, "OS", os);
+      await render(<Draft date="2026-03-29" time="02:30" />);
+      expect(await timeOfDay()).toEqual([2, 30]);
     },
   );
 
-  it("RF-083 F-02: toLocalTime keeps the noon fallback when there is no time", () => {
-    process.env.TZ = "Europe/Madrid";
-    const picked = toLocalTime(null);
-    expect([picked.getHours(), picked.getMinutes()]).toEqual([12, 0]);
-  });
+  it.each(platforms)(
+    "RF-083 F-02: on %s the date picker still receives the draft's day on that date",
+    async (_name, os) => {
+      jest.replaceProperty(Platform, "OS", os);
+      await render(<Draft date="2026-03-29" time="02:30" />);
+      const value = await pickerValue("date");
+      expect(localParts(value).slice(0, 3)).toEqual([2026, 3, 29]);
+    },
+  );
 
-  it("RF-083 F-02: on iOS, with TZ Europe/Madrid, a draft of 29 March 2026 at 02:30 gives the time picker 02:30", async () => {
-    process.env.TZ = "Europe/Madrid";
-    await render(field("2026-03-29", "02:30"));
-    const value = await pickerValue("time");
-    expect([value.getHours(), value.getMinutes()]).toEqual([2, 30]);
-  });
+  it.each(platforms)(
+    "RF-083 F-02: on %s, after the date picker moves the draft to 29 March 2026, the draft, the text and the time picker all keep 02:30",
+    async (_name, os) => {
+      jest.replaceProperty(Platform, "OS", os);
+      await render(<Draft date="2026-03-28" time="02:30" />);
+      await pickDate(2026, 3, 29);
+      expect(screen.getByText("29/03/2026")).toBeOnTheScreen();
+      expect(screen.getByText("02:30")).toBeOnTheScreen();
+      expect(await timeOfDay()).toEqual([2, 30]);
+    },
+  );
 
-  it("RF-083 F-02: on Android, with TZ Europe/Madrid, the time dialog of a draft of 29 March 2026 at 02:30 opens on 02:30", async () => {
-    process.env.TZ = "Europe/Madrid";
-    jest.replaceProperty(Platform, "OS", "android");
-    await render(field("2026-03-29", "02:30"));
-    const value = await pickerValue("time");
-    expect([value.getHours(), value.getMinutes()]).toEqual([2, 30]);
-  });
-
-  it("RF-083 F-02: the date picker still receives the draft's day on that date", async () => {
-    process.env.TZ = "Europe/Madrid";
-    await render(field("2026-03-29", "02:30"));
-    const value = await pickerValue("date");
-    expect(localParts(value).slice(0, 3)).toEqual([2026, 3, 29]);
-  });
-
-  it("RF-083 F-02: after the date picker moves to another day the time picker still shows the draft's time", async () => {
-    process.env.TZ = "Europe/Madrid";
-    await render(field("2026-03-28", "02:30"));
-    await pickDate(2026, 3, 29);
-    const value = await pickerValue("time");
-    expect([value.getHours(), value.getMinutes()]).toEqual([2, 30]);
-  });
+  it.each(platforms)(
+    "RF-083 F-02: on %s, picking 02:30 with the time picker on 29 March 2026 saves 02:30 and not 03:30",
+    async (_name, os) => {
+      jest.replaceProperty(Platform, "OS", os);
+      await render(<Draft date="2026-03-29" time="12:00" />);
+      await pickTime(2, 30);
+      expect(screen.getByText("02:30")).toBeOnTheScreen();
+      expect(screen.queryByText("03:30")).toBeNull();
+      expect(await timeOfDay()).toEqual([2, 30]);
+    },
+  );
 });

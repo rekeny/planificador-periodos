@@ -730,13 +730,13 @@ On the day the clocks go forward (in Spain, Sunday 29 March 2026) the hour from 
 ### To learn, with the real code
 
 - **JavaScript local dates:** `new Date(2026, 2, 29, 2, 30)` in Madrid is 03:30; the constructor never fails on a time that does not exist, it moves it. A function that only needs the time of day should not build a date on a real day.
-- **Testing a time zone:** `process.env.TZ = "Europe/Madrid"` in a test changes how `Date` works from then on, so each test restores it in `afterEach`.
+- **Testing a time zone:** the zone of a process is read when it starts, so assigning `process.env.TZ` inside a test does not change it (the first version of these tests did that, and passed only because the machine is in Spain; Codex found it). The suite sets it in a Jest `globalSetup`, before the workers start, and other zones are tried in child Node processes started with `TZ`, reading back the zone they used.
 
 ### To check it
 
 ```bash
 npm run verify
-npx jest src/ui/date-time-field.dst
+TZ=UTC npx jest src/ui/date-time-field
 ```
 
 - **Phone in the Madrid time zone:** new match, «Fecha» to 29 March 2026, «Añadir hora», choose 02:30: the field must show 02:30, and opening the dialog again must show 02:30.
