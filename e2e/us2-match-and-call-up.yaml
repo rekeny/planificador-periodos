@@ -364,7 +364,11 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - tapOn:
     text: "Notas"
     below: "Notas"
-- inputText: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdez"
+# The 501 characters are typed in three pieces: Maestro gives each command 120 s and typing took
+# 0.18 to 0.6 s per character on an Android 17 emulator (2026-11-21).
+- inputText: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesab"
+- inputText: "cdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenote"
+- inputText: "sabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdez"
 - assertVisible: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcde"
 - assertNotVisible: "notesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdenotesabcdez"
 - runFlow: subflows/close-number-keyboard.yaml
@@ -404,6 +408,15 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - scrollUntilVisible:
     element:
       text: ".*Ana.*"
+# On Android the first row can count as visible while it is still under the system navigation bar,
+# where a tap does nothing, and the rows below it are off screen: one more swipe brings the four
+# rows to the middle of the screen (checked on an Android 17 emulator, 2026-11-21).
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - swipe:
+          direction: UP
 - tapOn: ".*Ana.*"
 - tapOn: ".*Bea.*"
 - tapOn: ".*Carla.*"

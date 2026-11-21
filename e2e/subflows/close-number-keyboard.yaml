@@ -11,11 +11,32 @@ appId: com.fernando.planificadorperiodos
       visible: "Hide keyboard|Ocultar teclado"
     commands:
       - tapOn: "Hide keyboard|Ocultar teclado"
-- scrollUntilVisible:
-    element:
-      text: "Local"
-    direction: UP
-- tapOn:
-    text: "Local"
-    below: "Local"
-- pressKey: Enter
+# On Android the label «Local» can end up under the header after the scroll, and then the tap below
+# it finds nothing; the scroll centres it. `hideKeyboard` is not used there: when the keyboard is
+# already closed, as after `commit-typed-text.yaml`, it acts as Back and leaves the whole form
+# (checked on an Android 17 emulator, 2026-11-21).
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Local"
+          direction: UP
+          centerElement: true
+      - tapOn:
+          text: "Local"
+          below: "Local"
+      - pressKey: Enter
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Local"
+          direction: UP
+      - tapOn:
+          text: "Local"
+          below: "Local"
+      - pressKey: Enter

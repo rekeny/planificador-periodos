@@ -47,3 +47,30 @@ export function visible(): string[] {
 export function lines(): string[] {
   return readFlow(US2_FILE).commands.map((command) => command.block.trim());
 }
+
+/**
+ * Everything the flow types: each `inputText` text, and the join of every run of consecutive
+ * `inputText` steps. Maestro gives each command 120 s and typing is slow on Android (0.18 to 0.6 s
+ * per character), so a long text may be typed in pieces: what the field receives is their join.
+ */
+export function typedTexts(): string[] {
+  const texts: string[] = [];
+  let run: string[] = [];
+  const flush = (): void => {
+    if (run.length > 1) {
+      texts.push(run.join(""));
+    }
+    run = [];
+  };
+  for (const command of readFlow(US2_FILE).commands) {
+    const value = /^\s*(?:- )?inputText: "(.*)"$/m.exec(command.block)?.[1];
+    if (command.name === "inputText" && value !== undefined) {
+      texts.push(value);
+      run.push(value);
+    } else {
+      flush();
+    }
+  }
+  flush();
+  return texts;
+}
