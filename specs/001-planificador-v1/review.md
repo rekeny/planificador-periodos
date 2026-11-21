@@ -1065,3 +1065,47 @@ Form: `small-change-form-keyboard-offset.md` (approved by Fernando, 2026-11-20).
 | R1  | **IMPORTANT. The verification and simulator results are not in `review.md`, the form still says the simulator check is "to be run" and `summary.md` still lists F-01 as pending.** | Fixed in this branch: this section records them, the form says it passed, and `summary.md` has the after explanation and no longer lists F-01 as pending. |
 
 Codex's other category results: no scope violation, no constitution, layer or glossary finding, no test deleted, skipped or weakened (the new tests fail against the previous component), no security finding, no simplicity finding. Codex notes that the tests check configuration, not native geometry (covered by the simulator check above). Eight existing route tests failed in Codex's read-only run with both versions of the component; the full `npm run verify` here passes all 3168 tests, so this is a limit of its sandbox. Codex did not independently confirm the full verification or the simulator behaviour.
+
+## Maestro run on Android · fix/maestro-android-flows (2026-11-21)
+
+First run of the Maestro flows on Android. Form `small-change-maestro-android-flows.md` (approved by Fernando, 2026-11-20). Flows at commit `c4e983f`.
+
+- **Tools:** Maestro 2.12.1; Android emulator `Medium_Phone_API_37.0` (Android 17, arm64, 1080x2400, device language English). The data partition of that emulator was reduced from 10 G to 4 G to fit the free disk (backup `config.ini.bak` in its folder). For iOS: the iPhone 17 of the earlier run.
+- **Build:** Release APK, `expo prebuild` and `./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a` on `origin/main` at `bcbcd43` (the merge of PR 10), installed on the emulator with the animations off.
+
+| Flow                    | Android phone emulator                                    | iPhone 17 simulator                   |
+| ----------------------- | --------------------------------------------------------- | ------------------------------------- |
+| `us1-teams-and-players` | passes                                                    | passes                                |
+| `us1-form-interruption` | passes (flow unchanged since the first run)               | passes (run of 2026-11-20, unchanged) |
+| `us2-match-and-call-up` | stops at the score field (F-A1); date and time steps work | passes                                |
+| `us3-planning`          | stops after removing the last overtime (F-A2)             | not run again (flow unchanged)        |
+| `us3-interruption`      | passes                                                    | passes                                |
+| `us4-warnings`          | not run: tablet flow, no Android tablet emulator          | not run again (flow unchanged)        |
+
+On the first Android run only `us1-form-interruption` passed. The flow problems were fixed in this branch (see `summary.md`).
+
+**Verification:** `npm run verify` on the flows commit: 251 suites, 3169 tests, "All checks passed". Mutation testing did not run: nothing in `src/domain/` changed.
+
+**Findings about the app, outside this change** (their own branches):
+
+- **F-A1 · IMPORTANT · Android keyboard covers the focused field.** Match form: after `scrollUntilVisible` of «Notas», a tap on «Notas» or on a score field opens the keyboard and the form does not scroll: the field and what is typed are under the keyboard (screenshot checked; typed «hola notas» in «Notas» and it is not visible). This is the problem of F-01 (fixed in PR 10 only for iOS: `automaticallyAdjustKeyboardInsets` is iOS only and Android keeps `behavior="height"`). RF-076.
+- **F-A2 · IMPORTANT · Android grid stuck after removing the last overtime.** A mark in PR1 scrolls the grid sideways; removing the overtime leaves it scrolled, so P1 and P2 are behind the name column and a swipe does not bring them back. The cells are in the accessibility tree but off screen. RF-042, RF-057.
+- **F-A3 · MINOR · Android link lost right after the launch.** `launchApp` then `openLink` of `planificadorperiodos://matches/99` ends on the list of teams, with no «No se ha encontrado». The same link as the launch intent (`am start` on a stopped app) or to a running app works.
+- Also seen: on a phone the warning strip is bounded and shows only its first banner (known, RF-080), which is why `us4-warnings` needs a tablet.
+
+**What this run does NOT cover:** `us4-warnings` on Android, Android in landscape, a real Android device, other Android versions, a device in Spanish (the date dialog showed English names), and the iPad. `us3-planning` and `us2-match-and-call-up` cannot finish on Android until F-A2 and F-A1 are fixed.
+
+**Tasks:** T036 is ticked (both of its flows pass on iOS and Android). T048, T056 and T060 stay unticked.
+
+## Codex review · fix/maestro-android-flows (2026-11-21)
+
+Run: `scripts/review.sh specs/001-planificador-v1 origin/main` at commit `6dad746`. Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** 0 BLOCKING, 1 IMPORTANT, 1 MINOR. No blocking finding, so the phase 8 gate is met.
+
+| #   | Finding                                                                                                                                                                          | Decision                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **IMPORTANT. The Spanish Android date selector cannot match:** the flow taps `mes anterior`, but Material3 exposes «Cambiar al mes anterior» and Maestro matches the whole text. | Fixed in this branch: the selector is `(?i)change to previous month\|cambiar al mes anterior` in the flow and in `NATIVE_PICKER_TEXTS`, and a new test matches every native label (previous month, March 1, 18 hours, 30 minutes) in English and Spanish against the whole text; it fails with the old selector. Not run on a Spanish-configured Android (the emulator is in English). |
+| 2   | **MINOR. `summary.md` says T037 to T060 stay unticked and line 333 still describes T036 as unticked.**                                                                           | Fixed in this branch: the Maestro tasks are listed explicitly (T036 ticked, T048, T056 and T060 not).                                                                                                                                                                                                                                                                                  |
+
+Codex's other category results: no scope violation, no constitution, layer or glossary finding, no test deleted or skipped, no security finding, no simplicity finding. Codex did not rerun Maestro or the full verification.

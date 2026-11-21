@@ -18,6 +18,7 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
     below: "Nombre"
 - inputText: "abcdefghijabcdefghijabcdefghijabcdefghijk"
 - assertVisible: "abcdefghijabcdefghijabcdefghijabcdefghij"
+- runFlow: subflows/commit-typed-text.yaml
 - assertNotVisible: "abcdefghijabcdefghijabcdefghijabcdefghijk"
 - assertNotVisible: "Escribe un nombre."
 - eraseText
@@ -26,6 +27,7 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
     below: "Categoría"
 - inputText: "klmnopqrstklmnopqrstklmnopqrstklmnopqrstu"
 - assertVisible: "klmnopqrstklmnopqrstklmnopqrstklmnopqrst"
+- runFlow: subflows/commit-typed-text.yaml
 - assertNotVisible: "klmnopqrstklmnopqrstklmnopqrstklmnopqrstu"
 - assertNotVisible: "Escribe un nombre."
 - eraseText
@@ -77,6 +79,7 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
     below: "Nombre"
 - inputText: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcde"
 - assertVisible: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcd"
+- runFlow: subflows/commit-typed-text.yaml
 - assertNotVisible: "uvwxyzabcduvwxyzabcduvwxyzabcduvwxyzabcde"
 - assertNotVisible: "Escribe un nombre."
 - eraseText
@@ -85,6 +88,7 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
     below: "Dorsal"
 - inputText: "100"
 - assertVisible: "10"
+- runFlow: subflows/commit-typed-text.yaml
 - assertNotVisible: "100"
 - eraseText
 - inputText: "07"
