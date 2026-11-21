@@ -160,7 +160,7 @@ New dependencies (T024, audited by Security): `expo-sqlite`, `drizzle-orm`, `zus
 - **The 250-line limit also covers tests.** ESLint `max-lines` now checks `tests/`, `scripts/` and `plugins/` (T080), so big test helpers were split.
 - **A script for focused tests.** `scripts/check-focused-tests.sh` looks for `it.only`, `xit` and similar at the start of a line, so a test title with the word "fit" no longer fails it (D1 lesson).
 - **Codex finding F1: an invalidated draft.** When the new-match draft was reset for a team that no longer loaded, it quietly kept the old data. Now `reset` first empties the draft, never throws, and returns a boolean (`reset(teamId): boolean`); the route reads that `false` and shows the not-found screen. Lesson: a reset that can fail must leave a safe empty state first and say so, instead of leaving stale data behind.
-- **Codex finding F4: a screen that reloads on focus.** The team screen stays mounted under the match, so players created there did not show on Back. It now calls `openTeam` inside `useFocusEffect` (and once before the first render), so it reloads every time it comes back into view.
+- **Codex finding F4: a screen that reloads on focus.** The team screen stays mounted under the match, so players created there did not show on Back. It now calls `openTeam` inside `useFocusEffect`, so it reloads every time it comes back into view. (Until 2026-11-21 it also called it once inside a `useState` initialiser, before the first render; F-03 removed that, see the last section.)
 - **Codex finding F3: no fallible read after a commit.** If a read fails after the write was saved, the coach sees "save failed" for something that was saved. The rule is: read first, commit, publish from memory. Real code from `src/state/squad-store.ts`:
 
   ```ts
@@ -398,7 +398,7 @@ npm run verify
 - Codex found 0 blocking findings. Its other three findings are in code this branch does not change, and Fernando accepted them as pending on 2026-11-18:
   - **F-01, important:** the keyboard offset in `form-scroll.tsx`; «Guardar» may stay partly hidden on an iPhone in landscape. Fixed on 2026-11-20 on `fix/form-keyboard-offset` (see the last section).
   - **F-02, minor:** a picker drift on the March daylight-saving day.
-  - **F-03, minor:** M-01, `openTeam()` in a `useState` initialiser. It gets its own `fix/` branch.
+  - **F-03, minor:** M-01, `openTeam()` in a `useState` initialiser. Fixed on 2026-11-21 on `fix/team-forms-render-updates` (see the last section).
 
 ## Fix of 2026-11-20 · The keyboard no longer hides the focused field of a form (F-01, RF-076)
 
@@ -623,3 +623,46 @@ maestro --device <android-device> test e2e/us2-match-and-call-up.yaml
 - Not checked: a real phone, scaled-up system fonts, an Android tablet, a Spanish-configured device.
 - F-A3 (a link lost right after the launch on Android) is still open; `us4-warnings` is not run on Android; T060, T057, T061 and T092 stay unticked.
 - Codex found 0 blocking findings, two important and one minor; the three are fixed in this branch (`review.md`).
+
+## Fix of 2026-11-21 · The team screens no longer update the shared store while rendering (F-03, M-01)
+
+Branch `fix/team-forms-render-updates`, small change, form approved by Fernando on 2026-11-21 (`small-change-form-team-forms-render-updates.md`). One commit holds the code and its tests (`723f84c`).
+
+### What was done and what changes for the user
+
+Nothing changes on screen. In development, opening the edit-team form or the new-player form over the team screen made React print «Cannot update a component (`TeamScreen`) while rendering a different component». The three team routes opened their team in the shared store from inside a render, and a render must not update another component. Now they open it from the route's focus effect.
+
+### How: files and new pieces
+
+| Piece                                                                      | What it does                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/ui/use-open-route-team.ts` (new)                                      | The hook `useOpenRouteTeam(id, store, mode)`: opens the team from `useFocusEffect` and returns `ready` once it has. `"every-focus"` (the team screen) opens it on every focus; `"if-another"` (the two forms) on the first focus and later only when the store holds another team. |
+| `edit.tsx`, `players/new.tsx`, `index.tsx` under `src/app/teams/[teamId]/` | Use the hook instead of the `useState` initialiser; they draw nothing until it is ready, then keep the same guards (an unknown team shows «No se ha encontrado»).                                                                                                                  |
+| `tests/app/team-forms.render-updates.test.tsx` (new)                       | Five tests; three read the React warning from `console.error` and failed before.                                                                                                                                                                                                   |
+
+### Why: decisions along the way
+
+- **Why the initialiser existed.** So that a team left in the store by an earlier screen was never shown, nor received a player. The hook keeps that promise differently: the route draws nothing until its own team is open.
+- **Why not just remove it.** The first frame would show «No se ha encontrado» on every open. Drawing nothing for one frame is the smaller evil.
+- **A regression caught by a test.** The first version of the hook did not read the team again on the first focus of a form, so a team deleted since its last edit was still shown; an existing test failed and the hook now always reads on the first focus.
+- **Discarded.** Moving the opening into the store (`squad-store.ts`): it makes a timing problem of the screens part of the state layer.
+
+### To learn, with the real code
+
+- **A render must be pure:** `useStore(store, …)` subscribes a component to the store; a store update made while another component renders reaches the first one in the middle of that render, and React warns. Effects (`useFocusEffect`, `useEffect`) run after the render, which is where such updates belong.
+- **`useFocusEffect(useCallback(…))`:** runs when the screen is focused, including on the first time and every time it comes back after another screen over it is closed; the callback must be stable (`useCallback`), or it runs again on every render.
+- **Testing a warning:** `jest.spyOn(console, "error")` and a filter on the message, since React reports these problems as `console.error` and the test would otherwise pass in silence.
+
+### To check it
+
+```bash
+npm run verify
+npx jest tests/app/team-forms.render-updates
+```
+
+- **Android or iPhone:** open a team, then «Editar» and «Nuevo jugador», and go back: the screens show the same data as before and no «No se ha encontrado» appears for a moment.
+
+### Pending
+
+- Not checked: iOS (neither simulator nor device), a real Android device, and the first, empty frame of each route on a slow device.
+- Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
