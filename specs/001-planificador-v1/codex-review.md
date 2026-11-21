@@ -13,14 +13,14 @@ Reviewed `git diff origin/main...HEAD` at `0c97c20`.
 
 **Concrete fix:** update the table to describe both final suites and the six demonstrated regression failures.
 
-| Review category | Result |
-|---|---|
-| RF/E implementation and scope | No new findings. RF-083/F-02 is addressed; approved D3 functionality remains pending. |
-| Constitution, layers, conventions and glossary | No findings. |
-| Test integrity and effectiveness | No findings. The five adjusted assertions remove an irrelevant date constraint while preserving time checks. |
-| Security | No findings introduced: no runtime network calls, player-data logging, query changes, dependencies or permissions added. |
-| Explanation accuracy | MINOR finding above. |
-| Simplicity, clarity and efficiency | No findings. |
+| Review category                                | Result                                                                                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| RF/E implementation and scope                  | No new findings. RF-083/F-02 is addressed; approved D3 functionality remains pending.                                    |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                             |
+| Test integrity and effectiveness               | No findings. The five adjusted assertions remove an irrelevant date constraint while preserving time checks.             |
+| Security                                       | No findings introduced: no runtime network calls, player-data logging, query changes, dependencies or permissions added. |
+| Explanation accuracy                           | MINOR finding above.                                                                                                     |
+| Simplicity, clarity and efficiency             | No findings.                                                                                                             |
 
 Typecheck, lint, changed-file formatting, traceability and skipped-test checks passed. The 15 new tests passed with Jest cache writes disabled in memory; restoring the previous conversion triggered the six expected failures.
 
