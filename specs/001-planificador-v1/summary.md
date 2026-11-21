@@ -666,3 +666,41 @@ npx jest tests/app/team-forms.render-updates
 
 - Not checked: iOS (neither simulator nor device), a real Android device, and the first, empty frame of each route on a slow device.
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
+
+## Two osv-scanner exceptions removed · fix/osv-unused-exceptions (2026-11-21)
+
+Small change, form `small-change-form-osv-unused-exceptions.md`, approved by Fernando on 2026-11-21. One commit (`bf2c2fe`): `osv-scanner.toml` only.
+
+### What was done and what changes for the user
+
+Nothing changes in the app. `osv-scanner.toml` lists the known vulnerabilities of development tools that are accepted for now. Two of its entries, deepmerge and picomatch, were about advisories that their publisher **withdrew** (on 2026-11-16 and 2026-11-18), so they no longer matched anything, and every `npm run verify` warned about them. They are removed, and the header of the file is brought up to date. The seven that remain are still needed.
+
+### How: files and new pieces
+
+| Piece              | What it does                                                                                                                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `osv-scanner.toml` | Two `[[IgnoredVulns]]` blocks deleted (`GHSA-gcqx-w48m-w2h4`, `GHSA-fc5q-39xc-vjpf`); the header says the remaining exceptions are medium severity and were approved on 2026-11-10 and 2026-11-13. |
+
+### Why: decisions along the way
+
+- **Why remove them.** An exception that matches nothing still looks like an accepted risk; `docs/security.md` says that without reason, expiry and approval there is no exception, and an unused entry has none of them in force. If an advisory for the same package comes back, it will have a new id and the scan will fail until it is looked at.
+- **Evidence.** The advisory database (`api.osv.dev`) marks both as «Withdrawn Advisory» with their withdrawal dates; the scan ends with «No issues found»; the installed versions did not change.
+- **Security review.** `AGENTS.md` asks for the Security role when configuration changes; it found nothing (`review.md`).
+
+### To learn, with the real code
+
+- **`ignoreUntil`:** the field of an `[[IgnoredVulns]]` entry that gives the day the exception stops applying; `scripts/check-npm-audit.mjs` reads the same entries, so one list covers `osv-scanner` and `npm audit`.
+- **«Unused ignores»:** osv-scanner prints it when an exception names an id that the scan did not need; it is the signal that an entry can go.
+
+### To check it
+
+```bash
+osv-scanner scan source --lockfile=package-lock.json
+npm run verify
+```
+
+The first must end with «No issues found» and no «unused ignores» line.
+
+### Pending
+
+- `osv-scanner.toml` still uses `ignoreUntil`, which osv-scanner reports as deprecated in favour of `effectiveUntil`; migrating it also changes `scripts/check-npm-audit.mjs` (line 20), so it is its own small change.

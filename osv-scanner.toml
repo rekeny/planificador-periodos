@@ -1,11 +1,6 @@
 # OSV-Scanner exceptions (docs/security.md, "Exceptions").
-# Each one has a reason, an expiry of 90 days at most and Fernando's approval (2026-11-10, 2026-11-13 and 2026-11-17).
-# All are medium severity, except the picomatch one (high), and come from development and build tools (Expo CLI, Jest, ESLint, Stryker, drizzle-kit).
-
-[[IgnoredVulns]]
-id = "GHSA-gcqx-w48m-w2h4"
-ignoreUntil = 2027-02-08T00:00:00Z
-reason = "deepmerge 4.3.1, indirect from jest-config (development only); no fixed version. Approved by Fernando on 2026-11-10."
+# Each one has a reason, an expiry of 90 days at most and Fernando's approval (2026-11-10 and 2026-11-13).
+# All are medium severity and come from development and build tools (Expo CLI, Jest, ESLint, Stryker, drizzle-kit).
 
 [[IgnoredVulns]]
 id = "GHSA-3g3m-2fjr-6pw4"
@@ -41,8 +36,3 @@ reason = "qs 6.15.1, indirect from Stryker (development only). Approved by Ferna
 id = "GHSA-67mh-4wv8-2f99"
 ignoreUntil = 2027-02-10T00:00:00Z
 reason = "esbuild 0.18.20, indirect from drizzle-kit via the deprecated @esbuild-kit/esm-loader (development only, never in the app: npm ls --omit=dev is empty). The advisory is a CORS issue of esbuild's dev server (serve), which neither drizzle-kit nor the loader use; the fix needs esbuild 0.25, which drizzle-kit's own dependency already uses. Approved by Fernando on 2026-11-13."
-
-[[IgnoredVulns]]
-id = "GHSA-fc5q-39xc-vjpf"
-ignoreUntil = 2027-02-15T00:00:00Z
-reason = "picomatch 2.3.2 and 4.0.7, indirect from Metro, Expo CLI and Jest (build and test tools only); ReDoS, no fixed version. Approved by Fernando on 2026-11-17."
