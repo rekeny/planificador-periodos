@@ -485,7 +485,7 @@ maestro --device <android-device> test e2e/us1-teams-and-players.yaml
 ### Pending
 
 - **F-A1, Android keyboard:** fixed on 2026-11-21 on `fix/android-keyboard-offset` (see the last section).
-- **F-A2, Android grid:** after removing the last overtime, the grid stays scrolled and the P1 and P2 columns cannot be reached until the match is reopened.
+- **F-A2, Android grid:** fixed on 2026-11-21 on `fix/android-grid-scroll` (see the last section).
 - **F-A3, Android links:** a link sent right after the launch is lost.
 - `us4-warnings` is not run on Android (a tablet flow; no tablet emulator). Of the Maestro tasks, T036 is ticked; T048, T056 and T060 stay unticked.
 
@@ -530,5 +530,49 @@ npm run verify
 
 - Not checked: «Guardar» in landscape, the Android tablet, a real device, a keyboard other than Gboard, and the team and player forms.
 - `us2-match-and-call-up` on Android stops at the 500-character notes (Maestro's 120 s limit when typing); it needs the text in chunks.
-- F-A2 (the grid stuck after the last overtime is removed) and F-A3 (a link lost right after the launch) are still open.
+- F-A2 (the grid stuck after the last overtime is removed) was fixed on 2026-11-21 (last section); F-A3 (a link lost right after the launch) is still open.
+- Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
+
+## Fix of 2026-11-21 · The grid no longer stays scrolled after the last overtime is removed (F-A2, RF-076)
+
+Branch `fix/android-grid-scroll`, small change, form approved by Fernando on 2026-11-21 (`small-change-form-android-grid-scroll.md`). One commit holds the code and its tests (`2d9888f`).
+
+### What was done and what changes for the user
+
+On an Android phone, with overtimes the grid scrolls sideways. If the coach marked a cell in an overtime and then removed the overtimes, the grid stayed scrolled to the right: the first columns (P1, P2) sat behind the player column and could not be reached until the match was reopened. Now the grid goes back to where it can be, with every column in reach.
+
+### How: files and new pieces
+
+| Piece                                    | What it does                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/ui/grid/match-grid.tsx`             | New hook `useOffsetInRange`: the horizontal `ScrollView` reports its offset (`onScroll`); the largest offset is `max(0, columns × cell width − (viewport width − player column))`. When that value falls below the current offset, the grid scrolls to it without animation. With the columns fitting it is 0. `HeaderRow` is the header row taken out of `MatchGrid` to keep the function under the lint limit. |
+| `src/ui/grid/match-grid.offset.test.tsx` | Six tests of the cases above.                                                                                                                                                                                                                                                                                                                                                                                    |
+
+### Why: decisions along the way
+
+- **The cause.** With 9 columns of at least 44 pt on a 411 pt phone, the columns do not fit and the horizontal scroll is on. After removing the overtimes they fit, `scrollEnabled` becomes false, and Android does not bring the old offset back into range: the coach cannot, either, with the scroll off. iOS does not show it.
+- **Why bring the offset back, and not reset it.** Removing one overtime of three only needs the grid to go to the new end; a reset to 0 would also move a coach who was looking at the right place. A `key` that changes with the columns was discarded for the same reason, because it remounts the scroll on every change.
+- **No platform check.** The code does nothing while the offset is in range, so it is the same on both platforms.
+
+### To learn, with the real code
+
+- **`ScrollView` offsets:** `onScroll` gives `event.nativeEvent.contentOffset.x`, and the ref's `scrollTo({ x, animated: false })` moves it; `scrollEnabled={false}` stops only the touch, not `scrollTo`.
+- **`useEffect` with a derived value:** the effect depends on `largest`, so it runs only when the limit changes, not on every render.
+- **Testing a scroll:** the test sends a scroll event, rerenders with fewer overtimes (`screen.rerender`) and reads the `scrollTo` calls of the ScrollView mock, which shares one `scrollTo` between tests, so each test clears it first.
+
+### To check it
+
+```bash
+npm run verify
+maestro --device <android-device> test e2e/us3-planning.yaml
+```
+
+- **Android phone, 6 periods:** open a match, add three overtimes, mark a cell in PR1, remove the overtimes (confirm). P1 to P6 are in place and the first cell can be tapped.
+
+### Pending
+
+- The changed code has not been tested on iOS (the iPhone run used the build from before this change).
+- Not checked: the Android tablet, a real device, landscape.
+- `us2-match-and-call-up` on Android stops at the 500-character notes (Maestro's 120 s limit when typing); F-A3 (a link lost right after the launch) is still open; `us4-warnings` is not run on Android.
+- T056 is ticked (both of its flows pass on both platforms); T048 and T060 stay unticked.
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
