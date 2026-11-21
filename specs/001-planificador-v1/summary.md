@@ -330,7 +330,7 @@ Known D2 limits (stated in the spec and tasks, not bugs to fix now):
 
 Not done or not verified:
 
-- **Maestro: run on iOS simulators on 2026-11-20, not on Android.** The six flows pass on an iPhone 17 simulator (five of them) and an iPad Pro 11-inch in landscape (`us4-warnings`), with iOS 27.2 and Maestro 2.12.1; the details are in `review.md` and in `small-change-maestro-ios-flows.md`. On iOS the time of the match form is only checked up to «12:00» (decision of Fernando, 2026-11-20). NOT run: Android, iPad in portrait, iPhone in landscape. Before that run the flows had been written but not run. T036, T048, T056 and T060 are unticked in `tasks.md` (flows written, not run) until their Maestro runs are recorded: those four tasks are NOT done (Codex F5). T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked too.
+- **Maestro: run on iOS simulators on 2026-11-20, not on Android.** The six flows pass on an iPhone 17 simulator (five of them) and an iPad Pro 11-inch in landscape (`us4-warnings`), with iOS 27.2 and Maestro 2.12.1; the details are in `review.md` and in `small-change-maestro-ios-flows.md`. On iOS the time of the match form is only checked up to «12:00» (decision of Fernando, 2026-11-20). NOT run (on 2026-11-20): Android, iPad in portrait, iPhone in landscape. Before that run the flows had been written but not run. **Update 2026-11-21:** the first Android run is in the last section of this file. T036, T048, T056 and T060 are unticked in `tasks.md` (flows written, not run) until their Maestro runs are recorded: those four tasks are NOT done (Codex F5). T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked too.
 - **CI has not run yet** on this branch. The first full Stryker run on CI (about 25 minutes) and the incremental runs, with whether the cache was restored, are still to be recorded in `review.md`. A note: `tests/support/` and `tests/setup/` are part of the cache key, so changes there force a full run.
 - **Deviations:** FK columns NOT NULL, and the picker files (iOS inline, Android dialog) were approved by Fernando on 2026-11-14 and are recorded in `plan.md` "Deviations", with the later ones up to 2026-11-15.
 - **Security:** SEC-D2-1 (unused Android permissions) is done in T088 (`android.blockedPermissions`; `INTERNET` only for `APP_VARIANT=production`; the release needs an `eas.json` profile that sets it and a check with `aapt dump permissions`, listed in `docs/security.md`). SEC-D2-3 (the silent failure to open the database) is done in T087 (message and «Reintentar»). Still open for the release: SEC-D2-7 (the INTERNET block fails open if `APP_VARIANT` is forgotten), the dark-mode look of the failure message (SEC-D2-9) and the iOS `xattr` check.
@@ -393,7 +393,7 @@ npm run verify
 ### Pending
 
 - Fernando's checks on iPhone and Android, and the merge (T092).
-- The Maestro flow was updated on 2026-11-18 and run on an iPhone 17 simulator on 2026-11-20: its iOS «12:00» check passes. Its Android «Aceptar» tap is still unverified (no Android run yet).
+- The Maestro flow was updated on 2026-11-18 and run on an iPhone 17 simulator on 2026-11-20: its iOS «12:00» check passes. Its Android date and time steps were run on 2026-11-21 on an emulator and work (18:30 chosen with «Aceptar»); the rest of that flow stops earlier on Android because of a problem of the app (last section).
 - The match details half of E-032 is in T072 and T073 (D3).
 - Codex found 0 blocking findings. Its other three findings are in code this branch does not change, and Fernando accepted them as pending on 2026-11-18:
   - **F-01, important:** the keyboard offset in `form-scroll.tsx`; «Guardar» may stay partly hidden on an iPhone in landscape. Fixed on 2026-11-20 on `fix/form-keyboard-offset` (see the last section).
@@ -444,3 +444,47 @@ npm run verify
 - Not checked: Android, the iPad and a real device. The team and player forms share the component but were not opened on the simulator.
 - Rotating the device with the keyboard open does not scroll again until another field gets the focus.
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`, «Verification and Codex review · fix/form-keyboard-offset, F-01»).
+
+## Maestro on Android · fix/maestro-android-flows (2026-11-21)
+
+Small change, form `small-change-maestro-android-flows.md` approved by Fernando on 2026-11-20. No change in `src/`.
+
+### What was done and what changes for the user
+
+The Maestro flows were run for the first time on an Android phone emulator (Android 17, 1080x2400, English, Release build). Nothing changes in the app for the coach. What changes is what we know: three flows now pass on Android, and the other two stopped at two real problems of the Android app, which the flows found.
+
+### How: files and new pieces
+
+| Piece                                                              | What it does                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `e2e/us2-match-and-call-up.yaml`                                   | On Android it opens the date dialog with «Fecha», goes back to March 2026 with the dialog's «previous month» button, taps March 1 by its label and closes with «Aceptar». The time uses the dial's own labels («18 hours», «30 minutes», or their Spanish forms). |
+| `e2e/subflows/commit-typed-text.yaml` (new)                        | On Android only, hides the keyboard before each check that a character over the limit is not shown.                                                                                                                                                               |
+| `e2e/us1-teams-and-players.yaml`, `e2e/us2-match-and-call-up.yaml` | Call that subflow before the «not visible» checks of the 41st character and of «100» and «1234».                                                                                                                                                                  |
+| `e2e/us3-interruption.yaml`                                        | Waits for the list of teams before the three links to match 99, abc and 01.                                                                                                                                                                                       |
+| `tests/e2e/*`, `tests/support/e2e-flows.ts`                        | The static checks follow the new steps; a new one checks the Android date branch.                                                                                                                                                                                 |
+
+### Why: decisions along the way
+
+- **Gboard's suggestion strip.** While you type, the keyboard shows the word in its strip and Maestro counts it as visible, so «the 41st character is not shown» failed although the field held 40. Waiting did not help (the strip stays while the word is being composed). Hiding the keyboard ends the word. It is only done on Android: on iOS `hideKeyboard` can close the whole form.
+- **Links right after the launch.** On Android a link that arrives about a second after `launchApp` is lost (the list of teams shows). A link that is the launch itself, or one sent to a running app, works. The flow waits for the list; a coach opening a link from another app is the second case.
+- **No workaround for the app's problems.** The two flows that stop at a problem of the app are left failing on Android on purpose; a workaround would hide the problem.
+
+### To learn, with the real code
+
+- **Material date dialog:** its month and day names follow the device language, so the flow matches both: `"(?i).*(march 1, 2026|1 de marzo de 2026).*"`.
+- **Accessibility labels as selectors:** `tapOn` matches the label that Android exposes, such as «18 hours» or «Ana, P1: casilla vacía».
+- **Reading why an assertion fails:** Maestro saves the screen tree of each step in `~/.maestro/tests/<run>/…/screen-hierarchy/`, where the keyboard's strip showed up as an element with the typed word.
+
+### To check it
+
+```bash
+npm run verify
+maestro --device <android-device> test e2e/us1-teams-and-players.yaml
+```
+
+### Pending
+
+- **F-A1, Android keyboard:** the focused field stays under the keyboard in the match form («Notas», the score fields). F-01 (PR 10) was only fixed on iOS.
+- **F-A2, Android grid:** after removing the last overtime, the grid stays scrolled and the P1 and P2 columns cannot be reached until the match is reopened.
+- **F-A3, Android links:** a link sent right after the launch is lost.
+- `us4-warnings` is not run on Android (a tablet flow; no tablet emulator). T037 to T060 stay unticked except T036.
