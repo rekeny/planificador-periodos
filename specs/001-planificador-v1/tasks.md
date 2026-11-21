@@ -1016,6 +1016,7 @@ Added on 2026-11-14, after the Codex rounds, from the Security audit of D2 (`rev
     - Interruptions: a Stryker run that is killed halfway is repeated from the full local command (the incremental file is rebuilt), never trusted.
     - Mistakes: `summary.md` states the four known D2 limits under "Pending"; Codex checks that the explanations match what was done.
   - Pending: the Planner reviews D3 with the lessons of D2 before it starts (including the slice files of the session store, `plan.md` "State").
+  - Progress on 2026-11-21 (branch `docs/t061-d2-close`): done and recorded in `review.md`: the full local Stryker run (353 s; 28 s incremental; 94.78 %), the CI times, the classification of the 27 survivors, and the Security review (no blocking finding). Still open, so T061 stays unticked: the device checks (T057, T092), the iPad 100 ms measurement and the `us4-warnings` run on a tablet (T060), the iOS `xattr` check on a physical device, the Android E-028 test (the D2 PR was already merged on 2026-11-17 as `3e64306`; the device checks that remain are Fernando's).
 
 # Change of 2026-11-18 · Time field without a time (RF-083)
 
