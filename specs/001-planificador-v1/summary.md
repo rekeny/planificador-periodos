@@ -715,11 +715,13 @@ On the day the clocks go forward (in Spain, Sunday 29 March 2026) the hour from 
 
 ### How: files and new pieces
 
-| Piece                                                | What it does                                                                                                                                                                                |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `date-time-field-shared.ts`                          | New `toLocalTime(time)`: the `Date` for the time picker, built on a fixed reference day (15 January 2001), noon when there is no time. `toLocalDate(date, time)` stays for the date picker. |
-| `date-time-field.tsx`, `date-time-field-android.tsx` | The iOS inline time picker and the Android dialog in time mode get `toLocalTime(time)`; the date picker is as before.                                                                       |
-| `date-time-field.dst.test.tsx` (new)                 | Eleven tests under five time zones; eight failed before.                                                                                                                                    |
+| Piece                                                | What it does                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `date-time-field-shared.ts`                          | New `toLocalTime(time)`: the `Date` for the time picker, built on a fixed reference day (15 January 2001), noon when there is no time. `toLocalDate(date, time)` stays for the date picker.                                                                   |
+| `date-time-field.tsx`, `date-time-field-android.tsx` | The iOS inline time picker and the Android dialog in time mode get `toLocalTime(time)`; the date picker is as before.                                                                                                                                         |
+| `date-time-field.dst.test.tsx` (new)                 | Nine tests in Europe/Madrid on iOS and on Android, driven through a parent that keeps the draft; six of them fail with the old conversion put back.                                                                                                           |
+| `date-time-field.zones.test.ts` (new)                | Six tests: the real helpers run in five child Node processes, each started with its own `TZ` (Madrid, New York, Sydney, Lord Howe, UTC), reading back the zone it used and checking every time of the day; plus a check that the suite itself runs in Madrid. |
+| `tests/setup/time-zone.js`, `jest.config.js`         | A Jest `globalSetup` that puts the whole suite in `Europe/Madrid`.                                                                                                                                                                                            |
 
 ### Why: decisions along the way
 
