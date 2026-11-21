@@ -1096,3 +1096,16 @@ On the first Android run only `us1-form-interruption` passed. The flow problems 
 **What this run does NOT cover:** `us4-warnings` on Android, Android in landscape, a real Android device, other Android versions, a device in Spanish (the date dialog showed English names), and the iPad. `us3-planning` and `us2-match-and-call-up` cannot finish on Android until F-A2 and F-A1 are fixed.
 
 **Tasks:** T036 is ticked (both of its flows pass on iOS and Android). T048, T056 and T060 stay unticked.
+
+## Codex review · fix/maestro-android-flows (2026-11-21)
+
+Run: `scripts/review.sh specs/001-planificador-v1 origin/main` at commit `6dad746`. Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** 0 BLOCKING, 1 IMPORTANT, 1 MINOR. No blocking finding, so the phase 8 gate is met.
+
+| #   | Finding                                                                                                                                                                          | Decision                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **IMPORTANT. The Spanish Android date selector cannot match:** the flow taps `mes anterior`, but Material3 exposes «Cambiar al mes anterior» and Maestro matches the whole text. | Fixed in this branch: the selector is `(?i)change to previous month\|cambiar al mes anterior` in the flow and in `NATIVE_PICKER_TEXTS`, and a new test matches every native label (previous month, March 1, 18 hours, 30 minutes) in English and Spanish against the whole text; it fails with the old selector. Not run on a Spanish-configured Android (the emulator is in English). |
+| 2   | **MINOR. `summary.md` says T037 to T060 stay unticked and line 333 still describes T036 as unticked.**                                                                           | Fixed in this branch: the Maestro tasks are listed explicitly (T036 ticked, T048, T056 and T060 not).                                                                                                                                                                                                                                                                                  |
+
+Codex's other category results: no scope violation, no constitution, layer or glossary finding, no test deleted or skipped, no security finding, no simplicity finding. Codex did not rerun Maestro or the full verification.

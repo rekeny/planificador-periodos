@@ -243,7 +243,7 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
           while:
             notVisible: "(?i).*mar.* 2026.*"
           commands:
-            - tapOn: "(?i)change to previous month|mes anterior"
+            - tapOn: "(?i)change to previous month|cambiar al mes anterior"
       - tapOn: "(?i).*(march 1, 2026|1 de marzo de 2026).*"
       - tapOn: "Aceptar"
 - runFlow:

@@ -53,6 +53,36 @@ describe("T091 Maestro US2 flow, the time field without a time (RF-083, E-032, E
     expect(all).not.toContain("- swipe:");
   });
 
+  it("RF-083 E-032: the Android picker selectors match the whole label of the English and the Spanish dialogs (Maestro matches the full text)", () => {
+    const selector = (line: string): RegExp => {
+      const pattern = /- tapOn: "\(\?i\)(.+)"/.exec(line)?.[1] ?? "";
+      return new RegExp(`^(?:${pattern})$`, "i");
+    };
+    const all = lines();
+    const tap = (pattern: string): string => {
+      const line = all.find((entry) => entry.includes(pattern)) ?? "";
+      expect(line).not.toBe("");
+      return line;
+    };
+    const labels: [string, string[]][] = [
+      [
+        "previous month",
+        ["Change to previous month", "Cambiar al mes anterior"],
+      ],
+      [
+        "march 1, 2026",
+        ["Sunday, March 1, 2026", "domingo, 1 de marzo de 2026"],
+      ],
+      ["18 hours", ["18 hours", "18 horas"]],
+      ["30 minutes", ["30 minutes", "30 minutos"]],
+    ];
+    for (const [needle, names] of labels) {
+      for (const name of names) {
+        expect(selector(tap(needle)).test(name)).toBe(true);
+      }
+    }
+  });
+
   it("RF-083 E-033: the flow name carries E-033", () => {
     const name = headerValue(readFlow(US2_FILE), "name") ?? "";
     expect(idsIn(name)).toContain("E-033");

@@ -199,7 +199,7 @@ export const NATIVE_PICKER_TEXTS: readonly string[] = [
   "(?i)18 hours?|18 horas?",
   "(?i)30 minutes?|30 minutos?",
   "(?i)previous.*|anterior.*",
-  "(?i)change to previous month|mes anterior",
+  "(?i)change to previous month|cambiar al mes anterior",
   "(?i).*(march 1, 2026|1 de marzo de 2026).*",
   "(?i)date picker|selector de fecha",
 ];
