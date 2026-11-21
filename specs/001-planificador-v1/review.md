@@ -1089,7 +1089,7 @@ On the first Android run only `us1-form-interruption` passed. The flow problems 
 **Findings about the app, outside this change** (their own branches):
 
 - **F-A1 · IMPORTANT · Android keyboard covers the focused field.** Match form: after `scrollUntilVisible` of «Notas», a tap on «Notas» or on a score field opens the keyboard and the form does not scroll: the field and what is typed are under the keyboard (screenshot checked; typed «hola notas» in «Notas» and it is not visible). This is the problem of F-01 (fixed in PR 10 only for iOS: `automaticallyAdjustKeyboardInsets` is iOS only and Android keeps `behavior="height"`). RF-076. **Fixed on `fix/android-keyboard-offset` (2026-11-21); see the last section.**
-- **F-A2 · IMPORTANT · Android grid stuck after removing the last overtime.** A mark in PR1 scrolls the grid sideways; removing the overtime leaves it scrolled, so P1 and P2 are behind the name column and a swipe does not bring them back. The cells are in the accessibility tree but off screen. RF-042, RF-057.
+- **F-A2 · IMPORTANT · Android grid stuck after removing the last overtime.** A mark in PR1 scrolls the grid sideways; removing the overtime leaves it scrolled, so P1 and P2 are behind the name column and a swipe does not bring them back. The cells are in the accessibility tree but off screen. RF-042, RF-057. **Fixed on `fix/android-grid-scroll` (2026-11-21); see the last section.**
 - **F-A3 · MINOR · Android link lost right after the launch.** `launchApp` then `openLink` of `planificadorperiodos://matches/99` ends on the list of teams, with no «No se ha encontrado». The same link as the launch intent (`am start` on a stopped app) or to a running app works.
 - Also seen: on a phone the warning strip is bounded and shows only its first banner (known, RF-080), which is why `us4-warnings` needs a tablet.
 
@@ -1137,3 +1137,32 @@ Form: `small-change-form-android-keyboard.md` (approved by Fernando, 2026-11-21)
 | 1   | **IMPORTANT. The verification and the emulator results are not in `review.md`, and `summary.md` still lists F-A1 as pending.** | Fixed in this branch: this section records them (portrait, landscape, changing fields with the keyboard open, reaching «Guardar») and `summary.md` has the after explanation. Reaching «Guardar» in landscape is the one check not done. |
 
 Codex's other category results: no scope, constitution, layer or glossary finding, no test deleted, skipped or weakened (three new tests fail against the previous component), no security finding, no simplicity finding. Codex did not independently confirm the full verification or the native behaviour.
+
+## Verification and Codex review · fix/android-grid-scroll, F-A2 (2026-11-21)
+
+Form: `small-change-form-android-grid-scroll.md` (approved by Fernando, 2026-11-21). Fix at commit `2d9888f`: `src/ui/grid/match-grid.tsx` and `src/ui/grid/match-grid.offset.test.tsx`. This fixes F-A2 of the Maestro run on Android.
+
+**Verification:** `npm run verify` on `2d9888f`: 3182 tests, "20/20 checks passed", "All checks passed", exit code 0. Mutation testing did not run: nothing in `src/domain/` changed. The lint rule of 60 lines per function made `HeaderRow` a separate component in `match-grid.tsx`; its output is unchanged.
+
+**Tests:** six new tests in `src/ui/grid/match-grid.offset.test.tsx`. Two failed before the change for the right reasons (no scroll back when every overtime is removed from the right end, none when one of three is removed) and pass after it. The other four pass before and after, to keep those cases as they were: an offset still in range does not move, a grid never scrolled does not scroll, adding an overtime does not move it, and nothing happens before the container has measured its size. They give the grid a scroll event and a measured viewport (411 pt wide) and read the `scrollTo` it asks for: they do not prove real scroll geometry.
+
+**Android emulator (the real proof):** Android 17 emulator `Medium_Phone_API_37.0`, Release build (arm64) of the fix.
+
+- Before the change (reproduced twice on 2026-11-21): after removing the overtimes the grid showed P3 to P6 about 220 px to the left of where they belong, and `us3-planning` stopped at «Ana, P1: casilla vacía».
+- After: `us3-planning` passes to the end (208 steps, no failed step), including the overtimes, the confirmation with marks, the tap on «Ana, P1: casilla vacía» that stopped it and the rest of the journey.
+
+**iPhone 17 simulator (iOS 27.2):** `us3-planning` passes (204 steps). That run used the app **built before this change** (the Release build of 2026-11-20), where the problem does not occur, so it shows that the flow still passes on iOS and nothing more. **The changed grid code has not been tested on iOS**: a new iOS build did not fit in the free disk. It does nothing when the offset is in range, which is the case on iOS, but that is reasoning and not a test.
+
+**What this does NOT cover:** the changed code on iOS, the Android tablet, a real Android device, landscape, and the whole of `us3-planning` on a build of both platforms from the same commit.
+
+**Codex run:** `scripts/review.sh specs/001-planificador-v1 origin/main` on `2d9888f`. Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** 0 BLOCKING, 1 IMPORTANT, 0 MINOR. No blocking finding, so the phase 8 gate is met.
+
+| #   | Finding                                                                                                                                                                                                                  | Decision                                                                                                                                                                                                                                                                                                                            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **IMPORTANT. The verification records are missing, the form claimed an iOS recheck although the iPhone ran the build from before the change, and `summary.md`, `review.md` and `tasks.md` still describe F-A2 as open.** | Fixed in this branch: this section records the verification, the builds and the Maestro results; the form now says the iOS run used the previous build and that the changed code is not verified on iOS; `summary.md` has the after explanation; F-A2 and T056 are updated, and T056 is ticked (both flows pass on both platforms). |
+
+Codex's other category results: no scope, constitution, layer or glossary finding, no test deleted, skipped or weakened, no security finding, no simplicity finding. Codex could not run Jest (its environment cannot write the cache), and did not confirm the full verification or the native behaviour.
+
+**Tasks:** T056 is ticked. T048 and T060 stay unticked.
