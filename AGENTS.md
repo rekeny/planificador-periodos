@@ -132,6 +132,7 @@ Codex checks during the review that the explanations match what was really done.
 - **Commits:** one per task, such as `T012 RF-018: highlight periods in light red`. If the task has no requirement: `T001: description`.
 - **`main` is protected:** merges only through a PR with the GitHub Actions verification green. Every PR uses the template `.github/pull_request_template.md`.
 - **Merging:** PRs are merged with a merge commit, to keep the commits of each task.
+- **After opening a PR:** the PR's CI is watched from the moment it is opened (decision of Fernando, 2026-11-21), without asking. The watcher reports a red CI, a conflict or a comment, but not a green CI, so while a PR is open its state is read at the start of every turn. As soon as the CI is seen green, the developer is asked once whether to merge, and nobody merges before their yes: a green CI is not a yes.
 
 ## Verification and review
 
