@@ -1402,9 +1402,9 @@ Branch `docs/t061-d2-close`, from `main` at `b8a57c5`. No code changed. This sec
 | Run                                                      | Command                                                                                    | Time                   | Result                                                                              |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------- |
 | Full (every mutant, no incremental file, fresh checkout) | `npx stryker run --incremental --incrementalFile reports/stryker-incremental.json --force` | **353 s (5 min 53 s)** | 804 mutants: 470 killed, 20 timed out, 27 survived, 0 without coverage; **94.78 %** |
-| Incremental, right after the full run                    | the same command without `--force`                                                         | **28 s**               | Same result; the 804 mutants came from the file, none run again                     |
+| Incremental, right after the full run                    | the same command without `--force`                                                         | **28 s**               | Same result; 789 of the 804 results came from the file and 15 were run again        |
 
-`ios/` and `android/` did not exist in this worktree (fresh checkout), so Stryker did not fail copying `ios/Pods`. The score (94.78 %, threshold 80 %) and the survivor count (27) are the same as in the D1 run and in the verification of 2026-11-13.
+`ios/` and `android/` did not exist in this worktree (fresh checkout), so Stryker did not fail copying `ios/Pods`. The score (94.78 %, threshold 80 %) and the survivor count (27) are the same as in the verification of 2026-11-13; the D1 run recorded 93.89 % with the same 27 survivors.
 
 ### CI runs (GitHub Actions, workflow `verify`, from `gh run list`)
 
@@ -1450,3 +1450,19 @@ The Stryker clear-text output lists them; every one was read against the code. N
 ### Open decision
 
 - Add the one-line test for `column.ts:48` (and tests passing a cell outside the grid to `markSub` and `removeMark`) to reach 100 % on these files? It would raise the score by about 0.4 points and change nothing in the app. Recommended: no; the survivors are documented and the threshold is met with margin.
+
+## Codex review · docs/t061-d2-close (2026-11-21)
+
+Run: `scripts/review.sh specs/001-planificador-v1 origin/main` at commit `447a8a6`. **All three minor findings were fixed in the next commit** (reuse count 789 and 15, the two scores told apart, the merged PR recorded as merged). Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** 0 BLOCKING, 0 IMPORTANT, 3 MINOR. No blocking finding, so the phase 8 gate is met.
+
+| #   | Finding                                                                                                                                                                                                                                                       | Decision                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 1   | **MINOR. Incorrect cache reuse count:** the incremental log reports 789 of 804 results reused, which contradicts "804 … none run again" in the Mutation testing section (review.md:1405). Fix: record 789 reused and 15 not reused.                           | Pending: not fixed in this review. Recorded for the orchestrator. |
+| 2   | **MINOR. Incorrect D1 score comparison:** D1 recorded 93.89 %, whereas this run reached 94.78 % (review.md:1407). Only the survivor count, 27, matches. Fix: distinguish the two scores and keep the matching comparison with the 2026-11-13 D2 verification. | Pending: not fixed in this review. Recorded for the orchestrator. |
+| 3   | **MINOR. Already merged PR listed as pending:** D2 PR #5 was merged on 2026-11-17 as `3e64306`, but summary.md (line 753) and tasks.md (line 1019) list it as pending. Fix: record the merge as completed and keep the outstanding device checks pending.     | Pending: not fixed in this review. Recorded for the orchestrator. |
+
+Codex's category results: 1. requirements, examples and scope: no new findings; 11 RFs assigned to the pending D3 still lack test names. 2. Constitution, layers, conventions and glossary: none introduced. 3. Test integrity: none introduced, no tests changed. 4. Security: none introduced; documented release checks remain pending. 5. Explanations and reports: the three MINOR findings above. 6. Simplicity, clarity and efficiency: no findings.
+
+Codex ran type checking, lint, formatting, focused and skipped test detection, traceability and `git diff --check`, all passing. It inspected the existing verification and Stryker logs but did not rerun full verification or device tests. It could not check the PR or CI status because GitHub was unreachable, so the CI figures were not independently confirmed by Codex.

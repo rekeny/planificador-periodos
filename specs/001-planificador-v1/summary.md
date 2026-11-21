@@ -750,7 +750,7 @@ TZ=UTC npx jest src/ui/date-time-field
 
 ## D2 close, part one · docs/t061-d2-close (2026-11-21)
 
-Documentation only; no code, no test and no dependency changed. T061 stays unticked: it still needs the device checks and Fernando's merge of the D2 PR.
+Documentation only; no code, no test and no dependency changed. T061 stays unticked: it still needs the device checks (the D2 PR, 001 D2: usable in a match, was merged on 2026-11-17 as `3e64306`).
 
 ### What was done and what changes for the user
 
