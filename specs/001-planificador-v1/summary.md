@@ -664,7 +664,7 @@ npx jest tests/app/team-forms.render-updates
 
 ### Pending
 
-- Not checked: iOS (neither simulator nor device), a real Android device, and the first, empty frame of each route on a slow device.
+- Not checked: a real Android device, and the first, empty frame of each route on a slow device. iOS: the team screens open and save on the iPhone 17 simulator (`us1-*` pass, 2026-11-21, `review.md`); no device.
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
 
 ## Two osv-scanner exceptions removed · fix/osv-unused-exceptions (2026-11-21)
@@ -745,5 +745,5 @@ TZ=UTC npx jest src/ui/date-time-field
 
 ### Pending
 
-- Not checked: iOS (neither simulator nor device), a real phone, and time zones outside the five of the tests.
+- Not checked: a real phone, time zones outside the five of the tests, and the change on iOS itself: the iPhone simulator runs the form without a failure (`us2-match-and-call-up`, 2026-11-21) but Maestro cannot pick a time on the iOS wheels, so the 29 March scenario was seen on Android only.
 - Codex's verdict is in `review.md`.

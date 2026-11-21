@@ -1270,3 +1270,29 @@ Form: `small-change-form-picker-dst-drift.md` (approved by Fernando, 2026-11-21)
 **Codex run:** `scripts/review.sh specs/001-planificador-v1 origin/main` on the commit that follows; its output is in [codex-review.md](codex-review.md) and its verdict is recorded below.
 
 **Codex runs of this branch.** First run, on `4f1d199`: 1 BLOCKING (the time-zone tests assigned `process.env.TZ` inside Jest, which does not change the zone `Date` uses, so they only passed in a machine in Spain and failed with the host in UTC) and 1 IMPORTANT (the date-change test never changed the component's date), both fixed in `0c97c20` as described under «Tests». Second run, on `0c97c20`: **no BLOCKING or IMPORTANT finding, one MINOR** (the table of tests in `summary.md` described the first version: eleven tests, eight failing); fixed in this branch. Codex confirmed that the 15 new tests pass and that putting the old conversion back makes six of them fail. Full output of the second run: [codex-review.md](codex-review.md). Codex could not run the whole suite or the CI; both pass in this repository (`npm run verify` with the host in UTC: 3211 tests, "All checks passed").
+
+## Maestro on iOS with the Release build of `main` · docs/ios-verification-2026-11-21 (2026-11-21)
+
+The changes of 2026-11-21 (F-A2 the grid after the last overtime, F-A4 the warning strip of a phone in portrait, F-03 the team screens, F-02 the time picker) had been tested on an Android emulator only, and each pull request listed iOS as not tested. This run closes that gap for what Maestro can see.
+
+- **Build:** `npx expo run:ios --configuration Release --device <iPhone 17> --no-bundler` on `main` at `3fc01a7` (the merge of the pull request of F-02, so it contains F-01 to F-04 and the Android fixes; the only later merge is documentation). The same `.app` was installed on the iPad simulator.
+- **Tools:** Maestro 2.12.1; iPhone 17 (`26CB0B49-2377-485C-A49E-798122576A27`) and iPad Pro 11-inch (M5) (`9507BB90-40DB-4B28-987F-5409E82EA72D`, rotated to landscape), both on iOS 27.2.
+
+| Flow                    | Device                      | Result            |
+| ----------------------- | --------------------------- | ----------------- |
+| `us1-teams-and-players` | iPhone 17, portrait         | passes, 124 steps |
+| `us1-form-interruption` | iPhone 17, portrait         | passes, 64 steps  |
+| `us2-match-and-call-up` | iPhone 17, portrait         | passes, 284 steps |
+| `us3-planning`          | iPhone 17, portrait         | passes, 204 steps |
+| `us3-interruption`      | iPhone 17, portrait         | passes, 100 steps |
+| `us4-warnings`          | iPad Pro 11-inch, landscape | passes, 357 steps |
+
+What these runs show for each change on iOS: the team screen, the edit-team and new-player forms open and save (F-03, `us1-*`); a match with overtimes and their removal, with the call-up and the grid reachable (F-A2, `us3-planning`); the banners and legend on a phone in portrait and a tablet in landscape (F-A4, `us2-match-and-call-up`, `us4-warnings`); and the time field of the match form (F-02, `us2-match-and-call-up`: on iOS the flow only asserts «12:00» after «Añadir hora»).
+
+**What this does NOT cover:**
+
+- **F-02 on iOS:** the flows never pick a time on a daylight-saving day, and the iOS time wheels are not visible to Maestro (decision of 2026-11-20), so the change of the inline time picker is only shown not to break the form. The 29 March scenario was checked on the Android emulator only.
+- The iPad in portrait, an iPhone in landscape, a real iPhone or iPad, the 100 ms repaint measurement of T060 (by hand on the 5th-generation iPad), and Android on a tablet emulator for `us4-warnings`.
+- **Disk:** to fit the free space, the iOS build cache of the project (`DerivedData`, 4.4 GB, regenerable) was deleted after the build, and the app was kept in a copy to install it on the iPad.
+
+**Tasks:** T060 stays unticked: its flow still has to pass on an Android tablet and the 100 ms measurement is still to be done by hand.
