@@ -1,11 +1,5 @@
-import {
-  Stack,
-  useFocusEffect,
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useCallback, useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
@@ -14,26 +8,11 @@ import { useStore } from "zustand";
 import { getSquadStore } from "@/state/app-stores";
 import { parseTeamId } from "@/state/route-params";
 import { NotFound } from "@/ui/not-found";
+import { useOpenRouteTeam } from "@/ui/use-open-route-team";
 import { DuplicateNumberBanner } from "@/ui/warnings/duplicate-number-banner";
 
-type Store = ReturnType<typeof getSquadStore>;
-
-// Opened before the first render reads the store, so another team's players never show, and
-// again on every focus: the screen stays mounted under the match, so players created there
-// (and their duplicate-number warning) show on Back (RF-035, RF-069).
-function useOpenTeam(id: number | null, store: Store): void {
-  useState(() => {
-    if (id !== null) store.getState().openTeam(id);
-  });
-  useFocusEffect(
-    useCallback(() => {
-      if (id !== null) store.getState().openTeam(id);
-    }, [id, store]),
-  );
-}
-
 // Material symbol on Android, SF Symbol on iOS: one icon, no new dependency.
-function EditButton({ teamId }: { teamId: number }): ReactElement {
+function EditButton({ teamId }: { teamId: number }): ReactElement | null {
   const { t } = useTranslation();
   const router = useRouter();
   return (
@@ -52,18 +31,23 @@ function EditButton({ teamId }: { teamId: number }): ReactElement {
   );
 }
 
-export default function TeamScreen(): ReactElement {
+export default function TeamScreen(): ReactElement | null {
   const { t } = useTranslation();
   const router = useRouter();
   const { teamId } = useLocalSearchParams<{ teamId: string }>();
   const id = parseTeamId(teamId);
   const store = getSquadStore();
-  useOpenTeam(id, store);
+  // Opened on every focus, from the focus effect and never from a render (F-03): the screen stays
+  // mounted under the match, so players created there (and their duplicate-number warning) show on
+  // Back (RF-035, RF-069).
+  const ready = useOpenRouteTeam(id, store, "every-focus");
   const team = useStore(store, (state) => state.team);
   const players = useStore(store, (state) => state.players);
   const duplicates = useStore(store, (state) => state.duplicateNumbers);
 
-  if (id === null || team === null || team.id !== id) return <NotFound />;
+  if (id === null) return <NotFound />;
+  if (!ready) return null;
+  if (team === null || team.id !== id) return <NotFound />;
 
   return (
     <View style={styles.screen}>
