@@ -67,7 +67,11 @@ export function finding(name: string, id: string, severity: Severity): Finding {
   return { name, advisories: [{ id, severity }] };
 }
 
-type Exception = { id: string; until?: "future" | "past" | "none" };
+// `legacyKey` writes the deprecated `ignoreUntil` key with a future date.
+type Exception = {
+  id: string;
+  until?: "future" | "past" | "none" | "legacyKey";
+};
 
 export function osvToml(...exceptions: Exception[]): string {
   return exceptions
@@ -77,7 +81,9 @@ export function osvToml(...exceptions: Exception[]): string {
         `id = "${id}"`,
         ...(until === "none"
           ? []
-          : [`ignoreUntil = ${until === "past" ? PAST : FUTURE}`]),
+          : until === "legacyKey"
+            ? [`ignoreUntil = ${FUTURE}`]
+            : [`effectiveUntil = ${until === "past" ? PAST : FUTURE}`]),
         'reason = "A test reason."',
         "",
       ].join("\n"),
