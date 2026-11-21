@@ -1224,3 +1224,11 @@ Form: `small-change-form-osv-unused-exceptions.md` (approved by Fernando, 2026-1
 The change only removes exceptions, so it can only make the scan stricter: if an advisory for the same package comes back with a new id, the scan fails until it is looked at.
 
 **Minor note, not part of this change:** `osv-scanner.toml` still uses `ignoreUntil`, which osv-scanner reports as deprecated in favour of `effectiveUntil`. Migrating it is a separate small change, and `scripts/check-npm-audit.mjs` (line 20) reads `ignoreUntil`, so the script would change with it. Recorded as pending.
+
+## Codex review · fix/osv-unused-exceptions (2026-11-21)
+
+Run: `scripts/review.sh specs/001-planificador-v1 origin/main` at commit `61e5afc`. Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** no BLOCKING, IMPORTANT or MINOR findings. Its checks: exactly two exceptions removed, the seven kept unchanged with approval, reason and an expiry within 90 days, ten direct checks of the audit filter confirming that the removed ids are rejected, TOML validation, TypeScript, lint, formatting and traceability.
+
+**What Codex did not confirm:** its own OSV check failed because its environment could not resolve `api.osv.dev` (no network), so the withdrawal of the two advisories and the clean scan were not independently confirmed by Codex. They were read from the API and from the scan by the orchestrator and by the Security role (section above), which did have network. Codex also did not rerun the full verification.
