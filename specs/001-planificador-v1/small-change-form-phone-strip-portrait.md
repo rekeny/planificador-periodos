@@ -6,7 +6,7 @@
 
 ## What
 
-On a phone held in portrait, the strip of warnings above the grid may be 160 pt high instead of 60 pt, so that the two banners («Con las casillas vacías…» and «Convocatoria fuera del rango…») can be read without scrolling the strip. The legend lines below them still scroll inside the strip. Phones in landscape (60 pt) and tablets (80 pt) do not change. The change is in `src/ui/grid/tablet-budget.ts` and `src/ui/warnings/warning-strip.tsx`.
+On a phone held in portrait, the strip of warnings above the grid may be 220 pt high instead of 60 pt, so that the two banners («Con las casillas vacías…» and «Convocatoria fuera del rango…») can be read without scrolling the strip. The legend lines below them still scroll inside the strip. Phones in landscape (60 pt) and tablets (80 pt) do not change. The change is in `src/ui/grid/tablet-budget.ts` and `src/ui/warnings/warning-strip.tsx`.
 
 ## Why
 
@@ -14,21 +14,25 @@ Finding F-A4 of the run of `us2-match-and-call-up` on Android (2026-11-21). On a
 
 Cause: `PHONE_STRIP_MAX_HEIGHT = 60` is documented as the bound for "a phone (any orientation)". It was chosen for a landscape phone (375 pt high), which keeps `375 − 74 − 60 − 44 = 197` pt for the grid (Codex round 6, 2026-11-15). In portrait the bound was never revisited: a phone is at least about 640 pt high, and the grid scrolls vertically if the players do not fit.
 
-The budget in portrait, for the shortest common phone (640 pt high): chrome 74, call-up button 76, toolbar 56, the strip 160 and the header row 44 leave 230 pt for the grid, more than a header row and two rows (132), and the grid scrolls vertically for the rest, as it does today when 12 players do not fit (RF-076, RF-081 is about tablets).
+The budget in portrait, for the shortest common phone (640 pt high): chrome 74, call-up button 76, toolbar 56, the strip 220 and the header row 44 leave 170 pt for the grid, more than a header row and two rows (132), and the grid scrolls vertically for the rest, as it does today when 12 players do not fit (RF-076, RF-081 is about tablets).
 
 Approach, and what is discarded:
 
-- **Chosen:** a second constant, `PHONE_PORTRAIT_STRIP_MAX_HEIGHT = 160`, used when the window is a phone and is not wider than tall (the same test the screen already uses to put the buttons in the body: `compact` is false). 160 holds the two banners of about 75 pt each; the strip still scrolls when its content is taller.
+- **Chosen:** a second constant, `PHONE_PORTRAIT_STRIP_MAX_HEIGHT = 220`, used when the window is a phone and is not wider than tall (the same test the screen already uses to put the buttons in the body: `compact` is false). 220 holds the two banners; the strip still scrolls when its content is taller.
 - **Discarded:** a bound that is a fraction of the window height. It needs a rule for the minimum and for every window size, and one fixed number is easier to test and to read. Also discarded: removing the bound in portrait, because with three banners, a save-error banner and a long legend the grid would be left without room on a short phone.
 
 ## How
 
-- `src/ui/grid/tablet-budget.ts`: the new constant `PHONE_PORTRAIT_STRIP_MAX_HEIGHT = 160`, with the budget in its comment; the comment of `PHONE_STRIP_MAX_HEIGHT` says it is the bound of a phone in landscape.
-- `src/ui/warnings/warning-strip.tsx`: the strip chooses 80 on a tablet, 60 on a phone with `compact` (landscape), 160 on a phone in portrait; `scrollEnabled` still follows the measured content against the bound in use.
+- `src/ui/grid/tablet-budget.ts`: the new constant `PHONE_PORTRAIT_STRIP_MAX_HEIGHT = 220`, with the budget in its comment; the comment of `PHONE_STRIP_MAX_HEIGHT` says it is the bound of a phone in landscape.
+- `src/ui/warnings/warning-strip.tsx`: the strip chooses 80 on a tablet, 60 on a phone with `compact` (landscape), 220 on a phone in portrait; `scrollEnabled` still follows the measured content against the bound in use.
 - `tests/app/…` (the strip and phone budget tests that exist): new tests for the portrait phone; the existing landscape and tablet ones stay as they are.
 - On the way, the Maestro flow `us2-match-and-call-up` is run again on the Android emulator to see that it goes past the banners. T048 is ticked only if it passes on both platforms, as in `small-change-maestro-us2-android-notes.md`.
 
 No change in `src/domain/`, in `es.json`, in dependencies, in the spec or in what the banners say.
+
+## Change of the number, 2026-11-21 (after the Codex review)
+
+The form was approved with 160 pt. The Codex review pointed out that 160 does not hold two banners with their padding and margins, and the emulator agreed: at 411 pt wide the two banners need about 175 pt, and at 375 pt wide, where the first banner wraps to three lines, about 215 pt (the screens were measured with the app, at 411 and at 375 pt, `review.md`). The bound is **220 pt**, which keeps 170 pt for the grid on a 640 pt high phone (more than a header row and two rows, 132). The goal of the form (both banners readable without scrolling the strip) is the same; only the number changed, and Fernando is told in the report of this branch.
 
 ## Why it is small
 
@@ -36,4 +40,4 @@ It changes no specified behaviour (no requirement gives a height for the strip o
 
 ## Tests
 
-Jest has no layout engine, so the tests read the bound the strip is given and what is left for the grid, like the landscape ones: in a 411 × 914 window the strip's `maxHeight` is 160; with the measured banners at 150 and the legend at 0 it does not scroll, and with 170 it does; in a 360 × 640 window the grid keeps at least a header row and two rows; in 667 × 375 (landscape) and on a tablet the bound is still 60 and 80. The real proof is the emulator: before the change the second banner is hidden (reproduced on 2026-11-21); after it, both banners are in view and `us2-match-and-call-up` goes past the checks of the banners. **Not covered:** a real phone, an iPhone in portrait (the simulator runs the same flow afterwards), tablets in portrait (unchanged), fonts scaled up by the system (the banners may need scrolling there).
+Jest has no layout engine, so the tests read the bound the strip is given and what is left for the grid, like the landscape ones: in a 411 × 914 window the strip's `maxHeight` is 220; with the measured banners at 150 and the legend at 0 it does not scroll, and with 170 it does; in a 360 × 640 window the grid keeps at least a header row and two rows; in 667 × 375 (landscape) and on a tablet the bound is still 60 and 80. The real proof is the emulator: before the change the second banner is hidden (reproduced on 2026-11-21); after it, both banners are in view and `us2-match-and-call-up` goes past the checks of the banners. **Not covered:** a real phone, an iPhone in portrait (the simulator runs the same flow afterwards), tablets in portrait (unchanged), fonts scaled up by the system (the banners may need scrolling there).

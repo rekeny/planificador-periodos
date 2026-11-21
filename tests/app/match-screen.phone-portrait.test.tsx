@@ -1,7 +1,7 @@
 // F-A4 (run of the Maestro flow on an Android phone, 2026-11-21): on a phone in portrait the strip
 // of warnings was bounded at 60 pt, the bound chosen for a landscape phone, and showed about one
 // line of the first banner, so «Convocatoria fuera del rango» was not in view. In portrait the bound
-// is 160 pt (small-change-form-phone-strip-portrait.md); landscape phones (60) and tablets (80) keep
+// is 220 pt (small-change-form-phone-strip-portrait.md); landscape phones (60) and tablets (80) keep
 // theirs. Jest has no layout engine: the tests read the bound the strip is given, as the landscape
 // ones do (tests/support/phone-landscape-budget.ts).
 import { screen } from "expo-router/testing-library";
@@ -67,17 +67,17 @@ async function openWorstCase(window: { width: number; height: number }) {
 }
 
 describe("match screen on a phone in portrait, the banners are in view (F-A4, RF-010, RF-076)", () => {
-  it("RF-010 RF-076 F-A4: in a 411 × 914 window the strip of warnings is bounded at 160 pt", async () => {
+  it("RF-010 RF-076 F-A4: in a 411 × 914 window the strip of warnings is bounded at 220 pt", async () => {
     await openWorstCase(PORTRAIT);
-    expect(PHONE_PORTRAIT_STRIP_MAX_HEIGHT).toBe(160);
+    expect(PHONE_PORTRAIT_STRIP_MAX_HEIGHT).toBe(220);
     expect(stripBound()).toBe(PHONE_PORTRAIT_STRIP_MAX_HEIGHT);
   });
 
   it.each([
-    [150, 0, false],
-    [90, 70, false],
-    [90, 80, true],
-    [0, 200, true],
+    [215, 0, false],
+    [140, 80, false],
+    [140, 81, true],
+    [0, 300, true],
   ])(
     "RF-010 RF-076 F-A4: with the banners measured at %s pt and the legend at %s pt the strip of a phone in portrait scrolls: %s",
     async (banners, legend, scrolls) => {

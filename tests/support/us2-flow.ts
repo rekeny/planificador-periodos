@@ -49,28 +49,34 @@ export function lines(): string[] {
 }
 
 /**
- * Everything the flow types: each `inputText` text, and the join of every run of consecutive
- * `inputText` steps. Maestro gives each command 120 s and typing is slow on Android (0.18 to 0.6 s
- * per character), so a long text may be typed in pieces: what the field receives is their join.
+ * The runs of consecutive `inputText` steps, each run as its pieces in order. Maestro gives each
+ * command 120 s and typing is slow on Android (0.18 to 0.6 s per character), so a long text may be
+ * typed in pieces: what the field receives is the join of a run.
  */
-export function typedTexts(): string[] {
-  const texts: string[] = [];
+export function typedRuns(): string[][] {
+  const runs: string[][] = [];
   let run: string[] = [];
   const flush = (): void => {
-    if (run.length > 1) {
-      texts.push(run.join(""));
+    if (run.length > 0) {
+      runs.push(run);
     }
     run = [];
   };
   for (const command of readFlow(US2_FILE).commands) {
     const value = /^\s*(?:- )?inputText: "(.*)"$/m.exec(command.block)?.[1];
     if (command.name === "inputText" && value !== undefined) {
-      texts.push(value);
       run.push(value);
     } else {
       flush();
     }
   }
   flush();
-  return texts;
+  return runs;
+}
+
+/** Everything the flow types: each `inputText` text, and the join of every run of two or more steps. */
+export function typedTexts(): string[] {
+  return typedRuns().flatMap((run) =>
+    run.length > 1 ? [...run, run.join("")] : run,
+  );
 }

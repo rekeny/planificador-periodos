@@ -529,7 +529,7 @@ npm run verify
 ### Pending
 
 - Not checked: «Guardar» in landscape, the Android tablet, a real device, a keyboard other than Gboard, and the team and player forms.
-- `us2-match-and-call-up` on Android stops at the 500-character notes (Maestro's 120 s limit when typing); it needs the text in chunks.
+- `us2-match-and-call-up` on Android was finished on 2026-11-21 (last section).
 - F-A2 (the grid stuck after the last overtime is removed) was fixed on 2026-11-21 (last section); F-A3 (a link lost right after the launch) is still open.
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
 
@@ -573,6 +573,53 @@ maestro --device <android-device> test e2e/us3-planning.yaml
 
 - The changed code has not been tested on iOS (the iPhone run used the build from before this change).
 - Not checked: the Android tablet, a real device, landscape.
-- `us2-match-and-call-up` on Android stops at the 500-character notes (Maestro's 120 s limit when typing); F-A3 (a link lost right after the launch) is still open; `us4-warnings` is not run on Android.
+- `us2-match-and-call-up` on Android was finished on 2026-11-21 (last section); F-A3 (a link lost right after the launch) is still open; `us4-warnings` is not run on Android.
 - T056 is ticked (both of its flows pass on both platforms); T048 and T060 stay unticked.
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
+
+## T048 on Android and the warning strip of a phone in portrait · fix/maestro-us2-android-notes (2026-11-21)
+
+Two small changes, forms `small-change-maestro-us2-android-notes.md` and `small-change-form-phone-strip-portrait.md`, both approved by Fernando on 2026-11-21. Code: `src/ui/grid/tablet-budget.ts` and `src/ui/warnings/warning-strip.tsx` (F-A4); the rest is the Maestro flow and its tests.
+
+### What was done and what changes for the user
+
+On an Android phone held in portrait, the warnings above the grid («Con las casillas vacías…», «Convocatoria fuera del rango…») were squeezed into a strip of 60 pt that showed about one line: the second warning was out of view unless the coach scrolled that strip. Now the strip may take 220 pt on a phone in portrait, enough for both banners; on a phone in landscape and on a tablet it is as before. The Maestro flow `us2-match-and-call-up` (T048) now runs to the end on an Android phone emulator and on an iPhone simulator, and T048 is ticked.
+
+### How: files and new pieces
+
+| Piece                                                            | What it does                                                                                                                                                               |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tablet-budget.ts`                                               | New constant `PHONE_PORTRAIT_STRIP_MAX_HEIGHT = 220`, with the budget of a 640 pt phone in its comment.                                                                    |
+| `warning-strip.tsx`                                              | Chooses the bound: 80 on a tablet, 60 on a phone in landscape (`compact`), 220 on a phone in portrait.                                                                     |
+| `match-screen.phone-portrait.test.tsx`                           | Eight tests of the bound, when the strip scrolls, the room left for the grid, and landscape and tablet unchanged.                                                          |
+| `us2-match-and-call-up.yaml`                                     | Notes typed in three pieces; Android swipe before the call-up taps; scroll to the banners and to the 13th row; subflow `close-number-keyboard` centres «Local» on Android. |
+| `tests/e2e/us2-flow.typing.test.ts`, `tests/support/us2-flow.ts` | `typedRuns` / `typedTexts`, and the check that the notes are two or more pieces of at most 170 characters.                                                                 |
+
+### Why: decisions along the way
+
+- **Why 220 and not the approved 160.** The Codex review noted that two banners need more than 160 pt with their padding and margins; measured on the emulator, about 175 at 411 pt wide and about 215 at 375 pt wide. 220 keeps 170 pt for the grid on a 640 pt phone. The form records the change of number.
+- **Why the strip changes and not the flow.** A flow that slides the strip hides that the coach cannot read a warning on the device most coaches use. Fernando chose to fix the app.
+- **Typing in pieces.** Maestro gives each command 120 s, and typing took 0.18 to 0.6 s per character on the emulator, so 501 characters in one step were too close to the limit.
+- **`hideKeyboard` on Android.** It acts as Back when the keyboard is already closed, so the subflow keeps «focus «Local» and press Enter» there, with the label centred.
+
+### To learn, with the real code
+
+- **A bound chosen for one case:** `PHONE_STRIP_MAX_HEIGHT = 60` was documented for "any orientation" but chosen for a landscape phone; the new constant names the case it is for.
+- **`compact`:** in `MatchScreen` it is true when the buttons go in the header (a tablet or a landscape window), so `tablet`, then `compact`, then the rest picks the bound without reading the window again.
+- **Maestro «visible»:** on Android an element can count as visible while it is under the navigation bar or clipped by a bounded view; `scrollUntilVisible` of the text itself, or a swipe, brings it into view.
+
+### To check it
+
+```bash
+npm run verify
+maestro --device <android-device> test e2e/us2-match-and-call-up.yaml
+```
+
+- **Android phone, portrait:** open a match with 13 players: both banners are in view without scrolling the strip. Turn the phone to landscape: the strip is small again.
+
+### Pending
+
+- The F-A4 change has not been tested on iOS (the iPhone simulator has the app built before it).
+- Not checked: a real phone, scaled-up system fonts, an Android tablet, a Spanish-configured device.
+- F-A3 (a link lost right after the launch on Android) is still open; `us4-warnings` is not run on Android; T060, T057, T061 and T092 stay unticked.
+- Codex found 0 blocking findings, two important and one minor; the three are fixed in this branch (`review.md`).
