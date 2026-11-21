@@ -307,7 +307,7 @@ maestro test e2e/us3-interruption.yaml
 maestro test e2e/us4-warnings.yaml
 ```
 
-4. Paste each output in `review.md`. The flows were written without running them, so expect to fix some steps (risks are in the Pending lines of T036, T048, T056 and T060). `us4-warnings.yaml` is written for a tablet screen.
+4. Paste each output in `review.md`. All six flows have been run (iOS simulators on 2026-11-20 and again on 2026-11-21 with the Release build of `main`; Android phone emulator on 2026-11-21, except `us4-warnings`). Tips from those runs: Maestro 2.12.1 was used; on a slow emulator start it with `MAESTRO_DRIVER_STARTUP_TIMEOUT=240000`, wait about a minute after boot and dismiss the "System UI isn't responding" dialog first; if the driver does not start, stop the leftovers with `adb shell am force-stop dev.mobile.maestro`. `us4-warnings.yaml` is written for a tablet screen (an iPad in landscape, or a tablet emulator); it has not run on Android yet (T060).
 
 #### Device checklist (Fernando)
 
@@ -331,10 +331,10 @@ Known D2 limits (stated in the spec and tasks, not bugs to fix now):
 Not done or not verified:
 
 - **Maestro: run on iOS simulators on 2026-11-20, not on Android.** The six flows pass on an iPhone 17 simulator (five of them) and an iPad Pro 11-inch in landscape (`us4-warnings`), with iOS 27.2 and Maestro 2.12.1; the details are in `review.md` and in `small-change-maestro-ios-flows.md`. On iOS the time of the match form is only checked up to «12:00» (decision of Fernando, 2026-11-20). NOT run (on 2026-11-20): Android, iPad in portrait, iPhone in landscape. Before that run the flows had been written but not run. **Update 2026-11-21:** the first Android run is in the last section of this file. T048, T056 and T060 are unticked in `tasks.md` until their Maestro runs pass on both platforms: those three tasks are NOT done (Codex F5). T036 was ticked on 2026-11-21, when its two flows also passed on Android. T057 (device check of the grid layout) is not done. The iPad 100 ms measurement, the `xattr` check and the Android E-028 test are not done. So T057 and T061 stay unticked too.
-- **CI has not run yet** on this branch. The first full Stryker run on CI (about 25 minutes) and the incremental runs, with whether the cache was restored, are still to be recorded in `review.md`. A note: `tests/support/` and `tests/setup/` are part of the cache key, so changes there force a full run.
+- **CI (2026-11-21):** the runs on a pull request take 3 to 5 minutes (mutation testing is skipped when `src/domain/` does not change); the runs on `main` after a merge take 18 to 30 minutes, of which about 15 minutes are the full Stryker run (804 mutants, 94.78 %). The local runs are in `review.md` ("Mutation testing at the D2 close"): full 5 min 53 s, incremental 28 s. A note: `tests/support/` and `tests/setup/` are part of the cache key, so changes there force a full run.
 - **Deviations:** FK columns NOT NULL, and the picker files (iOS inline, Android dialog) were approved by Fernando on 2026-11-14 and are recorded in `plan.md` "Deviations", with the later ones up to 2026-11-15.
 - **Security:** SEC-D2-1 (unused Android permissions) is done in T088 (`android.blockedPermissions`; `INTERNET` only for `APP_VARIANT=production`; the release needs an `eas.json` profile that sets it and a check with `aapt dump permissions`, listed in `docs/security.md`). SEC-D2-3 (the silent failure to open the database) is done in T087 (message and «Reintentar»). Still open for the release: SEC-D2-7 (the INTERNET block fails open if `APP_VARIANT` is forgotten), the dark-mode look of the failure message (SEC-D2-9) and the iOS `xattr` check.
-- **Mutation survivors:** the 8 in `undo.ts` are classified (equivalent or defence only). The other 19 (`bounded-flow.ts` 9, `marking.ts` 5, `rule-feasibility.ts` 2, one each in `column.ts`, `overtime.ts`, `player-order.ts`) are probably the D1 set but are not yet classified one by one. `team-order.ts` gets no mutants (finding M1).
+- **Mutation survivors:** all 27 are classified in `review.md`: the 8 in `undo.ts` (equivalent or defence only) and the other 19 (`bounded-flow.ts` 9, `rule-feasibility.ts` 2, `overtime.ts` 1 and `player-order.ts` 1 are equivalent; `marking.ts` 5 and `column.ts` 1 are defence only). No D2 domain file has a survivor. `team-order.ts` gets no mutants (finding M1).
 - **Codex review:** it ran three times. Round 1: 4 blocking findings (F1 to F4), all fixed, plus F5 (the four unticked tasks above) and F6 (a stale claim removed). Round 2: 2 blocking (Android time, tablet 12 rows), one important (forms) and one minor (cache key), all fixed. Round 3: 4 blocking (match screen restore, save-error banner, tablet 768 threshold, scrolling strip) and one minor (this summary's picker paragraph), all fixed. Anything still open is listed in `review.md`; a fourth run is recorded there if the orchestrator runs it. **The real look on devices of all these layout fixes (forms, tablet threshold, strip, banner, Android picker) is unverified (T057).** Codex also checks that these explanations match what was done.
 - **Before D3 starts,** the Planner reviews D3's tasks with the lessons of D2, including the slice files of the session store.
 
@@ -747,3 +747,40 @@ TZ=UTC npx jest src/ui/date-time-field
 
 - Not checked: a real phone, time zones outside the five of the tests, and the change on iOS itself: the iPhone simulator runs the form without a failure (`us2-match-and-call-up`, 2026-11-21) but Maestro cannot pick a time on the iOS wheels, so the 29 March scenario was seen on Android only.
 - Codex's verdict is in `review.md`.
+
+## D2 close, part one · docs/t061-d2-close (2026-11-21)
+
+Documentation only; no code, no test and no dependency changed. T061 stays unticked: it still needs the device checks and Fernando's merge of the D2 PR.
+
+### What was done and what changes for the user
+
+Nothing changes in the app. The close of D2 gained three records: a full local mutation run with its times, a per-file classification of the 19 surviving mutants that were still unclassified, and the Security review of D2 (dependencies, backup plugin, data layer and navigation) with no blocking finding.
+
+### How: files and new pieces
+
+- `review.md`: the section "Security review at the D2 close (T061)" (written by the Security role) and "Mutation testing at the D2 close (T061)" (times, CI runs and the 19 survivors).
+- `summary.md`: the CI note (it said CI had not run), the survivors note and the "How to run Maestro" step 4.
+
+### Why: decisions along the way
+
+- **Survivors are explained, not killed.** 13 are equivalent (the changed code gives the same result) and 6 are defence only (a second guard that fires only with a cell or column outside the grid, which no action builds). Adding tests only to reach 100 % would change `src/domain/` for no behaviour; the 80 % threshold is met with 94.78 %. The choice is left to Fernando in `review.md` ("Open decision").
+- **CI times** come from `gh run list` and the log of the latest `main` run: a pull request that does not touch the domain skips Stryker (3 to 5 min); `main` runs it in full (about 15 min).
+
+### To learn, with the real code
+
+- **Equivalent mutant:** a change that cannot alter the result. `new Array<number>(n).fill(-1)` against `new Array().fill(-1)` in `bounded-flow.ts` is one: JavaScript arrays grow when assigned, and the unset values are never read.
+- **Defence only:** `markSub` in `marking.ts` re-checks `cellExists` although `chooseCellMenuOption` already did. The mutant that removes the check survives because no test can reach it through the real actions.
+
+### To check it
+
+```bash
+npx stryker run --incremental --incrementalFile reports/stryker-incremental.json --force   # full run, about 6 min
+```
+
+Then open `reports/mutation/index.html`, and compare with the tables in `review.md`.
+
+### Pending
+
+- Device checks (T057, T092), the iPad 100 ms measurement and the `us4-warnings` run on a tablet (T060), the iOS `xattr` check on a physical device and the Android E-028 test.
+- Questions from Security: remove four unused template packages (SEC-T061-3), look at an unmatched deep link on a device (SEC-T061-4).
+- The Planner reviews T062 to T079 before D3.
