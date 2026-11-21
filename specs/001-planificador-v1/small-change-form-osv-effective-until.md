@@ -42,4 +42,4 @@ It changes no behaviour of the app and touches no dependency: it renames a confi
 - **New test:** an `osv-scanner.toml` whose exception still has `ignoreUntil` and a future date does not approve the advisory, and the script fails.
 - **Kept:** an exception with a past `effectiveUntil` does not approve; an entry with no date does not approve.
 - `npm run verify` green, and its osv-scanner step must no longer print the deprecation warning; `osv-scanner scan source --lockfile=package-lock.json` still ends with «No issues found».
-- **Not covered:** a future osv-scanner that changes the key again; the weekly scan would show it as a warning, as it did this time.
+- **Not covered:** a future osv-scanner that changes the key again; the next verification run would show it as a warning, as it did this time.
