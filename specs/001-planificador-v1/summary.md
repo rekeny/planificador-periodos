@@ -486,7 +486,7 @@ maestro --device <android-device> test e2e/us1-teams-and-players.yaml
 
 - **F-A1, Android keyboard:** fixed on 2026-11-21 on `fix/android-keyboard-offset` (see the last section).
 - **F-A2, Android grid:** fixed on 2026-11-21 on `fix/android-grid-scroll` (see the last section).
-- **F-A3, Android links:** a link sent right after the launch is lost.
+- **F-A3, Android links:** a link that arrives in the first fraction of a second after the launch (0.3 s measured; 0.8 s and later work) is lost. Accepted as a limit on 2026-11-21 (`review.md`).
 - `us4-warnings` is not run on Android (a tablet flow; no tablet emulator). Of the Maestro tasks, T036 is ticked; T048, T056 and T060 stay unticked.
 
 ## Fix of 2026-11-21 · The Android keyboard no longer hides the focused field of a form (F-A1, RF-076)
@@ -530,7 +530,7 @@ npm run verify
 
 - Not checked: «Guardar» in landscape, the Android tablet, a real device, a keyboard other than Gboard, and the team and player forms.
 - `us2-match-and-call-up` on Android was finished on 2026-11-21 (last section).
-- F-A2 (the grid stuck after the last overtime is removed) was fixed on 2026-11-21 (last section); F-A3 (a link lost right after the launch) is still open.
+- F-A2 (the grid stuck after the last overtime is removed) was fixed on 2026-11-21 (last section); F-A3 (a link lost in the first fraction of a second after the launch) was accepted as a limit on 2026-11-21 (`review.md`).
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
 
 ## Fix of 2026-11-21 · The grid no longer stays scrolled after the last overtime is removed (F-A2, RF-076)
@@ -573,7 +573,7 @@ maestro --device <android-device> test e2e/us3-planning.yaml
 
 - The changed code has not been tested on iOS (the iPhone run used the build from before this change).
 - Not checked: the Android tablet, a real device, landscape.
-- `us2-match-and-call-up` on Android was finished on 2026-11-21 (last section); F-A3 (a link lost right after the launch) is still open; `us4-warnings` is not run on Android.
+- `us2-match-and-call-up` on Android was finished on 2026-11-21 (last section); F-A3 (a link lost in the first fraction of a second after the launch) was accepted as a limit on 2026-11-21 (`review.md`); `us4-warnings` is not run on Android.
 - T056 is ticked (both of its flows pass on both platforms); T048 and T060 stay unticked.
 - Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
 
@@ -621,7 +621,7 @@ maestro --device <android-device> test e2e/us2-match-and-call-up.yaml
 
 - The F-A4 change has not been tested on iOS (the iPhone simulator has the app built before it).
 - Not checked: a real phone, scaled-up system fonts, an Android tablet, a Spanish-configured device.
-- F-A3 (a link lost right after the launch on Android) is still open; `us4-warnings` is not run on Android; T060, T057, T061 and T092 stay unticked.
+- F-A3 (a link lost in the first fraction of a second after the launch on Android) was accepted as a limit on 2026-11-21 (`review.md`); `us4-warnings` is not run on Android; T060, T057, T061 and T092 stay unticked.
 - Codex found 0 blocking findings, two important and one minor; the three are fixed in this branch (`review.md`).
 
 ## Fix of 2026-11-21 · The team screens no longer update the shared store while rendering (F-03, M-01)
