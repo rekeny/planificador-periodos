@@ -484,7 +484,51 @@ maestro --device <android-device> test e2e/us1-teams-and-players.yaml
 
 ### Pending
 
-- **F-A1, Android keyboard:** the focused field stays under the keyboard in the match form («Notas», the score fields). F-01 (PR 10) was only fixed on iOS.
+- **F-A1, Android keyboard:** fixed on 2026-11-21 on `fix/android-keyboard-offset` (see the last section).
 - **F-A2, Android grid:** after removing the last overtime, the grid stays scrolled and the P1 and P2 columns cannot be reached until the match is reopened.
 - **F-A3, Android links:** a link sent right after the launch is lost.
 - `us4-warnings` is not run on Android (a tablet flow; no tablet emulator). Of the Maestro tasks, T036 is ticked; T048, T056 and T060 stay unticked.
+
+## Fix of 2026-11-21 · The Android keyboard no longer hides the focused field of a form (F-A1, RF-076)
+
+Branch `fix/android-keyboard-offset`, small change, form approved by Fernando on 2026-11-21 (`small-change-form-android-keyboard.md`). One commit holds the code and its tests (`937b497`).
+
+### What was done and what changes for the user
+
+On an Android phone, tapping a text field of the new-match, new-team or new-player form, with the keyboard closed, used to leave the field, and what you typed in it, under the keyboard. Now, once the keyboard has opened, the form scrolls so that the field sits just above it. The iPhone was already fixed in F-01.
+
+### How: files and new pieces
+
+| Piece                                     | What it does                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/ui/form-scroll.tsx`                  | The component the three forms share. A new hook, `useScrollToFocusedField`, listens to `keyboardDidShow` on Android only, measures the focused field and, if the keyboard covers it, scrolls the form by the difference plus 16 points. It keeps the current scroll offset (from `onScroll`) and removes the listener when the form goes away. |
+| `tests/app/form-scroll.keyboard.test.tsx` | Six new tests for Android and iOS, added to the three of F-01.                                                                                                                                                                                                                                                                                 |
+
+### Why: decisions along the way
+
+- **The cause.** The app is edge to edge on Android, so the window does not resize for the keyboard. The `KeyboardAvoidingView` with `"height"` already shrinks the visible area, but the tapped field was in view before the keyboard opened and nothing scrolled it again.
+- **Why a listener and not another `behavior`.** `"padding"` would shrink the area in the same way and scroll nothing. The `ScrollView` prop that does it on iOS, `automaticallyAdjustKeyboardInsets`, is iOS only.
+- **Discarded.** `react-native-keyboard-controller` (`KeyboardAwareScrollView`): a new dependency with native code, a new development build and a root provider; a medium change with an entry in `plan.md`. It was the fallback if the emulator had shown the listener to be unreliable; it did not.
+- **Found along the way.** In landscape Android shows the keyboard's own full-screen editor for the field, so the text is visible there but not the form. Left as it is. And `us2-match-and-call-up` now stops at the 500-character notes on Android because typing takes too long for Maestro's 120 s limit: a limit of the flow.
+
+### To learn, with the real code
+
+- **`Keyboard.addListener("keyboardDidShow", …)`:** returns a subscription; the effect returns `() => subscription.remove()` so nothing is left listening.
+- **`TextInput.State.currentlyFocusedInput()`:** the field that has the focus, and `measureInWindow` gives its position on the screen, which is compared with `event.endCoordinates.screenY`, the top of the keyboard.
+- **Testing without a keyboard:** the tests replace `Keyboard.addListener` with a recorder, so the test sends the event itself, and spy on `ScrollView.prototype.scrollTo`. The ScrollView mock shares one `scrollTo` between tests, so each test clears it first.
+
+### To check it
+
+```bash
+npm run verify
+```
+
+- **Android phone, portrait:** new match → scroll to «Notas» and tap it. The field stays above the keyboard and what you type is visible; the same with the score fields and with «Local» and «Visitante». Scroll down and reach «Guardar» with the keyboard open.
+- **Android phone, landscape:** the same; the text shows in the keyboard's full-screen editor.
+
+### Pending
+
+- Not checked: «Guardar» in landscape, the Android tablet, a real device, a keyboard other than Gboard, and the team and player forms.
+- `us2-match-and-call-up` on Android stops at the 500-character notes (Maestro's 120 s limit when typing); it needs the text in chunks.
+- F-A2 (the grid stuck after the last overtime is removed) and F-A3 (a link lost right after the launch) are still open.
+- Codex found 0 blocking findings and 1 important one about these records, fixed in this branch (`review.md`).
