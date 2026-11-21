@@ -26,6 +26,7 @@ import {
   flowLiterals,
   lines,
   range,
+  typedTexts,
   visible,
 } from "../support/us2-flow";
 
@@ -60,9 +61,7 @@ describe("T048 Maestro US2 flow", () => {
     const flow = readFlow(US2_FILE);
     expect(inlineStructures(flow)).toEqual([]);
     const literals = literalsOf(flow);
-    const typed = literals
-      .filter((literal) => literal.key === "inputText")
-      .map((literal) => literal.value);
+    const typed = typedTexts();
     const unknown = literals
       .filter((literal) => literal.key !== "inputText")
       .map((literal) => literal.value)
@@ -239,10 +238,9 @@ describe("T048 Maestro US2 flow", () => {
       { limit: 500, fits: (value: string) => value.length === 501 },
       { limit: 3, fits: (value: string) => /^\d{4}$/.test(value) },
     ];
+    const typed_ = typedTexts();
     for (const { limit, fits } of shapes) {
-      const typed = literals.filter(
-        (l) => l.key === "inputText" && fits(l.value),
-      );
+      const typed = typed_.filter(fits).map((value) => ({ value }));
       expect(typed.length).toBeGreaterThan(0);
       for (const { value } of typed) {
         expect(literals).toContainEqual({

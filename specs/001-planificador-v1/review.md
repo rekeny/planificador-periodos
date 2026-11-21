@@ -1166,3 +1166,43 @@ Form: `small-change-form-android-grid-scroll.md` (approved by Fernando, 2026-11-
 Codex's other category results: no scope, constitution, layer or glossary finding, no test deleted, skipped or weakened, no security finding, no simplicity finding. Codex could not run Jest (its environment cannot write the cache), and did not confirm the full verification or the native behaviour.
 
 **Tasks:** T056 is ticked. T048 and T060 stay unticked.
+
+## Maestro `us2` on Android, F-A4 and Codex review · fix/maestro-us2-android-notes (2026-11-21)
+
+Forms: `small-change-maestro-us2-android-notes.md` and `small-change-form-phone-strip-portrait.md` (both approved by Fernando, 2026-11-21). Commits: flow and tests `700e83a`, the strip `3402c24`, and the follow-up of the Codex review of this section.
+
+**What changed in the app (F-A4).** `src/ui/grid/tablet-budget.ts` and `src/ui/warnings/warning-strip.tsx`: the warning strip of a phone in portrait is bounded at 220 pt (`PHONE_PORTRAIT_STRIP_MAX_HEIGHT`) instead of the 60 pt of a landscape phone, so the two banners are in view. Landscape phones (60) and tablets (80) are unchanged. Found when `us2-match-and-call-up` stopped at «Convocatoria fuera del rango» on an Android phone: the strip showed about one line of the first banner.
+
+**The number.** The form was approved with 160 pt. The Codex review (finding 1 below) noted that two banners with their padding and margins do not fit in 160, and measuring on the emulator confirmed it: with 160 the second banner was cut. With 220, both banners are fully in view on the Android 17 emulator at 411 pt wide (two lines each, and the first legend line below) and at 375 pt wide (`wm size 984x2160`, the first banner on three lines, both banners complete, the legend line cut). The form records the change of number.
+
+**Flow changes (T048).** `e2e/us2-match-and-call-up.yaml`: the 501 characters of the notes in three pieces of 167 (Maestro gives each command 120 s; typing took 0.18 to 0.6 s per character); on Android one swipe before the call-up taps; the number-keyboard subflow centres the «Local» label on Android before tapping it (`hideKeyboard` there leaves the form when the keyboard is already closed, which was seen); the flow scrolls to the banner and to the last row of the 13-player grid instead of asserting them where they are. Static tests: `typedRuns` and `typedTexts` in `tests/support/us2-flow.ts` read the notes as the join of consecutive steps, and `tests/e2e/us2-flow.typing.test.ts` requires at least two pieces of at most 170 characters (it fails with one step of 501).
+
+**Tests.** `tests/app/match-screen.phone-portrait.test.tsx`: eight tests for the strip (the bound in portrait, when it scrolls, the grid keeps a header row and two rows on a 360 × 640 phone, landscape and tablet bounds unchanged); five failed before the change.
+
+**Verification:** `npm run verify` on `3402c24`: 3190 tests, "20/20 checks passed", "All checks passed", exit code 0. It was run again after the follow-up (see the commit of this section). Mutation testing did not run: nothing in `src/domain/` changed.
+
+**Maestro results (Android 17 phone emulator, Release build of the final code; iPhone 17 simulator).**
+
+| Flow                    | Android phone emulator                 | iPhone 17 simulator                                  |
+| ----------------------- | -------------------------------------- | ---------------------------------------------------- |
+| `us2-match-and-call-up` | passes, 292 steps                      | passes, 284 steps (app built before the F-A4 change) |
+| `us3-planning`          | passes, 208 steps                      | passes, 204 steps (run on 2026-11-21, before F-A4)   |
+| `us3-interruption`      | passes, 100 steps (with the 160 build) | passes (run on 2026-11-20)                           |
+
+`us3-interruption` on Android was last run with the 160 pt build, not the 220 pt one; the flow does not read the banners. Two runs of `us3-*` on the first try did not start: Maestro's driver did not come up on a freshly booted emulator ("System UI isn't responding" dialog, dismissed with «Wait»).
+
+**What this does NOT cover:** the F-A4 change itself on iOS (the iPhone simulator has the build from before it); `us4-warnings` on Android (a tablet flow); a real phone; scaled-up system fonts (the banners may need scrolling); the Android tablet; a Spanish-configured device.
+
+**Codex run:** `scripts/review.sh specs/001-planificador-v1 origin/main` on `3402c24`. Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** 0 BLOCKING, 2 IMPORTANT, 1 MINOR. No blocking finding, so the phase 8 gate is met.
+
+| #   | Finding                                                                                                                                                                                                                                                | Decision                                                                                                                                                                                                                                                                                            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **IMPORTANT. The portrait height budget underestimates the banners:** each banner takes 32 pt of margins and 24 pt of padding, so 160 leaves 48 pt for the wrapped texts; the tests inject a 150 pt measurement and do not show that both banners fit. | Fixed in this branch: the bound is 220 pt, with the budget in the comment of the constant (about 175 at 411 pt wide and 215 at 375 pt wide). Checked on the emulator at both widths. Jest has no layout engine, so the tests still read the bound; the emulator check is the proof of the geometry. |
+| 2   | **IMPORTANT. Current verification and completion records are missing.**                                                                                                                                                                                | Fixed in this branch: this section, `summary.md` (after explanation) and T048 (ticked).                                                                                                                                                                                                             |
+| 3   | **MINOR. The static test does not protect the notes chunking:** Codex replaced the three pieces by one 501-character step and the 19 US2 tests still passed.                                                                                           | Fixed in this branch: `tests/e2e/us2-flow.typing.test.ts` fails in that case (checked by making the same replacement).                                                                                                                                                                              |
+
+Codex's other category results: no scope, constitution, layer or glossary finding, no test deleted or skipped, no security finding, no simplicity finding. Codex could not run the screen tests in its environment and did not confirm the full verification or the native behaviour.
+
+**Tasks:** T048 is ticked (the flow passes on both platforms). T060 stays unticked.

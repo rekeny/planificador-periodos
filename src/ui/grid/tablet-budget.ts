@@ -18,7 +18,17 @@ export function tabletGridViewportHeight(windowHeight: number): number {
 }
 
 /**
- * The most the warnings strip may take on a phone (any orientation): a landscape phone (375 high)
+ * The most the warnings strip may take on a phone in landscape: a landscape phone (375 high)
  * keeps 375 - 74 - 60 - 44 = 197 >= 132 for the grid, with or without the save-error banner (44).
  */
 export const PHONE_STRIP_MAX_HEIGHT = 60;
+
+/**
+ * The most the strip may take on a phone in portrait (F-A4). 60 showed about one line of the first
+ * banner there, so the second one was out of view. A banner on a phone in portrait takes its text
+ * (two lines of 16 at 411 wide, three at 375) plus 24 of padding and 32 of margin, so the two
+ * banners need about 175 at 411 wide and about 215 at 375 wide; 220 holds both. A phone is at least
+ * about 640 high: 640 - 74 chrome - 76 call-up button - 56 toolbar - 220 strip - 44 header row = 170
+ * >= 132 (a header row and two rows) for the grid, which scrolls vertically for the rest.
+ */
+export const PHONE_PORTRAIT_STRIP_MAX_HEIGHT = 220;
