@@ -105,6 +105,16 @@ describe("check-npm-audit script, what fails", () => {
     expect(result.output).toContain(ID_A);
   });
 
+  it("fails when the exception still uses the deprecated ignoreUntil key, so it gets migrated", () => {
+    const result = runCheck(
+      auditJson(finding("picomatch", ID_A, "high")),
+      osvToml({ id: ID_A, until: "legacyKey" }),
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.output).toContain(ID_A);
+  });
+
   it("fails when there is no osv-scanner.toml, because nothing is approved", () => {
     const result = runCheck(auditJson(finding("picomatch", ID_A, "high")));
 

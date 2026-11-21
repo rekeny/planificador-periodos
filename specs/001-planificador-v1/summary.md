@@ -703,7 +703,7 @@ The first must end with «No issues found» and no «unused ignores» line.
 
 ### Pending
 
-- `osv-scanner.toml` still uses `ignoreUntil`, which osv-scanner reports as deprecated in favour of `effectiveUntil`; migrating it also changes `scripts/check-npm-audit.mjs` (line 20), so it is its own small change.
+- `osv-scanner.toml` still used `ignoreUntil`, which osv-scanner reports as deprecated in favour of `effectiveUntil`. **Done on 2026-11-21** in its own small change (last section of this file).
 
 ## Fix of 2026-11-21 · The time picker shows the draft's time on a daylight-saving day (F-02, RF-083)
 
@@ -784,3 +784,39 @@ Then open `reports/mutation/index.html`, and compare with the tables in `review.
 - Device checks (T057, T092), the iPad 100 ms measurement and the `us4-warnings` run on a tablet (T060), the iOS `xattr` check on a physical device and the Android E-028 test.
 - Questions from Security: remove four unused template packages (SEC-T061-3), look at an unmatched deep link on a device (SEC-T061-4).
 - The Planner reviews T062 to T079 before D3.
+
+## osv-scanner exceptions use `effectiveUntil` · fix/osv-effective-until (2026-11-21)
+
+Small change, form approved by Fernando on 2026-11-21 (`small-change-form-osv-effective-until.md`). One commit holds the configuration, the script and its tests (`e852353`).
+
+### What was done and what changes for the user
+
+Nothing changes in the app. The seven security exceptions of `osv-scanner.toml` now use the key `effectiveUntil`, the one osv-scanner asks for, and no longer print a deprecation warning on every check. Same exceptions, same expiry dates (2027-02-08 and 2027-02-10).
+
+### How: files and new pieces
+
+- `osv-scanner.toml`: seven lines renamed.
+- `scripts/check-npm-audit.mjs`: the regular expression that reads the expiry date reads the new key.
+- `tests/scripts/check-npm-audit-fixtures.ts` and `check-npm-audit.test.ts`: fixtures use the new key; one new test with the old one.
+
+### Why: decisions along the way
+
+- **The old key is not accepted as a fallback.** An entry that still uses `ignoreUntil` has no date for the script, so `npm audit` fails on it. The migration cannot be forgotten silently; osv-scanner would still honour the old key for now, and the stricter tool wins.
+- **Two tools, one key.** `osv-scanner` and our own script read the same file for different advisories (the scanner for the lockfile, the script for `npm audit`), so renaming only the file would have broken `verify.sh`.
+
+### To learn, with the real code
+
+- **Test first on a rename:** the fixtures were changed before the script, so three tests failed because the script looked for a key that was no longer there; changing the script then made them pass.
+- **A regular expression as a parser:** `/^\s*effectiveUntil\s*=\s*.../m` reads one line of a TOML block without a TOML parser. It is enough for this file, and its limits (it accepts a bare year, it ignores `[[PackageOverrides]]`) are in the Security record.
+
+### To check it
+
+```bash
+osv-scanner scan source --lockfile=package-lock.json --config=osv-scanner.toml   # «No issues found», no «deprecated» warning
+npx jest tests/scripts/check-npm-audit
+```
+
+### Pending
+
+- Renewal of the exceptions before 2027-02-08 (the 90-day maximum).
+- Optional hardening of the script (SEC-OSV-EU-1 and SEC-OSV-EU-2), as a separate change.

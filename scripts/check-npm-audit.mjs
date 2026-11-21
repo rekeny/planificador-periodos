@@ -11,13 +11,13 @@ function fail(message) {
   process.exit(1);
 }
 
-// Ids of the [[IgnoredVulns]] entries whose ignoreUntil is a date that has not passed yet.
-// An entry without ignoreUntil never ends, so it does not count.
+// Ids of the [[IgnoredVulns]] entries whose effectiveUntil is a date that has not passed yet.
+// An entry without effectiveUntil never ends, so it does not count.
 export function approvedIds(toml, now = new Date()) {
   const ids = new Set();
   for (const block of toml.split("[[IgnoredVulns]]").slice(1)) {
     const id = /^\s*id\s*=\s*"([^"]+)"/m.exec(block)?.[1];
-    const until = /^\s*ignoreUntil\s*=\s*([0-9T:\-Z.+]+)/m.exec(block)?.[1];
+    const until = /^\s*effectiveUntil\s*=\s*([0-9T:\-Z.+]+)/m.exec(block)?.[1];
     const expiry = until === undefined ? NaN : Date.parse(until);
     if (id !== undefined && expiry > now.getTime()) ids.add(id);
   }

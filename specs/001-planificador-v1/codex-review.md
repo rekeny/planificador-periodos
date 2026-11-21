@@ -1,28 +1,32 @@
 # Codex review
 
-- Date: 2026-11-21 21:34
-- Branch: docs/t061-d2-close against origin/main
-- Commit: 447a8a6
+- Date: 2026-11-21 21:56
+- Branch: fix/osv-effective-until against origin/main
+- Commit: e852353
 
-Reviewed `git diff origin/main...HEAD` at `447a8a6`. Only three documentation files changed.
+Reviewed `git diff origin/main...HEAD` at `e852353`.
 
-**BLOCKING: none. IMPORTANT: none.**
+**BLOCKING: none. IMPORTANT: none. MINOR: two documentation findings.**
 
-Three **MINOR** findings concern reporting accuracy:
+1. **MINOR — The report promises a weekly scan that is not configured.**  
+   `specs/001-planificador-v1/small-change-form-osv-effective-until.md:45` says a “weekly scan” would detect future changes. The only verification workflow runs on pull requests and pushes to `main`; weekly Dependabot checks cover GitHub Actions updates.  
+   **Fix:** replace “the weekly scan” with “the next verification run.”
 
-1. **Incorrect cache reuse count** — [review.md:1405](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/review.md:1405). The incremental log reports **789 of 804 results reused**, contradicting “804 … none run again”. **Fix:** record 789 reused and 15 not reused.
+2. **MINOR — The completion report is missing.**  
+   `specs/001-planificador-v1/summary.md:706` still lists this migration as pending, and neither `summary.md` nor `review.md` records this branch’s implementation and verification outcome. AGENTS.md requires that explanation and verification evidence.  
+   **Fix:** append the migration summary and actual verification results, and mark the migration portion of the pending item resolved. Keep exception renewal pending.
 
-2. **Incorrect D1 score comparison** — [review.md:1407](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/review.md:1407). D1 recorded **93.89%**, whereas this run achieved **94.78%**. Only the survivor count, 27, matches. **Fix:** distinguish the scores and retain the matching comparison with the November 13 D2 verification.
+No additional findings in:
 
-3. **Already merged PR listed as pending** — [summary.md:753](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/summary.md:753), repeated in `tasks.md:1019`. D2 PR #5 was merged on November 17 as `3e64306`. **Fix:** record that merge as completed and keep the outstanding device checks pending.
+| Review category                                | Result                                                                                                                                                                    |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Requirements and scope                         | Migration matches the approved small-change form. No application behaviour added.                                                                                         |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                                                                              |
+| Test preservation and effectiveness            | No assertions removed or weakened; reverting the key breaks the relevant scenarios.                                                                                       |
+| Security                                       | No findings. All seven IDs, reasons, approvals and expiry timestamps are preserved. OSV supports [`effectiveUntil`](https://google.github.io/osv-scanner/configuration/). |
+| Explanations and reports                       | The two minor findings above.                                                                                                                                             |
+| Simplicity and efficiency                      | No findings.                                                                                                                                                              |
 
-| Requested category                                | Result                                                                                                    |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 1. Requirements, examples and scope               | No new findings. Completed-task traceability passes; 11 RFs assigned to pending D3 still lack test names. |
-| 2. Constitution, layers, conventions and glossary | No findings introduced.                                                                                   |
-| 3. Test integrity and effectiveness               | No findings introduced; no tests changed.                                                                 |
-| 4. Security                                       | No findings introduced; documented release checks remain pending.                                         |
-| 5. Explanations and reports                       | Three MINOR findings above.                                                                               |
-| 6. Simplicity, clarity and efficiency             | No findings.                                                                                              |
+**Validation passed:** TypeScript, ESLint, formatting of changed supported files, focused/skipped-test checks, traceability, diff whitespace checks, and 12 additional in-memory scenarios using the actual script source.
 
-Type checking, lint, formatting, focused/skipped-test detection, traceability and `git diff --check` passed. Existing verification and Stryker logs were inspected; full verification and device tests were not rerun. Current PR/CI status could not be checked because GitHub was unreachable.
+Full Jest, `verify.sh`, fresh vulnerability scans and PR status were not verified because of filesystem and network restrictions. This review does **not** certify whole-spec completion: the specification remains in progress, with D3 tasks pending.
