@@ -1228,3 +1228,29 @@ Form: `small-change-form-team-forms-render-updates.md` (approved by Fernando, 20
 | 1   | **IMPORTANT. Verification records and the after explanation are missing; `summary.md` still teaches that `openTeam` runs before the first render and lists F-03 as pending; T081 describes the removed initialiser.** | Fixed in this branch: this section; `summary.md` has the after explanation and the corrected teaching paragraph, and F-03 is no longer pending; T081 says the initialiser is gone. The unverified checks (iOS, real device) are listed above. |
 
 Codex's other category results: no scope, constitution, layer or glossary finding, no test deleted, skipped or weakened, no security finding, no simplicity finding. Codex could not run Jest in its environment and did not confirm the full verification or the native behaviour.
+
+## Security and verification · fix/osv-unused-exceptions (2026-11-21)
+
+Form: `small-change-form-osv-unused-exceptions.md` (approved by Fernando, 2026-11-21). Change at commit `bf2c2fe`: two `[[IgnoredVulns]]` entries and two header lines of `osv-scanner.toml`. Nothing else.
+
+**Verification:** `npm run verify` on `bf2c2fe`: "20/20 checks passed", "All checks passed", exit code 0, and the osv-scanner step no longer prints «osv-scanner.toml has unused ignores» (it did on the earlier runs, for exactly these two ids). Tests and mutation testing are not affected: no code changed.
+
+**Security (role run by a subagent, read-only):** no findings, all five checks run.
+
+1. Both advisories are withdrawn (`https://api.osv.dev/v1/vulns/<id>`): `GHSA-gcqx-w48m-w2h4` (deepmerge) on 2026-11-16 and `GHSA-fc5q-39xc-vjpf` (picomatch) on 2026-11-18, both «Withdrawn Advisory».
+2. `osv-scanner scan source --lockfile=package-lock.json` scanned 1279 packages and ended with «No issues found», with no unused-ignores warning.
+3. The remaining seven exceptions (glob, minimatch, four of `qs`, esbuild) each have a reason, an approval and an expiry of at most 90 days from it (2027-02-08 for the ones approved on 2026-11-10, 90 days; 2027-02-10 for esbuild, approved on 2026-11-13, 89 days), and all seven are still used by the scan.
+4. `scripts/check-npm-audit.mjs` has no hard-coded id: it reads the `[[IgnoredVulns]]` entries at run time. Run as `scripts/verify.sh` runs it: «npm audit: no unapproved high or critical advisories», exit 0.
+5. Outside `specs/` nothing mentions the two ids; in `specs/` they appear only as history (the expo-sdk58 patches form, `000-puesta-en-marcha/review.md`, earlier sections of this file).
+
+The change only removes exceptions, so it can only make the scan stricter: if an advisory for the same package comes back with a new id, the scan fails until it is looked at.
+
+**Minor note, not part of this change:** `osv-scanner.toml` still uses `ignoreUntil`, which osv-scanner reports as deprecated in favour of `effectiveUntil`. Migrating it is a separate small change, and `scripts/check-npm-audit.mjs` (line 20) reads `ignoreUntil`, so the script would change with it. Recorded as pending.
+
+## Codex review · fix/osv-unused-exceptions (2026-11-21)
+
+Run: `scripts/review.sh specs/001-planificador-v1 origin/main` at commit `61e5afc`. Full output: [codex-review.md](codex-review.md), which replaces the previous one.
+
+**Verdict as stated by Codex:** no BLOCKING, IMPORTANT or MINOR findings. Its checks: exactly two exceptions removed, the seven kept unchanged with approval, reason and an expiry within 90 days, ten direct checks of the audit filter confirming that the removed ids are rejected, TOML validation, TypeScript, lint, formatting and traceability.
+
+**What Codex did not confirm:** its own OSV check failed because its environment could not resolve `api.osv.dev` (no network), so the withdrawal of the two advisories and the clean scan were not independently confirmed by Codex. They were read from the API and from the scan by the orchestrator and by the Security role (section above), which did have network. Codex also did not rerun the full verification.
