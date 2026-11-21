@@ -519,12 +519,22 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - scrollUntilVisible:
     element:
       text: "13 convocados"
+# The warning sits under the count: on Android the count can be on screen with the warning still
+# below the navigation bar, so the flow scrolls to the warning itself (checked on an Android 17
+# emulator, 2026-11-21).
+- scrollUntilVisible:
+    element:
+      text: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 13."
 - assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 13."
 - scrollUntilVisible:
     element:
       text: "Guardar"
 - tapOn: "Guardar"
 - assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 13."
+# With 13 players the last row is below the first screen of a phone: the grid scrolls vertically.
+- scrollUntilVisible:
+    element:
+      text: "Nora"
 - assertVisible: "Nora"
 - runFlow:
     when:
@@ -545,6 +555,12 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - scrollUntilVisible:
     element:
       text: "0 convocados"
+# The warning sits under the count: on Android the count can be on screen with the warning still
+# below the navigation bar, so the flow scrolls to the warning itself (checked on an Android 17
+# emulator, 2026-11-21).
+- scrollUntilVisible:
+    element:
+      text: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 0."
 - assertVisible: "Convocatoria fuera del rango: con 6 periodos deben ser de 9 a 12 jugadores, y hay 0."
 - scrollUntilVisible:
     element:

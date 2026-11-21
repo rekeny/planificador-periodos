@@ -8,6 +8,7 @@ import {
 
 import type { MatchView } from "@/state/match-view";
 import {
+  PHONE_PORTRAIT_STRIP_MAX_HEIGHT,
   PHONE_STRIP_MAX_HEIGHT,
   TABLET_STRIP_MAX_HEIGHT,
 } from "@/ui/grid/tablet-budget";
@@ -19,7 +20,7 @@ interface WarningStripProps {
   readonly view: MatchView;
   // Chips and short legend, as on a tablet or a phone in landscape (RF-076).
   readonly compact: boolean;
-  // The strip is bounded on every device so the grid keeps its room (RF-081); phones get less.
+  // The strip is bounded on every device so the grid keeps its room (RF-081); phones in landscape get less.
   readonly tablet: boolean;
   readonly onBannersLayout: (event: LayoutChangeEvent) => void;
   readonly onLegendLayout: (event: LayoutChangeEvent) => void;
@@ -38,7 +39,12 @@ export function WarningStrip({
   // part counts 0, and before any report nothing scrolls.
   const [bannersHeight, setBannersHeight] = useState(0);
   const [legendHeight, setLegendHeight] = useState(0);
-  const maxHeight = tablet ? TABLET_STRIP_MAX_HEIGHT : PHONE_STRIP_MAX_HEIGHT;
+  // A tablet, a phone in landscape (`compact`) and a phone in portrait each have their own bound.
+  const maxHeight = tablet
+    ? TABLET_STRIP_MAX_HEIGHT
+    : compact
+      ? PHONE_STRIP_MAX_HEIGHT
+      : PHONE_PORTRAIT_STRIP_MAX_HEIGHT;
   const scrollEnabled = bannersHeight + legendHeight > maxHeight;
   const handleBannersLayout = (event: LayoutChangeEvent): void => {
     setBannersHeight(event.nativeEvent.layout.height);
