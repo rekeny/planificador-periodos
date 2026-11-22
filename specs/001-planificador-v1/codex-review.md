@@ -1,32 +1,32 @@
 # Codex review
 
-- Date: 2026-11-21 21:56
-- Branch: fix/osv-effective-until against origin/main
-- Commit: e852353
+- Date: 2026-11-21 23:06
+- Branch: docs/d3-planner-review against origin/main
+- Commit: d2b26bc
 
-Reviewed `git diff origin/main...HEAD` at `e852353`.
+Reviewed `d2b26bc` using `git diff origin/main...HEAD`. This is a documentation-only D3 planning change.
 
-**BLOCKING: none. IMPORTANT: none. MINOR: two documentation findings.**
+**Findings: 0 BLOCKING, 1 IMPORTANT, 2 MINOR.**
 
-1. **MINOR — The report promises a weekly scan that is not configured.**  
-   `specs/001-planificador-v1/small-change-form-osv-effective-until.md:45` says a “weekly scan” would detect future changes. The only verification workflow runs on pull requests and pushes to `main`; weekly Dependabot checks cover GitHub Actions updates.  
-   **Fix:** replace “the weekly scan” with “the next verification run.”
+1. **IMPORTANT — T062 knowingly weakens existing properties until another commit.**  
+   [tasks.md:1240](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:1240) explicitly postpones adapting the random-sequence tests until T100. Once a question becomes pending, subsequent taps stop exercising marking, while the properties remain green. This conflicts with the requirement to preserve meaningful tests in every task commit.  
+   **Fix:** adapt both properties in T062, alongside the behavior change. Leave the additional action guards in T100.
 
-2. **MINOR — The completion report is missing.**  
-   `specs/001-planificador-v1/summary.md:706` still lists this migration as pending, and neither `summary.md` nor `review.md` records this branch’s implementation and verification outcome. AGENTS.md requires that explanation and verification evidence.  
-   **Fix:** append the migration summary and actual verification results, and mark the migration portion of the pending item resolved. Keep exception renewal pending.
+2. **MINOR — T093 needs a regression for choosing across dialog stages.**  
+   [tasks.md:1285](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:1285) combines the existing double-tap guard with content changes while `visible` remains true. The current guard resets only when visibility changes; the listed component scenario checks replacement content but never presses its options. T064 would catch this later, but T093 could pass independently with an unusable second stage.  
+   **Fix:** require a test that chooses an option, changes stages without closing, then successfully chooses again. Rearm the guard per stage while suppressing duplicate presses within that stage.
 
-No additional findings in:
+3. **MINOR — Current approval records contradict one another.**  
+   [tasks.md:15](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:15) still says approval is pending. The approval columns in `plan.md:1132` and `plan.md:1136` do likewise, although the plan header records Fernando’s decisions.  
+   **Fix:** update these current status fields with the recorded approvals and dates; retain device checks as pending.
 
-| Review category                                | Result                                                                                                                                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Requirements and scope                         | Migration matches the approved small-change form. No application behaviour added.                                                                                         |
-| Constitution, layers, conventions and glossary | No findings.                                                                                                                                                              |
-| Test preservation and effectiveness            | No assertions removed or weakened; reverting the key breaks the relevant scenarios.                                                                                       |
-| Security                                       | No findings. All seven IDs, reasons, approvals and expiry timestamps are preserved. OSV supports [`effectiveUntil`](https://google.github.io/osv-scanner/configuration/). |
-| Explanations and reports                       | The two minor findings above.                                                                                                                                             |
-| Simplicity and efficiency                      | No findings.                                                                                                                                                              |
+Category results:
 
-**Validation passed:** TypeScript, ESLint, formatting of changed supported files, focused/skipped-test checks, traceability, diff whitespace checks, and 12 additional in-memory scenarios using the actual script source.
+- **Requirements, examples and scope:** no additional findings. Full v1 remains incomplete: 11 RFs lack test names, all assigned to pending D3 work. Existing example names do not establish complete implementation.
+- **Constitution, layers, conventions and glossary:** no additional findings. ADR-006 covers the glossary additions.
+- **Test integrity:** findings 1–2. This diff changes no executable tests.
+- **Security:** no findings introduced; no runtime, dependency, permission or query changes.
+- **Explanations and reports:** finding 3. `summary.md` remains unchanged and describes earlier deliveries.
+- **Simplicity and efficiency:** no findings.
 
-Full Jest, `verify.sh`, fresh vulnerability scans and PR status were not verified because of filesystem and network restrictions. This review does **not** certify whole-spec completion: the specification remains in progress, with D3 tasks pending.
+Passed: TypeScript, lint, changed-file formatting, traceability, focused/skipped-test detection and `git diff --check`. Full verification, Jest, Stryker and native checks were not rerun. GitHub access failed, so PR/CI status was not confirmed.
