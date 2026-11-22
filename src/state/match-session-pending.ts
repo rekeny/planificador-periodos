@@ -11,6 +11,11 @@ export function ask(host: CallUpHost, pending: PendingQuestion): SaveResult {
   return { kind: "unchanged" };
 }
 
+/** While a question is open, nothing else acts on the match (D3-7). */
+export function hasPendingQuestion(host: CallUpHost): boolean {
+  return host.get().pending !== null;
+}
+
 /** Closes the open question and leaves everything else as it was. */
 export function drop(host: CallUpHost): void {
   host.set({ pending: null });

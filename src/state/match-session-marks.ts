@@ -15,7 +15,7 @@ import {
   type CallUpHost,
 } from "@/state/match-session-call-up";
 import { commitMarkChange } from "@/state/match-session-commit";
-import { ask } from "@/state/match-session-pending";
+import { ask, hasPendingQuestion } from "@/state/match-session-pending";
 import type { MatchSessionState } from "@/state/match-session-store";
 import type { SaveResult } from "@/state/save-result";
 
@@ -48,6 +48,9 @@ function tap(host: CallUpHost, cell: Cell): SaveResult {
 }
 
 function add(host: CallUpHost): SaveResult {
+  if (hasPendingQuestion(host)) {
+    return { kind: "unchanged" };
+  }
   const current = openMatchOf(host);
   if (current === null) {
     return { kind: "unchanged" };
@@ -68,6 +71,9 @@ function add(host: CallUpHost): SaveResult {
 }
 
 function removeLast(host: CallUpHost): SaveResult {
+  if (hasPendingQuestion(host)) {
+    return { kind: "unchanged" };
+  }
   const current = openMatchOf(host);
   if (current === null || current.grid.overtimeCount === 0) {
     return { kind: "unchanged" };
