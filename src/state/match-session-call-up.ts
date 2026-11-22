@@ -26,7 +26,7 @@ type Actions = Pick<
 >;
 type Published = Pick<
   MatchSessionState,
-  "grid" | "warnings" | "view" | "history" | "saveFailed"
+  "grid" | "warnings" | "view" | "history" | "saveFailed" | "pending"
 >;
 
 /** What the slice needs from the store: its state, a way to publish and the open match's team. */
@@ -60,7 +60,14 @@ export function publish(host: CallUpHost, next: Next): SaveResult {
     history,
     teamPlayers,
   });
-  host.set({ grid, warnings, view, history, saveFailed: false });
+  host.set({
+    grid,
+    warnings,
+    view,
+    history,
+    saveFailed: false,
+    pending: null,
+  });
   return { kind: "saved" };
 }
 

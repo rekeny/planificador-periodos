@@ -198,6 +198,9 @@ describe("match session, undoing a long series", () => {
     for (const [row, key] of taps) {
       const state = placed(store, db, matchId);
       if (tapAt(session, row, key).kind === "saved") before.push(state);
+      // T062: a tap without effect that asks leaves a question open, which would stop the later
+      // taps; the coach cancels it, so the question changes nothing and the sequence goes on.
+      store.getState().cancelQuestion();
     }
     expect(before.length).toBeGreaterThan(10);
     expect(before.length).toBeLessThan(taps.length);

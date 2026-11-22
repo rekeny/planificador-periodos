@@ -1,0 +1,17 @@
+import type { CallUpHost } from "@/state/match-session-call-up";
+import type { PendingQuestion } from "@/state/match-session-store";
+import type { SaveResult } from "@/state/save-result";
+
+/**
+ * Opens a question. A question is not a write: nothing is read or saved, no undo entry is pushed
+ * and nothing is published, so a previous failure flag stays as it was.
+ */
+export function ask(host: CallUpHost, pending: PendingQuestion): SaveResult {
+  host.set({ pending });
+  return { kind: "unchanged" };
+}
+
+/** Closes the open question and leaves everything else as it was. */
+export function drop(host: CallUpHost): void {
+  host.set({ pending: null });
+}

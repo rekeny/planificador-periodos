@@ -1,6 +1,7 @@
 // T051: tapCell on the session store, saved at once (RF-044, RF-048, RF-049, RF-051, RF-055, RF-056,
-// RF-060, RF-082). Real in-memory SQLite, the real domain. In D2 a tap that the domain answers with a
-// question (askSubOrStarter, confirmRemoveStarter) does nothing yet: the questions arrive in D3.
+// RF-060, RF-082). Real in-memory SQLite, the real domain. A tap that the domain answers with a
+// question (askSubOrStarter, confirmRemoveStarter) saves nothing and leaves `pending` set (T062,
+// RF-045, RF-050); the answers are tested in match-session-store.questions.test.ts.
 import { cellState } from "@/domain/grid";
 import { evaluateWarnings } from "@/domain/warnings";
 import { undoEntryOf } from "../../tests/support/match-session-call-up";
@@ -32,6 +33,7 @@ describe("match session, tapping an empty cell", () => {
     expect(warnings).toEqual(evaluateWarnings(savedGrid(db, matchId)));
     expect(history).toEqual([undoEntryOf(ana, 1)]);
     expect(view?.canUndo).toBe(true);
+    expect(store.getState().pending).toBeNull();
   });
 
   it("RF-044 RF-082: the first tap on a match with no marks and no overtimes works and reads back from a new store", () => {
@@ -53,6 +55,7 @@ describe("match session, tapping an empty cell", () => {
     expect(savedMarks(db, matchId)).toContain(`${ana}:P6=sub`);
     expect(mostStarters(savedGrid(db, matchId))).toBe(5);
     expect(store.getState().history).toEqual([undoEntryOf(ana, 6)]);
+    expect(store.getState().pending).toBeNull();
   });
 
   it("RF-048: tapping an empty cell in an overtime with 5 X marks a circled X", () => {
@@ -123,23 +126,33 @@ describe("match session, a tap the domain answers with a question", () => {
       8,
       fillColumn("P1", [1, 2, 3, 4, 5]),
     );
+    const ana = entryIds[0] ?? 0;
     const before = snapshotOf(store, db, matchId);
-    expect(store.getState().tapCell(cellAt(entryIds[0] ?? 0, "P1"))).toEqual({
+    expect(store.getState().tapCell(cellAt(ana, "P1"))).toEqual({
       kind: "unchanged",
+    });
+    expect(store.getState().pending).toEqual({
+      kind: "subOrStarter",
+      cell: cellAt(ana, "P1"),
     });
     expect(snapshotOf(store, db, matchId)).toEqual(before);
     expect(store.getState().saveFailed).toBe(false);
   });
 
-  it("RF-049: tapping an X in a period that has a sub is unchanged in D2: the confirmation arrives in D3", () => {
+  it("RF-050 E-013: tapping an X in a period that has a sub asks the reminder: unchanged, nothing saved and the reminder pending on that cell", () => {
     const seeds = [
       ...fillColumn("P6", [0, 1, 2, 3, 4]),
       ...fillColumn("P6", [5], "sub"),
     ];
     const { store, db, matchId, entryIds } = openedSession(8, seeds);
+    const eva = entryIds[0] ?? 0;
     const before = snapshotOf(store, db, matchId);
-    expect(store.getState().tapCell(cellAt(entryIds[0] ?? 0, "P6"))).toEqual({
+    expect(store.getState().tapCell(cellAt(eva, "P6"))).toEqual({
       kind: "unchanged",
+    });
+    expect(store.getState().pending).toEqual({
+      kind: "confirmRemoveStarter",
+      cell: cellAt(eva, "P6"),
     });
     expect(snapshotOf(store, db, matchId)).toEqual(before);
   });

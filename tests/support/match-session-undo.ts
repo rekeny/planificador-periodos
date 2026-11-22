@@ -2,6 +2,7 @@
 // match-session-marks.ts without changing it. Expected API of the session store, on top of the T051
 // one: undo(): SaveResult (synchronous, like tapCell, addOvertime and removeLastOvertime).
 import {
+  boolean,
   constant,
   integer,
   nat,
@@ -69,9 +70,18 @@ export function withCellState(
   };
 }
 
-/** One step of a random sequence: `col` is a position in the drawn columns, -1 the last column. */
+/**
+ * One step of a random sequence: `col` is a position in the drawn columns, -1 the last column. A
+ * tap can leave a question pending (T062): `answer` tells the sequence to answer it (answerSub or
+ * confirmRemove) when true, or to cancel it (cancelQuestion) when false.
+ */
 export type Step =
-  | { readonly kind: "tap"; readonly row: number; readonly col: number }
+  | {
+      readonly kind: "tap";
+      readonly row: number;
+      readonly col: number;
+      readonly answer: boolean;
+    }
   | { readonly kind: "add" }
   | { readonly kind: "remove" }
   | { readonly kind: "undo" };
@@ -88,7 +98,8 @@ export const stepArbitrary: Arbitrary<Step> = oneof(
         integer({ min: 0, max: 11 }),
         constant(-1),
       ),
-    ).map(([row, col]): Step => ({ kind: "tap", row, col })),
+      boolean(),
+    ).map(([row, col, answer]): Step => ({ kind: "tap", row, col, answer })),
   },
   { weight: 2, arbitrary: constant<Step>({ kind: "add" }) },
   { weight: 2, arbitrary: constant<Step>({ kind: "remove" }) },

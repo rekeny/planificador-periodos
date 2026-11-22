@@ -4,7 +4,7 @@
 // splash screen, initializeDatabase and the store getters of `@/state/app-stores` are doubles. The
 // grid is read through the labels of its cells. Window: a phone, so the buttons are in the toolbar
 // (the header ones are in match-screen.toolbar.test.tsx). Assumed screen: match-screen-grid.ts.
-import { screen } from "expo-router/testing-library";
+import { act, screen } from "expo-router/testing-library";
 
 import {
   fillColumn,
@@ -146,7 +146,7 @@ describe("match screen, tapping cells", () => {
     },
   );
 
-  it("RF-049 RF-055: an X in a period with a sub does nothing yet (D2 limit), and the circled X still empties", async () => {
+  it("RF-049 RF-050 RF-055: an X in a period with a sub only opens the reminder in the store (the dialog is T064), and after cancelling it the circled X still empties", async () => {
     const seeds: SeedMark[] = [
       ...fillColumn("P6", [0, 1, 2, 3, 4]),
       [5, "P6", "sub"],
@@ -156,6 +156,8 @@ describe("match screen, tapping cells", () => {
     expect(cellState("Jugador 1", "P6")).toBe("starter");
     expect(savedMarks(s.db, s.matchId)).toHaveLength(6);
     expect(screen.queryByText(SAVE_FAILED)).toBeNull();
+    expect(s.store.getState().pending?.kind).toBe("confirmRemoveStarter");
+    await act(async () => s.store.getState().cancelQuestion());
     await tap("Jugador 6", "P6");
     expect(cellState("Jugador 6", "P6")).toBe("empty");
   });

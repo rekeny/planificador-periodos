@@ -1,20 +1,21 @@
 import {
   addOvertime as saveOvertime,
   removeLastOvertime as deleteLastOvertime,
-  saveCellChanges,
 } from "@/data/grid-repository";
 import { listPlayers } from "@/data/player-repository";
 import type { PlayerRecord } from "@/data/records";
 import { cellExists, type Cell } from "@/domain/grid";
 import { tapCell } from "@/domain/marking";
 import { addOvertime, removeLastOvertime } from "@/domain/overtime";
-import { cellChanges, pruneHistory, undoEntryFor } from "@/domain/undo";
+import { pruneHistory } from "@/domain/undo";
 import {
   failed,
   openMatchOf,
   publish,
   type CallUpHost,
 } from "@/state/match-session-call-up";
+import { commitMarkChange } from "@/state/match-session-commit";
+import { ask } from "@/state/match-session-pending";
 import type { MatchSessionState } from "@/state/match-session-store";
 import type { SaveResult } from "@/state/save-result";
 
@@ -23,35 +24,27 @@ type Actions = Pick<
   "tapCell" | "addOvertime" | "removeLastOvertime"
 >;
 
-// In D2 the questions and "unchanged" change nothing (the questions arrive in D3).
 function tap(host: CallUpHost, cell: Cell): SaveResult {
   const current = openMatchOf(host);
-  if (current === null || !cellExists(current.grid, cell)) {
+  // While a question is open nothing else acts on the grid (D3-7).
+  if (
+    current === null ||
+    host.get().pending !== null ||
+    !cellExists(current.grid, cell)
+  ) {
     return { kind: "unchanged" };
   }
   const result = tapCell(current.grid, cell);
-  if (result.kind !== "changed") {
-    return { kind: "unchanged" };
+  switch (result.kind) {
+    case "changed":
+      return commitMarkChange(host, current, result.grid);
+    case "askSubOrStarter":
+      return ask(host, { kind: "subOrStarter", cell });
+    case "confirmRemoveStarter":
+      return ask(host, { kind: "confirmRemoveStarter", cell });
+    default:
+      return { kind: "unchanged" };
   }
-  let teamPlayers: PlayerRecord[];
-  try {
-    // Read first, write last: nothing fallible is left after the commit (RF-085).
-    teamPlayers = listPlayers(host.db, current.teamId);
-    saveCellChanges(
-      host.db,
-      current.matchId,
-      cellChanges(current.grid, result.grid),
-    );
-  } catch {
-    return failed(host);
-  }
-  const entry = undoEntryFor(current.grid, result.grid);
-  return publish(host, {
-    matchId: current.matchId,
-    grid: result.grid,
-    history: [...host.get().history, entry],
-    teamPlayers,
-  });
 }
 
 function add(host: CallUpHost): SaveResult {

@@ -4,6 +4,9 @@
 // replaced, pruned the way RF-086 says (an overtime removed takes its entries with it), and expects
 // every undo to give exactly that, so an undo that touched a column created again would fail.
 // Each run resets one in-memory database per format. Settings come from tests/setup/.
+// T062: a tap that asks (a full rule-window period, an X in a period with a sub) leaves a question
+// pending, and then every other tap is unchanged. So the sequence answers or cancels each question
+// right away, as the step's `answer` flag says, and the later taps keep marking the grid.
 import { array, assert, constantFrom, property } from "fast-check";
 import type { Format } from "@/domain/format";
 import {
@@ -13,6 +16,7 @@ import {
   type MatchGrid,
 } from "@/domain/grid";
 import type { MatchSessionState } from "@/state/match-session-store";
+import type { MatchSessionStore } from "../../tests/support/match-session-fixtures";
 import type { SaveResult } from "@/state/save-result";
 import {
   mostStarters,
@@ -51,7 +55,8 @@ function gridOf(state: MatchSessionState): MatchGrid {
   return state.grid;
 }
 
-// A tap changes exactly the cell it aims at, or nothing (the questions arrive in D3).
+// A tap, with the answer to the question it may ask, changes exactly the cell it aims at, or
+// nothing (the question was cancelled).
 function followTap(stack: Replaced[], { before, after, result, cell }: Moment) {
   if (cell === null) throw new Error("A tap has a cell");
   if (result.kind !== "saved") {
@@ -63,6 +68,26 @@ function followTap(stack: Replaced[], { before, after, result, cell }: Moment) {
   expect(cellState(after, cell)).not.toBe(prior);
   expect(after).toEqual(withCellState(before, cell, cellState(after, cell)));
   stack.push({ cell, prior });
+}
+
+// A tap that returns "unchanged" must have asked: answer it or cancel it, as the step says, and
+// return what the tap and its answer did together (the result of the answer, or "unchanged").
+function settle(store: MatchSessionStore, answer: boolean, m: Moment): Moment {
+  if (m.result.kind === "saved") {
+    expect(store.getState().pending).toBeNull();
+    return m;
+  }
+  expect(m.after).toEqual(m.before);
+  const state = store.getState();
+  const kind = state.pending?.kind;
+  expect(["subOrStarter", "confirmRemoveStarter"]).toContain(kind);
+  if (!answer) {
+    state.cancelQuestion();
+    return { ...m, after: gridOf(store.getState()) };
+  }
+  const result =
+    kind === "subOrStarter" ? state.answerSub() : state.confirmRemove();
+  return { ...m, result, after: gridOf(store.getState()) };
 }
 
 function followOvertime(stack: Replaced[], kind: Step["kind"], m: Moment) {
@@ -102,15 +127,20 @@ function runSteps(format: Format, steps: readonly Step[]): void {
     const state = store.getState();
     const after = gridOf(state);
     const moment = { before, after, result, cell };
-    if (step.kind === "tap") followTap(stack, moment);
-    else if (step.kind === "undo") followUndo(stack, moment);
+    if (step.kind === "tap") {
+      followTap(stack, settle(store, step.answer, moment));
+    } else if (step.kind === "undo") followUndo(stack, moment);
     else followOvertime(stack, step.kind, moment);
-    expect(mostStarters(after)).toBeLessThanOrEqual(5);
-    expect(savedGrid(db, matchId)).toEqual(after);
-    expect(state.saveFailed).toBe(false);
-    expect(state.view?.columns).toHaveLength(format + after.overtimeCount);
-    expect(state.history).toHaveLength(stack.length);
-    expect(state.view?.canUndo).toBe(stack.length > 0);
+    const settled = store.getState();
+    const final = gridOf(settled);
+    expect(mostStarters(final)).toBeLessThanOrEqual(5);
+    expect(savedGrid(db, matchId)).toEqual(final);
+    expect(settled.saveFailed).toBe(false);
+    expect(settled.view?.columns).toHaveLength(format + final.overtimeCount);
+    expect(settled.history).toHaveLength(stack.length);
+    expect(settled.view?.canUndo).toBe(stack.length > 0);
+    // Only a tap that asked leaves a question open, and it was just answered or cancelled.
+    expect(settled.pending).toBeNull();
   }
 }
 
