@@ -59,8 +59,9 @@ export function QuestionDialog(props: QuestionDialogProps): ReactElement {
       visible={visible}
       onRequestClose={onCancel}
     >
-      <Pressable style={styles.backdrop} onPress={onCancel}>
+      <Pressable accessible={false} style={styles.backdrop} onPress={onCancel}>
         <Pressable
+          accessible={false}
           testID="choice-dialog-card"
           style={[
             styles.card,
