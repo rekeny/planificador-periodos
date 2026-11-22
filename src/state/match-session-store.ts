@@ -3,11 +3,13 @@ import type { StoreApi } from "zustand/vanilla";
 import type { AppDatabase } from "@/data/database-types";
 import { loadGridRecords } from "@/data/grid-repository";
 import { listPlayers } from "@/data/player-repository";
+import type { CellMenuChoice } from "@/domain/cell-menu";
 import type { Cell, MatchGrid } from "@/domain/grid";
 import type { UndoEntry } from "@/domain/undo";
 import { evaluateWarnings, type Warnings } from "@/domain/warnings";
 import { createCallUpActions } from "@/state/match-session-call-up";
 import { createMarksActions } from "@/state/match-session-marks";
+import { createMenuActions } from "@/state/match-session-menu";
 import { createQuestionsActions } from "@/state/match-session-questions";
 import { createUndoActions } from "@/state/match-session-undo";
 import { gridFromRecords } from "@/state/match-session-grid";
@@ -36,6 +38,8 @@ export interface MatchSessionState {
   chooseReplaced(entryId: number): SaveResult; //     RF-047, RF-057
   confirmRemove(): SaveResult; //                     RF-050, RF-054
   cancelQuestion(): void; //                          RF-045, RF-050
+  openCellMenu(cell: Cell): SaveResult; //            RF-052 (opens the menu, writes nothing)
+  chooseCellMenuOption(choice: CellMenuChoice): SaveResult; // RF-052, RF-053
 }
 
 export type PendingQuestion =
@@ -87,6 +91,7 @@ export function createMatchSessionStore(db: AppDatabase): MatchSessionStore {
     ...createMarksActions({ db, get, set, teamId: () => teamId }),
     ...createUndoActions({ db, get, set, teamId: () => teamId }),
     ...createQuestionsActions({ db, get, set, teamId: () => teamId }),
+    ...createMenuActions({ db, get, set, teamId: () => teamId }),
     openMatch(id) {
       try {
         const loaded = load(db, id);
