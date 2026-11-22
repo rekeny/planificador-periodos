@@ -1590,3 +1590,33 @@ Run: `scripts/review.sh specs/001-planificador-v1 origin/main < /dev/null` at co
 Codex's category results: 1. requirements, examples and scope: no additional findings; 11 RFs still lack test names, all assigned to pending D3 work. 2. Constitution, layers, conventions and glossary: no findings; ADR-006 covers the glossary additions. 3. Test integrity: findings 1 and 2, since this diff changes no executable tests. 4. Security: no findings; no runtime, dependency, permission or query changes. 5. Explanations and reports: finding 3; `summary.md` is unchanged and describes earlier deliveries. 6. Simplicity and efficiency: no findings.
 
 Codex passed TypeScript, lint, changed-file formatting, traceability, focused and skipped-test detection and `git diff --check`. It did not rerun full verification, Jest, Stryker or native checks. GitHub access failed, so PR and CI status were not confirmed.
+
+## Maestro of US5 on iOS and Android · T066 and F-D3-02 (2026-11-22)
+
+Branch `001-planificador-v1-d3`. The app code of every device run is the commit `5ee3336` (F-D3-02): the first iOS runs were made before it and found the defect it fixes. The flows are uncommitted at the time of the runs and are committed with T066. Maestro 2.12.1, Release builds (`npx expo run:ios --configuration Release`, 519 s; `./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a`, 53 min 56 s with the download of Gradle and its dependencies, APK of 37 MB).
+
+### Devices
+
+- **iOS:** iPhone 17 simulator (iOS 27.2), Spanish.
+- **Android:** phone emulator `Medium_Phone_API_37.0` (Android 17, 1080 x 2400), started with `-no-snapshot-save -no-audio`; the "System UI isn't responding" dialog dismissed with «Wait»; `MAESTRO_DRIVER_STARTUP_TIMEOUT=240000`.
+
+### Result
+
+| Flow                                                                                      | iOS (steps, time)        | Android (steps, time)    |
+| ----------------------------------------------------------------------------------------- | ------------------------ | ------------------------ |
+| `us5-subs` (E-011, E-012, E-013, E-027, RF-047, RF-053, the long-press menu, saved state) | passes, 343 steps, 351 s | passes, 343 steps, 793 s |
+| `us5-undo-after-call-up` (E-026)                                                          | passes, 108 steps, 159 s | passes, 108 steps, 313 s |
+| `us3-planning` (the sixth tap now opens the question and «Cancelar» closes it)            | passes, 207 steps, 214 s | passes, 211 steps, 479 s |
+
+`us5-subs` needed five runs on iOS (the first four each found one thing below) and, on Android, two (the first lost the first tap after a cold start of the emulator: a tap by hand with `adb` opened the form, as in F-A3). The Android run of `us3-planning` has four more completed steps than the iOS one because of the platform conditions of the flow.
+
+### Findings of the runs
+
+- **F-D3-02 (app, accessibility, fixed in `5ee3336`).** On iOS the backdrop and the card of the question dialog were accessibility elements and merged the text of everything inside them: Maestro saw the card as one element, «Ana, P3: X, titular, Titular, Entró de cambio, Quitar, …, Cancelar», so «Cancelar» could not be found or tapped by itself, and VoiceOver could not reach it either. Fix: `accessible={false}` on both, with a Jest test on the prop (Jest cannot reproduce the merge: the Maestro run is the proof). Not seen by the Jest tests of T093 and T064.
+- **The tap outside at 5%,5% (flow).** On iOS that point is inside the status bar, whose touches never reach the app, so the question did not close. The US5 flows tap the backdrop at `2%,50%` (the 24 pt margin left of the card, at mid height).
+- **The choice of the replaced X (flow).** iOS exposes each option as one element, «5, Eva» (number and name merged, right for VoiceOver); the flows select it with `(\d+, )?Eva` below the title of the question. Android did not need `childOf` or `index`.
+- **Environment.** A disk full (386 MB free) made the third iOS run fail after 29 s; the regenerable build outputs (`ios/`, `DerivedData` of 6.3 GB) were deleted and the app stayed installed. `pod install` needs `LANG` and `LC_ALL` in UTF-8 in this shell. The Gradle cache (`~/.gradle`) did not exist and was downloaded again (3.2 GB).
+
+### Not covered by these runs (for T094, by hand)
+
+The question dialog in landscape on iOS (React Native's `Modal` supports portrait by default), a possible flicker when a question closes, whether the long press yields to the horizontal scroll of the grid on a real finger, and the iPad and the Android tablet (these runs are a phone each).

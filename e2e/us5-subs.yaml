@@ -1,0 +1,512 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-045 RF-046 RF-047 RF-048 RF-050 RF-051 RF-052 RF-053 RF-054 RF-055 RF-066 RF-087 E-011 E-012 E-013 E-027: the question of a sixth X, the choice of the replaced X, the reminder and the long-press menu, each closing three ways, and the legend of a period with a sub"
+---
+# Journey of US5 on a clean install (T066). Written WITHOUT running it: Maestro is not run in the session that
+# writes it, so the first real run may need adjustments. Nothing here uses the network.
+# Device size assumed: a phone in portrait, iOS and Android. The only platform-conditional steps are Back
+# (Android only) and, in its place on iOS, a second tap outside. Only the first seven rows are touched, so no
+# vertical scroll of the grid is needed. The team has 10 players, so the call-up is in range and the strip holds
+# only what the situation of each step makes appear.
+# A dialog closes three ways, and each is tried: its «Cancelar», a tap outside the card (the point 2%,50% is
+# the dark backdrop left of it, at mid height: 5%,5% falls in the iOS status bar, which never reaches the app) and Back on Android; iOS has no Back, so there the third way is a second tap
+# outside. After each, the cells are checked as they were.
+# In a rule-window period (P1 to P5) with 5 X a tap on an empty cell asks; in P6, a free period, it does not.
+# The long press is Maestro's `longPressOn` on the cell's accessible label.
+- launchApp:
+    clearState: true
+- tapOn: "Nuevo equipo"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Alevín A"
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Ana"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "1"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Bea"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "2"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Carla"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "3"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Dani"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "4"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Eva"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "5"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Fran"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "6"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Gala"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "7"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Hugo"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "8"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Iker"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "9"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Jon"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "10"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- assertVisible: "Jon"
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+
+# The situation of E-002 built with the menu: Ana has an X in P1 and P2 and a sub in P3, no other cell.
+# A long press on the X of P3 offers the three options and «Cancelar»; «Entró de cambio» makes the circle.
+# The legend, found by scrolling in the strip, explains the light red cell, «!» and «≠» and not the player
+# in red. P3 shows «≠» and not «!»; P1 and P5 show «!»; P6 shows nothing.
+- tapOn: "Ana, P1: casilla vacía"
+- assertVisible: "Ana, P1: X, titular"
+- tapOn: "Ana, P2: casilla vacía"
+- assertVisible: "Ana, P2: X, titular"
+- tapOn: "Ana, P3: casilla vacía"
+- assertVisible: "Ana, P3: X, titular"
+- longPressOn: "Ana, P3: X, titular"
+- assertVisible: "Entró de cambio"
+- assertVisible: "Titular"
+- assertVisible: "Quitar"
+- assertVisible: "Cancelar"
+- tapOn: "Entró de cambio"
+- assertNotVisible: "Entró de cambio"
+- assertVisible: "Ana, P3: X con círculo, entró de cambio"
+- scrollUntilVisible:
+    element:
+      text: "Si la marcas, no descansará el mínimo del tramo."
+- assertVisible: "Si la marcas, no descansará el mínimo del tramo."
+- scrollUntilVisible:
+    element:
+      text: "Periodo incompleto: tiene menos de 5 titulares."
+- assertVisible: "Periodo incompleto: tiene menos de 5 titulares."
+- scrollUntilVisible:
+    element:
+      text: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertVisible: "Periodo incoherente: hay un cambio pero menos de 5 titulares. ¿Has quitado la X de quien salió?"
+- assertNotVisible: "No cumple la regla del tramo."
+- assertNotVisible: "Con las casillas vacías que quedan en el tramo ya no se puede cumplir la regla para todos."
+- assertVisible:
+    text: "≠"
+    rightOf: "P3"
+    leftOf: "P4"
+- assertVisible:
+    text: "!"
+    leftOf: "P2"
+- assertVisible:
+    text: "!"
+    rightOf: "P5"
+    leftOf: "P6"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P6"
+
+# E-011: P2 gets five X; the sixth tap, on Fran's empty cell, asks. «Cancelar», a tap outside and Back
+# each close it and leave Fran's cell empty and Eva's X in place, with no circle.
+- tapOn: "Bea, P2: casilla vacía"
+- assertVisible: "Bea, P2: X, titular"
+- tapOn: "Carla, P2: casilla vacía"
+- assertVisible: "Carla, P2: X, titular"
+- tapOn: "Dani, P2: casilla vacía"
+- assertVisible: "Dani, P2: X, titular"
+- tapOn: "Eva, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- tapOn: "Fran, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Entra de cambio"
+- assertVisible: "Titular en lugar de otro"
+- assertVisible: "Cancelar"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Fran, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- assertNotVisible: "Fran, P2: X con círculo, entró de cambio"
+- tapOn: "Fran, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Entra de cambio"
+- assertVisible: "Titular en lugar de otro"
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Fran, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- assertNotVisible: "Fran, P2: X con círculo, entró de cambio"
+- tapOn: "Fran, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Entra de cambio"
+- assertVisible: "Titular en lugar de otro"
+- assertVisible: "Cancelar"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: 2%,50%
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Fran, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- assertNotVisible: "Fran, P2: X con círculo, entró de cambio"
+# Answering «Entra de cambio» marks a circled X; the five X stay.
+- tapOn: "Fran, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Entra de cambio"
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Fran, P2: X con círculo, entró de cambio"
+- assertVisible: "Eva, P2: X, titular"
+- assertVisible: "Ana, P2: X, titular"
+
+# Answering «Titular en lugar de otro» asks whom it replaces. The choice closes three ways too, leaving
+# Gala's cell empty and every X as it was. Then Eva is chosen: Gala gets the X and Eva's cell is empty,
+# not circled, and Fran's sub stays. On iOS each option of the choice is ONE element labelled «5, Eva» (number and name merged), so the
+# text is a regex with an optional number prefix; on Android they may be two nodes. The regex is anchored, so it
+# does not match the grid's cell labels «Eva, P2: …».
+- tapOn: "Gala, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Titular en lugar de otro"
+- assertVisible: "¿A quién sustituye como titular?"
+- assertVisible: "Cancelar"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿A quién sustituye como titular?"
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Gala, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- assertVisible: "Fran, P2: X con círculo, entró de cambio"
+- tapOn: "Gala, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Titular en lugar de otro"
+- assertVisible: "¿A quién sustituye como titular?"
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertNotVisible: "¿A quién sustituye como titular?"
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Gala, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- assertVisible: "Fran, P2: X con círculo, entró de cambio"
+- tapOn: "Gala, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Titular en lugar de otro"
+- assertVisible: "¿A quién sustituye como titular?"
+- assertVisible: "Cancelar"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: 2%,50%
+- assertNotVisible: "¿A quién sustituye como titular?"
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- assertVisible: "Gala, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- assertVisible: "Fran, P2: X con círculo, entró de cambio"
+- tapOn: "Gala, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Titular en lugar de otro"
+- assertVisible: "¿A quién sustituye como titular?"
+- tapOn:
+    text: "(\\d+, )?Eva"
+    below: "¿A quién sustituye como titular?"
+- assertNotVisible: "¿A quién sustituye como titular?"
+- assertVisible: "Gala, P2: X, titular"
+- assertVisible: "Eva, P2: casilla vacía"
+- assertNotVisible: "Eva, P2: X con círculo, entró de cambio"
+- assertVisible: "Fran, P2: X con círculo, entró de cambio"
+
+# A long press on the circled X of P2 and «Titular» in a period with 5 X asks which X it replaces: Dani.
+- longPressOn: "Fran, P2: X con círculo, entró de cambio"
+- assertVisible: "Entró de cambio"
+- assertVisible: "Titular"
+- assertVisible: "Quitar"
+- assertVisible: "Cancelar"
+- tapOn: "Titular"
+- assertVisible: "¿A quién sustituye como titular?"
+- tapOn:
+    text: "(\\d+, )?Dani"
+    below: "¿A quién sustituye como titular?"
+- assertNotVisible: "¿A quién sustituye como titular?"
+- assertVisible: "Fran, P2: X, titular"
+- assertVisible: "Dani, P2: casilla vacía"
+- assertNotVisible: "Dani, P2: X con círculo, entró de cambio"
+
+# E-012: P6 is a free period. With five X, a sixth tap marks a circled X with no question; a tap on a
+# circled X removes it, in any period.
+- tapOn: "Ana, P6: casilla vacía"
+- assertVisible: "Ana, P6: X, titular"
+- tapOn: "Bea, P6: casilla vacía"
+- assertVisible: "Bea, P6: X, titular"
+- tapOn: "Carla, P6: casilla vacía"
+- assertVisible: "Carla, P6: X, titular"
+- tapOn: "Dani, P6: casilla vacía"
+- assertVisible: "Dani, P6: X, titular"
+- tapOn: "Eva, P6: casilla vacía"
+- assertVisible: "Eva, P6: X, titular"
+- tapOn: "Fran, P6: casilla vacía"
+- assertVisible: "Fran, P6: X con círculo, entró de cambio"
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Fran, P6: X con círculo, entró de cambio"
+- assertVisible: "Fran, P6: casilla vacía"
+
+# E-013: P3 gets five X besides Ana's sub. A tap on Eva's X shows the reminder, which closes three ways
+# keeping the X. «Quitar de todos modos» removes it: the sub stays circled (nothing changes by itself),
+# and P3 shows «≠» and not «!».
+- tapOn: "Bea, P3: casilla vacía"
+- assertVisible: "Bea, P3: X, titular"
+- tapOn: "Carla, P3: casilla vacía"
+- assertVisible: "Carla, P3: X, titular"
+- tapOn: "Dani, P3: casilla vacía"
+- assertVisible: "Dani, P3: X, titular"
+- tapOn: "Eva, P3: casilla vacía"
+- assertVisible: "Eva, P3: X, titular"
+- tapOn: "Fran, P3: casilla vacía"
+- assertVisible: "Fran, P3: X, titular"
+- tapOn: "Eva, P3: X, titular"
+- assertVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Quitar de todos modos"
+- assertVisible: "Cancelar"
+- tapOn: "Cancelar"
+- assertNotVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Eva, P3: X, titular"
+- assertVisible: "Ana, P3: X con círculo, entró de cambio"
+- tapOn: "Eva, P3: X, titular"
+- assertVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Quitar de todos modos"
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertNotVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Eva, P3: X, titular"
+- assertVisible: "Ana, P3: X con círculo, entró de cambio"
+- tapOn: "Eva, P3: X, titular"
+- assertVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Quitar de todos modos"
+- assertVisible: "Cancelar"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: 2%,50%
+- assertNotVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Eva, P3: X, titular"
+- assertVisible: "Ana, P3: X con círculo, entró de cambio"
+- tapOn: "Eva, P3: X, titular"
+- assertVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- tapOn: "Quitar de todos modos"
+- assertNotVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Eva, P3: casilla vacía"
+- assertVisible: "Ana, P3: X con círculo, entró de cambio"
+- assertVisible:
+    text: "≠"
+    rightOf: "P3"
+    leftOf: "P4"
+- assertNotVisible:
+    text: "!"
+    rightOf: "P3"
+    leftOf: "P4"
+
+# The long-press menu on Dani's X of P3 (a period with a sub): it closes three ways changing nothing.
+# «Quitar» shows the reminder first, as a tap does: «Cancelar» keeps the X, «Quitar de todos modos» removes it.
+- longPressOn: "Dani, P3: X, titular"
+- assertVisible: "Entró de cambio"
+- assertVisible: "Titular"
+- assertVisible: "Quitar"
+- assertVisible: "Cancelar"
+- tapOn: "Cancelar"
+- assertNotVisible: "Entró de cambio"
+- assertVisible: "Dani, P3: X, titular"
+- longPressOn: "Dani, P3: X, titular"
+- assertVisible: "Entró de cambio"
+- assertVisible: "Titular"
+- assertVisible: "Quitar"
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertNotVisible: "Entró de cambio"
+- assertVisible: "Dani, P3: X, titular"
+- longPressOn: "Dani, P3: X, titular"
+- assertVisible: "Entró de cambio"
+- assertVisible: "Titular"
+- assertVisible: "Quitar"
+- assertVisible: "Cancelar"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: 2%,50%
+- assertNotVisible: "Entró de cambio"
+- assertVisible: "Dani, P3: X, titular"
+- longPressOn: "Dani, P3: X, titular"
+- tapOn: "Quitar"
+- assertVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- tapOn: "Cancelar"
+- assertNotVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Dani, P3: X, titular"
+- longPressOn: "Dani, P3: X, titular"
+- tapOn: "Quitar"
+- assertVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- tapOn: "Quitar de todos modos"
+- assertNotVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Dani, P3: casilla vacía"
+# P3 now has 3 X and Ana's sub: «Titular» on the sub makes an X with no question. With no sub left in
+# the period, «Quitar» on an X removes it at once; «Entró de cambio» and then «Quitar» empties a cell.
+- longPressOn: "Ana, P3: X con círculo, entró de cambio"
+- tapOn: "Titular"
+- assertNotVisible: "¿A quién sustituye como titular?"
+- assertVisible: "Ana, P3: X, titular"
+- longPressOn: "Fran, P3: X, titular"
+- tapOn: "Quitar"
+- assertNotVisible: "Si ha salido por un cambio, déjala marcada: sigue contando como jugado"
+- assertVisible: "Fran, P3: casilla vacía"
+- longPressOn: "Bea, P3: X, titular"
+- tapOn: "Entró de cambio"
+- assertVisible: "Bea, P3: X con círculo, entró de cambio"
+- longPressOn: "Bea, P3: X con círculo, entró de cambio"
+- tapOn: "Quitar"
+- assertVisible: "Bea, P3: casilla vacía"
+
+# Constitution 4: every change was saved at once. The app is closed and opened again with nothing
+# cleared; the list of teams comes first (F-A3: a link in the first fraction of a second is lost) and
+# then match 1 is opened with its deep link.
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertVisible: "Alevín A"
+- openLink: planificadorperiodos://matches/1
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
+# The match is read from the database after the link: on a busy machine the grid takes longer than
+# the default wait of a check, so the first check waits up to 20 seconds.
+- extendedWaitUntil:
+    visible: "Ana, P3: X, titular"
+    timeout: 20000
+- assertVisible: "Ana, P3: X, titular"
+- assertVisible: "Carla, P3: X, titular"
+- assertVisible: "Bea, P3: casilla vacía"
+- assertVisible: "Gala, P2: X, titular"
+- assertVisible: "Fran, P2: X, titular"
+- assertVisible: "Eva, P2: casilla vacía"
+- assertVisible: "Dani, P2: casilla vacía"

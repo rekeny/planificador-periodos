@@ -1,0 +1,183 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-047 RF-057 RF-086 E-026: a starter replaces Eva in P2, Eva is removed in the call-up screen, and Undo on the grid empties Ana's P2 and does not bring Eva back, also after the app is closed"
+---
+# Journey of E-026 (T066). Written WITHOUT running it: Maestro is not run in the session that writes it.
+# Device size assumed: a phone in portrait, iOS and Android. The team has 6 players and the matches are
+# reached with the deep link after the app is closed and opened again.
+# P2 has five X, Eva's among them. Ana's empty P2 is tapped, «Titular en lugar de otro» answered and Eva
+# chosen: Ana gets the X and Eva's cell is empty (she has no other marks). Eva is removed in the call-up
+# screen (no question: nothing of hers is marked), the app goes back to the grid and «Deshacer» is pressed:
+# Ana's P2 is empty again and P2 has 4 X; Eva's cell is skipped and she does not come back to the grid.
+# The call-up rows are in order of number, so Eva, number 5, has the fifth «Quitar de la convocatoria»
+# (index 4). The first row is avoided on iOS because the strip under the header can take its touch.
+- launchApp:
+    clearState: true
+- tapOn: "Nuevo equipo"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Alevín A"
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Ana"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "1"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Bea"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "2"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Carla"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "3"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Dani"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "4"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Eva"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "5"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Fran"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "6"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- assertVisible: "Fran"
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Convocatoria"
+- tapOn: "Bea, P2: casilla vacía"
+- assertVisible: "Bea, P2: X, titular"
+- tapOn: "Carla, P2: casilla vacía"
+- assertVisible: "Carla, P2: X, titular"
+- tapOn: "Dani, P2: casilla vacía"
+- assertVisible: "Dani, P2: X, titular"
+- tapOn: "Eva, P2: casilla vacía"
+- assertVisible: "Eva, P2: X, titular"
+- tapOn: "Fran, P2: casilla vacía"
+- assertVisible: "Fran, P2: X, titular"
+- tapOn: "Ana, P2: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Titular en lugar de otro"
+- assertVisible: "¿A quién sustituye como titular?"
+- tapOn:
+    text: "(\\d+, )?Eva"
+    below: "¿A quién sustituye como titular?"
+- assertNotVisible: "¿A quién sustituye como titular?"
+- assertVisible: "Ana, P2: X, titular"
+- assertVisible: "Eva, P2: casilla vacía"
+
+# The call-up screen is part of the match. Eva has no marks left, so she is removed with no question and
+# then offered again in the list below, which may be under the fold of a phone.
+- tapOn: "Convocatoria"
+- assertVisible: "Añadir a la convocatoria"
+- tapOn:
+    text: "Quitar de la convocatoria"
+    index: 4
+- assertNotVisible: "¿Quitar a Eva de la convocatoria?"
+- scrollUntilVisible:
+    element:
+      text: ".*Eva.*"
+- assertVisible:
+    text: ".*Eva.*"
+    below: "Añadir a la convocatoria"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 70%, 50%
+- assertVisible: "Ana, P2: X, titular"
+- assertNotVisible: "Eva, P2: casilla vacía"
+- assertNotVisible: "Eva, P2: X, titular"
+- tapOn: "Deshacer"
+- assertVisible: "Ana, P2: casilla vacía"
+- assertVisible: "Bea, P2: X, titular"
+- assertVisible: "Carla, P2: X, titular"
+- assertVisible: "Dani, P2: X, titular"
+- assertVisible: "Fran, P2: X, titular"
+- assertNotVisible: "Eva, P2: X, titular"
+- assertNotVisible: "Eva, P2: casilla vacía"
+
+# What the Undo did was saved: after the app is closed and opened again, the same grid is read.
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertVisible: "Alevín A"
+- openLink: planificadorperiodos://matches/1
+# iOS asks «¿Abrir en Planificador de periodos?» before following a link from outside the app; the
+# simulator's language decides the button. Android opens it straight away.
+- runFlow:
+    when:
+      visible: "Abrir|Open"
+    commands:
+      - tapOn: "Abrir|Open"
+# The match is read from the database after the link: on a busy machine the grid takes longer than
+# the default wait of a check, so the first check waits up to 20 seconds.
+- extendedWaitUntil:
+    visible: "Bea, P2: X, titular"
+    timeout: 20000
+- assertVisible: "Ana, P2: casilla vacía"
+- assertVisible: "Fran, P2: X, titular"
+- assertNotVisible: "Eva, P2: casilla vacía"
+- assertNotVisible: "Eva, P2: X, titular"

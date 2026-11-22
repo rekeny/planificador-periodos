@@ -115,8 +115,9 @@ name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth
     text: "Deshacer"
     enabled: false
 
-# Five starters in P1 (criterion 1). A sixth tap on an empty cell of the full period does nothing:
-# no X, no circle, no message (RF-055; the question that period would ask arrives in D3).
+# Five starters in P1 (criterion 1). A sixth tap on an empty cell of the full period asks «¿Entra de
+# cambio o es titular en lugar de otro?» (T062, T064); «Cancelar» closes the question and nothing
+# changes: no X, no circle (RF-055). The answers to the question are in us5-subs.yaml (T066).
 - tapOn: "Ana, P1: casilla vacía"
 - assertVisible: "Ana, P1: X, titular"
 - tapOn: "Bea, P1: casilla vacía"
@@ -128,6 +129,9 @@ name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth
 - tapOn: "Eva, P1: casilla vacía"
 - assertVisible: "Eva, P1: X, titular"
 - tapOn: "Fran, P1: casilla vacía"
+- assertVisible: "¿Entra de cambio o es titular en lugar de otro?"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Entra de cambio o es titular en lugar de otro?"
 - assertVisible: "Fran, P1: casilla vacía"
 - assertNotVisible: "Fran, P1: X, titular"
 - assertNotVisible: "Fran, P1: X con círculo, entró de cambio"
