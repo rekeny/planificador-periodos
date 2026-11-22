@@ -1,10 +1,10 @@
 // T055: the match screen with the grid and tapping cells (RF-044, RF-048, RF-049, RF-051, RF-055,
-// RF-056, RF-060, RF-068, RF-070, E-012). Real src/app routes through
+// RF-056, RF-060, RF-068, RF-070, E-012; the questions are in match-screen.questions.test.tsx). Real src/app routes through
 // renderRouter with the real match session store on the in-memory database; only expo-sqlite, the
 // splash screen, initializeDatabase and the store getters of `@/state/app-stores` are doubles. The
 // grid is read through the labels of its cells. Window: a phone, so the buttons are in the toolbar
 // (the header ones are in match-screen.toolbar.test.tsx). Assumed screen: match-screen-grid.ts.
-import { act, screen } from "expo-router/testing-library";
+import { fireEvent, screen } from "expo-router/testing-library";
 
 import {
   fillColumn,
@@ -52,6 +52,9 @@ jest.mock("@/state/app-stores", () =>
     .mockAppStoresModule(),
 );
 
+const QUESTION = "¿Entra de cambio o es titular en lugar de otro?";
+const REMINDER =
+  "Si ha salido por un cambio, déjala marcada: sigue contando como jugado";
 const FULL_P1: SeedMark[] = fillColumn("P1", [0, 1, 2, 3, 4]);
 
 beforeEach(async () => setWindow(PHONE.width, PHONE.height));
@@ -107,12 +110,18 @@ describe("match screen, tapping cells", () => {
     expect(savedMarks(s.db, s.matchId)).toHaveLength(1);
   });
 
-  it("RF-055 RF-044: a sixth tap in a full P1 changes nothing, shows nothing and leaves nothing to undo (D2 limit)", async () => {
+  it("RF-055 RF-044 RF-045: a sixth tap in a full P1 opens the question and still makes no sixth X", async () => {
     const s = await openPlan(9, FULL_P1);
     await tap("Jugador 6", "P1");
+    expect(screen.getByText(QUESTION)).toBeOnTheScreen();
     expect(cellState("Jugador 6", "P1")).toBe("empty");
     expect(savedMarks(s.db, s.matchId)).toHaveLength(5);
     expect(screen.queryByText(SAVE_FAILED)).toBeNull();
+    expect(undoButton()).toBeDisabled();
+    await fireEvent.press(screen.getByRole("button", { name: "Cancelar" }));
+    expect(screen.queryByText(QUESTION)).toBeNull();
+    expect(cellState("Jugador 6", "P1")).toBe("empty");
+    expect(savedMarks(s.db, s.matchId)).toHaveLength(5);
     expect(undoButton()).toBeDisabled();
   });
 
@@ -146,18 +155,22 @@ describe("match screen, tapping cells", () => {
     },
   );
 
-  it("RF-049 RF-050 RF-055: an X in a period with a sub only opens the reminder in the store (the dialog is T064), and after cancelling it the circled X still empties", async () => {
+  it("RF-049 RF-050 RF-055: an X in a period with a sub opens the reminder, «Cancelar» changes nothing, and the circled X still empties", async () => {
     const seeds: SeedMark[] = [
       ...fillColumn("P6", [0, 1, 2, 3, 4]),
       [5, "P6", "sub"],
     ];
     const s = await openPlan(9, seeds);
     await tap("Jugador 1", "P6");
+    expect(screen.getByText(REMINDER)).toBeOnTheScreen();
+    expect(s.store.getState().pending?.kind).toBe("confirmRemoveStarter");
     expect(cellState("Jugador 1", "P6")).toBe("starter");
     expect(savedMarks(s.db, s.matchId)).toHaveLength(6);
     expect(screen.queryByText(SAVE_FAILED)).toBeNull();
-    expect(s.store.getState().pending?.kind).toBe("confirmRemoveStarter");
-    await act(async () => s.store.getState().cancelQuestion());
+    await fireEvent.press(screen.getByRole("button", { name: "Cancelar" }));
+    expect(screen.queryByText(REMINDER)).toBeNull();
+    expect(s.store.getState().pending).toBeNull();
+    expect(cellState("Jugador 1", "P6")).toBe("starter");
     await tap("Jugador 6", "P6");
     expect(cellState("Jugador 6", "P6")).toBe("empty");
   });
