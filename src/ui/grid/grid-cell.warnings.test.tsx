@@ -28,6 +28,7 @@ async function draw(cell: CellView, playerName = "Jugador 1") {
       cellWidth={44}
       rowHeight={44}
       onTapCell={jest.fn()}
+      onLongPressCell={jest.fn()}
     />,
   );
   return screen.getByRole("button");
@@ -90,6 +91,7 @@ describe("grid cell, light red", () => {
         cellWidth={44}
         rowHeight={44}
         onTapCell={onTapCell}
+        onLongPressCell={jest.fn()}
       />,
     );
     const button = screen.getByRole("button", {

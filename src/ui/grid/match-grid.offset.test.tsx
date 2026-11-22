@@ -25,6 +25,7 @@ const gridWithOvertimes = (overtimeCount: number) => (
   <MatchGrid
     view={viewOf(gridWith({ players: 6, format: 6, overtimeCount }))}
     onTapCell={jest.fn()}
+    onLongPressCell={jest.fn()}
   />
 );
 

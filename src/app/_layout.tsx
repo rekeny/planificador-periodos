@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import type { ReactElement } from "react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import "@/i18n";
 import { useDatabaseStart } from "../state/use-database-start";
@@ -19,6 +20,8 @@ const MODAL = "modal" as const;
 // Options by route name here, at layout level: the new-team form is a modal with its own title.
 // iOS 26 (Liquid Glass) makes the header transparent when no background is set, so the content
 // would start behind it. An explicit opaque header keeps the content below it.
+const ROOT = { flex: 1 } as const;
+
 const BASE = { headerTransparent: false } as const;
 
 function screenOptionsFor(t: Translate) {
@@ -61,5 +64,9 @@ export default function RootLayout(): ReactElement | null {
   if (status === "failed") {
     return <DatabaseOpenFailed retrying={retrying} onRetry={retry} />;
   }
-  return <Stack screenOptions={screenOptionsFor(t)} />;
+  return (
+    <GestureHandlerRootView style={ROOT}>
+      <Stack screenOptions={screenOptionsFor(t)} />
+    </GestureHandlerRootView>
+  );
 }

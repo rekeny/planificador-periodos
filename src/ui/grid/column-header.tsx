@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
@@ -12,11 +13,15 @@ export interface ColumnHeaderProps {
 }
 
 /** The text of a column header: «P1»… for a period, «PR1»… for an overtime (RF-042). */
-export function useColumnTitle(column: Column): string {
-  const { t } = useTranslation();
+export function columnTitle(column: Column, t: TFunction): string {
   const key =
     column.kind === "period" ? "grid.header.period" : "grid.header.overtime";
   return t(key, { number: column.number });
+}
+
+export function useColumnTitle(column: Column): string {
+  const { t } = useTranslation();
+  return columnTitle(column, t);
 }
 
 // Only «≠» when a header is both incomplete and inconsistent: the state already gives one kind (RF-066).

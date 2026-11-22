@@ -6,6 +6,8 @@ const base = require("./jest.config.js");
 module.exports = {
   ...base,
   setupFiles: ["<rootDir>/tests/setup/fast-check-mutation.ts"],
+  // The domain tests have no screens, so they skip the gesture environment.
+  setupFilesAfterEnv: [],
   testMatch: ["<rootDir>/src/domain/**/*.test.ts"],
   testPathIgnorePatterns: [
     ...base.testPathIgnorePatterns,

@@ -25,7 +25,9 @@ const pedro = { id: 2, playerId: 2, name: "Pedro", number: "7" };
 const viewWith = (options: GridOptions = {}) => viewOf(gridWith(options));
 
 function gridElement(view: MatchView, onTapCell = jest.fn()) {
-  return <MatchGrid view={view} onTapCell={onTapCell} />;
+  return (
+    <MatchGrid view={view} onTapCell={onTapCell} onLongPressCell={jest.fn()} />
+  );
 }
 
 beforeEach(async () => setWindow(1024, 768));

@@ -146,6 +146,7 @@ export default function MatchScreen(): ReactElement {
         bannersHeight={heights.bannersHeight}
         legendHeight={heights.legendHeight}
         onTapCell={(cell) => void store.getState().tapCell(cell)}
+        onLongPressCell={(cell) => void store.getState().openCellMenu(cell)}
       />
       {inHeader ? null : <GridButtons {...buttons} />}
       {dialog}

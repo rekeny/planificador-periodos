@@ -65,6 +65,11 @@
       "sub": "Entra de cambio",
       "starter": "Titular en lugar de otro"
     },
+    "cellMenu": {
+      "starter": "Titular",
+      "sub": "Entró de cambio",
+      "remove": "Quitar"
+    },
     "chooseReplaced": {
       "title": "¿A quién sustituye como titular?"
     },
