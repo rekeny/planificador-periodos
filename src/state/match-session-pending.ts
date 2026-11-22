@@ -1,3 +1,4 @@
+import { replaceableStarters } from "@/domain/marking";
 import type { CallUpHost } from "@/state/match-session-call-up";
 import type { PendingQuestion } from "@/state/match-session-store";
 import type { SaveResult } from "@/state/save-result";
@@ -7,6 +8,13 @@ import type { SaveResult } from "@/state/save-result";
  * and nothing is published, so a previous failure flag stays as it was.
  */
 export function ask(host: CallUpHost, pending: PendingQuestion): SaveResult {
+  const { grid, view } = host.get();
+  if (pending.kind === "chooseReplaced" && grid !== null && view !== null) {
+    const ids = replaceableStarters(grid, pending.cell.column);
+    const rows = view.rows.filter((row) => ids.includes(row.entryId));
+    host.set({ pending, view: { ...view, replaceableStarters: rows } });
+    return { kind: "unchanged" };
+  }
   host.set({ pending });
   return { kind: "unchanged" };
 }
@@ -18,5 +26,9 @@ export function hasPendingQuestion(host: CallUpHost): boolean {
 
 /** Closes the open question and leaves everything else as it was. */
 export function drop(host: CallUpHost): void {
-  host.set({ pending: null });
+  const { view } = host.get();
+  host.set({
+    pending: null,
+    view: view === null ? null : { ...view, replaceableStarters: [] },
+  });
 }

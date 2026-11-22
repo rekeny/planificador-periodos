@@ -32,6 +32,8 @@ export interface MatchSessionState {
   removeLastOvertime(): SaveResult; //                RF-059
   undo(): SaveResult; //                              RF-055, RF-057, RF-086
   answerSub(): SaveResult; //                         RF-046
+  answerStarter(): SaveResult; //                     RF-047 (opens the choice, writes nothing)
+  chooseReplaced(entryId: number): SaveResult; //     RF-047, RF-057
   confirmRemove(): SaveResult; //                     RF-050, RF-054
   cancelQuestion(): void; //                          RF-045, RF-050
 }

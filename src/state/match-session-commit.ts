@@ -27,7 +27,12 @@ export function commitMarkChange(
     teamPlayers = listPlayers(host.db, current.teamId);
     saveCellChanges(host.db, current.matchId, cellChanges(current.grid, after));
   } catch {
-    host.set({ saveFailed: true, pending: null });
+    const { view } = host.get();
+    host.set({
+      saveFailed: true,
+      pending: null,
+      view: view === null ? null : { ...view, replaceableStarters: [] },
+    });
     return { kind: "saveFailed" };
   }
   return publish(host, {
