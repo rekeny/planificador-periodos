@@ -1,4 +1,5 @@
 import { getDatabase } from "@/data/database";
+import { createMatchesStore } from "@/state/matches-store";
 import { createMatchSessionStore } from "@/state/match-session-store";
 import { createNewMatchDraft } from "@/state/new-match-draft";
 import { createSquadStore } from "@/state/squad-store";
@@ -30,4 +31,12 @@ export function getMatchSessionStore(): ReturnType<
 > {
   matchSessionStore ??= createMatchSessionStore(getDatabase());
   return matchSessionStore;
+}
+
+let matchesStore: ReturnType<typeof createMatchesStore> | undefined;
+
+/** The one matches store of the app (lists of matches), built on first use like the other stores. */
+export function getMatchesStore(): ReturnType<typeof createMatchesStore> {
+  matchesStore ??= createMatchesStore(getDatabase());
+  return matchesStore;
 }
