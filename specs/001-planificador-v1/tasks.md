@@ -1351,7 +1351,7 @@ D2 rules 1 ("Done when" never shorter than the plan), 2 (literal test titles), 3
 
 ## US6 · View, edit and delete matches
 
-- [ ] **T067** · Domain: match list order (RF-074, RF-075)
+- [x] **T067** · Domain: match list order (RF-074, RF-075)
   - Layer and files: domain · `src/domain/match-order.ts`, `src/domain/match-order.test.ts`.
   - Done when: `compareMatches(a: Pick<Match, "date" | "time">, b: Pick<Match, "date" | "time">): number` orders by date descending, then by time descending, with the matches without a time after those with one on the same date, and returns 0 for the same date and time (the stable `Array.prototype.sort` then keeps their order); it is pure and imports nothing outside `src/domain/`; tables are named constants with one literal title carrying RF-074 and RF-075 (D2 rule 2); this is the first D3 change in `src/domain/`, so the task runs the full local Stryker run of D3 rule 1, writes its time in the commit body, and leaves `match-order.ts` with no surviving mutant, or each survivor classified in `review.md`.
   - Scenarios:
@@ -1363,6 +1363,7 @@ D2 rules 1 ("Done when" never shorter than the plan), 2 (literal test titles), 3
     - Interruptions: not applicable.
     - Mistakes: "09:00" versus "10:00" compared as times; "2026-11-08" versus "2026-11-15" compared as dates (the fixed `YYYY-MM-DD` and `HH:MM` texts compare in the right order; a test pins it with "2026-02-01" against "2026-11-01").
   - Pending: nothing.
+  - Done on 2026-11-23: `verify.sh` green (286 suites, 3,579 tests), full local Stryker run (`STRYKER_INCREMENTAL=1 STRYKER_FORCE=1`): 94.92 % in 5 min 30 s (6 min 38 s the whole verify), `match-order.ts` at 100 % with no survivor and the same 27 classified ones elsewhere. The first run left one equivalent mutant (`a < b` against `a <= b` after an `a === b` guard); the comparison was written as `a < b ? 1 : a > b ? -1 : 0` so no equivalent mutant remains.
 
 - [ ] **T068** · Data: match lists, edit details, delete match, change format (RF-028, RF-029, RF-038, RF-040, RF-041, RF-074, RF-075, E-016)
   - Layer and files: data · `src/data/match-repository.ts` (`listAllMatches`, `listTeamMatches`, `updateMatchDetails`, `deleteMatch`, `changeMatchFormat`; the two lists move to `src/data/match-list-repository.ts` if the file passes 250 lines), `src/data/records.ts` (`MatchListRecord`), tests `src/data/match-repository.lists.test.ts`, `src/data/match-repository.details.test.ts` and `src/data/match-repository.format.test.ts`.
