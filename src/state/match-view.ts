@@ -14,6 +14,7 @@ import {
   type CellView,
   type ColumnView,
 } from "@/state/match-view-grid";
+import { formatOptions } from "@/state/format-options";
 import { isInRed, warningView } from "@/state/match-view-warnings";
 
 export interface MatchViewSource {
@@ -46,6 +47,7 @@ export interface MatchView {
   readonly legend: readonly LegendItem[]; // RF-087
   readonly callUpRange: CallUpRangeWarning | null; // RF-068
   readonly playersToAdd: readonly Player[]; // active, not in the call-up, sorted (RF-032)
+  readonly formatOptions: readonly { format: Format; isCurrent: boolean }[]; // RF-038
   readonly replaceableStarters: readonly RowView[]; // rows with an X in the asked column; [] unless choosing (RF-047)
 }
 
@@ -84,6 +86,10 @@ export function buildMatchView({
     ...warningView(warnings),
     callUpRange: warnings.callUpRange,
     playersToAdd: playersToAdd(teamPlayers, grid.callUp),
+    formatOptions: formatOptions.map((format) => ({
+      format,
+      isCurrent: format === grid.format,
+    })),
     replaceableStarters: [],
   };
 }
