@@ -24,30 +24,38 @@ const ROOT = { flex: 1 } as const;
 
 const BASE = { headerTransparent: false } as const;
 
-function screenOptionsFor(t: Translate) {
-  return ({ route }: { route: { name: string } }) => {
-    if (route.name === "teams/new") {
-      return { ...BASE, title: t("teams.new"), presentation: MODAL };
-    }
-    if (route.name === "teams/[teamId]/edit") {
-      return { ...BASE, title: t("common.edit"), presentation: MODAL };
-    }
-    if (route.name === "teams/[teamId]/players/new") {
-      return { ...BASE, title: t("players.new"), presentation: MODAL };
-    }
-    if (route.name === "teams/[teamId]/matches/new") {
-      return { ...BASE, title: t("matches.new"), presentation: MODAL };
-    }
-    // The match screen has no title of its own yet; the empty string hides the route name.
-    if (route.name === "matches/[matchId]/index") return { ...BASE, title: "" };
-    if (route.name === "matches/[matchId]/call-up") {
-      return { ...BASE, title: t("callUp.title") };
-    }
-    if (route.name === "matches/[matchId]/new-player") {
-      return { ...BASE, title: t("players.new"), presentation: MODAL };
-    }
-    return { ...BASE, title: t("teams.title") };
+type RouteOptions = { title: string; presentation?: typeof MODAL };
+
+// Title and presentation by route name. A route that is not listed gets the title of the list of
+// teams. The match screen has no title of its own yet; the empty string hides the route name.
+function optionsTable(t: Translate): Record<string, RouteOptions> {
+  return {
+    "teams/new": { title: t("teams.new"), presentation: MODAL },
+    "teams/[teamId]/edit": { title: t("common.edit"), presentation: MODAL },
+    "teams/[teamId]/players/new": {
+      title: t("players.new"),
+      presentation: MODAL,
+    },
+    "teams/[teamId]/matches/new": {
+      title: t("matches.new"),
+      presentation: MODAL,
+    },
+    "matches/index": { title: t("matches.allTitle") },
+    "matches/[matchId]/index": { title: "" },
+    "matches/[matchId]/call-up": { title: t("callUp.title") },
+    "matches/[matchId]/new-player": {
+      title: t("players.new"),
+      presentation: MODAL,
+    },
   };
+}
+
+function screenOptionsFor(t: Translate) {
+  const table = optionsTable(t);
+  return ({ route }: { route: { name: string } }) => ({
+    ...BASE,
+    ...(table[route.name] ?? { title: t("teams.title") }),
+  });
 }
 
 export default function RootLayout(): ReactElement | null {

@@ -20,7 +20,13 @@
     "new": "Nuevo jugador"
   },
   "matches": {
-    "new": "Nuevo partido"
+    "new": "Nuevo partido",
+    "allTitle": "Todos los partidos",
+    "empty": "Todavía no hay partidos.",
+    "item": {
+      "sides": "{{home}} – {{away}}",
+      "score": "{{home}}–{{away}}"
+    }
   },
   "match": {
     "field": {
