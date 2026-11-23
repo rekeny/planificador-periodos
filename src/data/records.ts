@@ -47,3 +47,9 @@ export interface MarkRecord {
   readonly columnNumber: number;
   readonly mark: string;
 }
+
+/** A match with its team's name and category, for the list of every match (RF-074). */
+export interface MatchListRecord extends MatchRecord {
+  readonly teamName: string;
+  readonly teamCategory: string | null;
+}
