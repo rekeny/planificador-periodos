@@ -4,7 +4,10 @@ import type { ReactElement } from "react";
 import { useStore } from "zustand";
 
 import { getMatchSessionStore, newMatchDetailsDraft } from "@/state/app-stores";
+import type { MatchDetailsDraft } from "@/state/match-details-draft";
+import type { MatchView } from "@/state/match-view";
 import { parseMatchId } from "@/state/route-params";
+import { useMatchDetailsActions } from "@/ui/match-details-actions";
 import { MatchDetailsSave } from "@/ui/match-details-save";
 import { MatchForm } from "@/ui/match-form";
 import { NotFound } from "@/ui/not-found";
@@ -25,16 +28,41 @@ export default function MatchDetailsScreen(): ReactElement {
   if (id === null || !ready || status !== "open" || view?.matchId !== id) {
     return <NotFound />;
   }
-  const current = view.formatOptions.find((option) => option.isCurrent);
+  return (
+    <Details
+      draft={draft}
+      matchId={id}
+      view={view}
+      onSaved={() => router.back()}
+    />
+  );
+}
 
+interface DetailsProps {
+  readonly draft: MatchDetailsDraft;
+  readonly matchId: number;
+  readonly view: MatchView;
+  readonly onSaved: () => void;
+}
+
+// Drawn only once the guards above hold, so the actions' hook never runs for another match.
+function Details({
+  draft,
+  matchId,
+  view,
+  onSaved,
+}: DetailsProps): ReactElement {
+  const current = view.formatOptions.find((option) => option.isCurrent);
+  const format = current?.format ?? view.formatOptions[0]!.format;
+  const actions = useMatchDetailsActions(matchId, format);
   return (
     <MatchForm
       draft={draft}
-      format={current?.format ?? view.formatOptions[0]!.format}
-      // Changing the format of an open match is wired in T096.
-      onFormatChange={() => undefined}
+      format={format}
+      onFormatChange={actions.onFormatChange}
     >
-      <MatchDetailsSave draft={draft} onSaved={() => router.back()} />
+      <MatchDetailsSave draft={draft} onSaved={onSaved} />
+      {actions.footer}
     </MatchForm>
   );
 }

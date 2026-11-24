@@ -39,6 +39,7 @@
       "date": "Fecha",
       "time": "Hora"
     },
+    "delete": "Borrar partido",
     "clearTime": "Quitar hora",
     "noTime": "Sin hora",
     "addTime": "Añadir hora",
@@ -127,6 +128,16 @@
     "addEmpty": "No quedan jugadores activos por añadir. Puedes crear uno nuevo."
   },
   "confirm": {
+    "formatChange": {
+      "title": "¿Cambiar la variante?",
+      "message": "Cambiar la variante puede hacer perder información: se borrarán las marcas de los periodos que desaparezcan.",
+      "confirm": "Cambiar variante"
+    },
+    "deleteMatch": {
+      "title": "¿Borrar este partido?",
+      "message": "Se borrarán el partido y su cuadrícula. No se puede deshacer.",
+      "confirm": "Borrar partido"
+    },
     "removeFromCallUp": {
       "title": "¿Quitar a {{name}} de la convocatoria?",
       "message": "Tiene marcas en este partido y se borrarán.",
