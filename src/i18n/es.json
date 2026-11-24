@@ -15,7 +15,8 @@
       "defaultFormat": "Variante por defecto"
     },
     "players": "Jugadores",
-    "matches": "Partidos"
+    "matches": "Partidos",
+    "delete": "Borrar equipo"
   },
   "players": {
     "new": "Nuevo jugador"
@@ -145,6 +146,15 @@
       "title": "¿Quitar a {{name}} de la convocatoria?",
       "message": "Tiene marcas en este partido y se borrarán.",
       "confirm": "Quitar"
+    },
+    "deleteTeam": {
+      "title": "¿Borrar el equipo {{name}}?",
+      "message": "Se borrarán también {{players}} y {{matches}}. No se puede deshacer.",
+      "players_one": "su jugador",
+      "players_other": "sus {{count}} jugadores",
+      "matches_one": "su partido",
+      "matches_other": "sus {{count}} partidos",
+      "confirm": "Borrar equipo"
     },
     "deactivatePlayer": {
       "title": "¿Desactivar a {{name}}?",

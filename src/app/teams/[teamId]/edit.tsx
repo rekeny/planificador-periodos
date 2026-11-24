@@ -6,6 +6,7 @@ import { getSquadStore } from "@/state/app-stores";
 import { parseTeamId } from "@/state/route-params";
 import type { TeamInput } from "@/state/squad-store";
 import { NotFound } from "@/ui/not-found";
+import { TeamDeleteActions } from "@/ui/team-delete-actions";
 import { TeamForm } from "@/ui/team-form";
 import { useOpenRouteTeam } from "@/ui/use-open-route-team";
 
@@ -30,6 +31,17 @@ export default function EditTeamScreen(): ReactElement | null {
     return result;
   };
 
+  const onDelete = () => {
+    const result = store.getState().deleteTeam(id);
+    // The same handler goes back to the list of teams. A restored stack with only this form has
+    // nothing to dismiss, so it is replaced by the list.
+    if (result.kind === "saved") {
+      if (router.canDismiss()) router.dismissAll();
+      else router.replace("/");
+    }
+    return result;
+  };
+
   return (
     <TeamForm
       initialValues={{
@@ -38,6 +50,12 @@ export default function EditTeamScreen(): ReactElement | null {
         defaultFormat: team.defaultFormat,
       }}
       onSave={onSave}
-    />
+    >
+      <TeamDeleteActions
+        name={team.name}
+        readContents={() => store.getState().teamContents(id)}
+        onDelete={onDelete}
+      />
+    </TeamForm>
   );
 }

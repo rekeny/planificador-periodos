@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 
@@ -20,6 +20,8 @@ export interface TeamFormValues {
 interface TeamFormProps {
   readonly initialValues: TeamFormValues;
   readonly onSave: (input: TeamInput) => SaveResult;
+  // Extra actions at the bottom of the scroll container (the edit-team form's «Borrar equipo»).
+  readonly children?: ReactNode;
 }
 
 type Message = "none" | "nameRequired" | "saveFailed";
@@ -27,6 +29,7 @@ type Message = "none" | "nameRequired" | "saveFailed";
 export function TeamForm({
   initialValues,
   onSave,
+  children,
 }: TeamFormProps): ReactElement {
   const { t } = useTranslation();
   const [name, setName] = useState(initialValues.name);
@@ -75,6 +78,7 @@ export function TeamForm({
         <Text style={styles.saveText}>{t("common.save")}</Text>
       </Pressable>
       {message === "saveFailed" ? <SaveErrorBanner /> : null}
+      {children}
     </FormScroll>
   );
 }
