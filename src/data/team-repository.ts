@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 import type { AppDatabase } from "./database-types";
 import type { TeamRecord } from "./records";
-import { teams } from "./schema";
+import { matches, players, teams } from "./schema";
 
 /** What a team stores; the state layer passes it already validated and normalised (T030). */
 export interface TeamValues {
@@ -35,4 +35,36 @@ export function listTeams(db: AppDatabase): TeamRecord[] {
 
 export function getTeam(db: AppDatabase, id: number): TeamRecord | undefined {
   return db.select().from(teams).where(eq(teams.id, id)).get();
+}
+
+/** What deleting a team would remove besides the team itself (RF-015). */
+export interface TeamContents {
+  readonly players: number;
+  readonly matches: number;
+}
+
+/** Counts the players (inactive ones too) and the matches of a team; read only. */
+export function countTeamContents(
+  db: AppDatabase,
+  teamId: number,
+): TeamContents {
+  const playerCount = db
+    .select({ value: count() })
+    .from(players)
+    .where(eq(players.teamId, teamId))
+    .get();
+  const matchCount = db
+    .select({ value: count() })
+    .from(matches)
+    .where(eq(matches.teamId, teamId))
+    .get();
+  return { players: playerCount?.value ?? 0, matches: matchCount?.value ?? 0 };
+}
+
+/**
+ * Deletes a team. The schema's cascades remove its players, matches, call-up entries and marks
+ * inside this one statement, so a failure rolls everything back. An unknown ID does nothing.
+ */
+export function deleteTeam(db: AppDatabase, teamId: number): void {
+  db.delete(teams).where(eq(teams.id, teamId)).run();
 }

@@ -1504,7 +1504,7 @@ D2 rules 1 ("Done when" never shorter than the plan), 2 (literal test titles), 3
 
 ## US7 · Keep the squad up to date
 
-- [ ] **T074** · Data: edit player, deactivate and reactivate, delete team with counts (RF-015, RF-018, RF-019, RF-020, RF-021, RF-022, RF-024, E-018)
+- [x] **T074** · Data: edit player, deactivate and reactivate, delete team with counts (RF-015, RF-018, RF-019, RF-020, RF-021, RF-022, RF-024, E-018)
   - Layer and files: data · `src/data/player-repository.ts` (`updatePlayer`, `setPlayerActive`), `src/data/team-repository.ts` (`deleteTeam`, `countTeamContents`), tests split by subject (`src/data/player-repository.update.test.ts`, `src/data/team-repository.delete.test.ts`).
   - Done when: `updatePlayer(db, playerId, { name, number })` updates only the player row and returns the record, or `undefined` for an unknown id (call-up snapshots untouched, RF-019); `setPlayerActive(db, playerId, isActive)` sets the flag and returns the record or `undefined`; `countTeamContents(db, teamId): { players: number; matches: number }`; `deleteTeam(db, teamId)` removes the team, its players, its matches and their call-ups and marks (cascade) and nothing of another team; there is no function to delete a single player (RF-021); queries only through Drizzle with parameters.
   - Scenarios:
@@ -1516,6 +1516,7 @@ D2 rules 1 ("Done when" never shorter than the plan), 2 (literal test titles), 3
     - Interruptions: failure halfway through a team deletion → nothing deleted.
     - Mistakes: deleting a team never touches another team's data.
   - Pending: nothing.
+  - Done on 2026-11-24: `verify.sh` green (338 suites, 4,142 tests; incremental Stryker 94.92 %, no change in `src/domain/` or `tests/support/`). `updatePlayer` and `setPlayerActive` return the `PlayerRecord` or `undefined`, write the values as given (the state layer validates) and throw on a failed write; `countTeamContents` answers `{ players: 0, matches: 0 }` for an unknown team (T075 decides what the screen does with it) and counts inactive players; `deleteTeam` is one `DELETE` of the team and relies on the schema's cascades, so a failure rolls everything back (the tests abort it with triggers on each of the five tables); no function deletes a single player (a test checks the three repositories export none). The tests are in `player-repository.update.test.ts`, `.active.test.ts` and `team-repository.delete.test.ts`, with `tests/data/team-delete-fixtures.ts` (the 250-line limit split the player file in two).
 
 - [ ] **T075** · State: edit, deactivate and reactivate players, delete a team (RF-015, RF-018, RF-019, RF-021, RF-022, RF-023, RF-024, RF-069, RF-082, RF-085, E-018)
   - Layer and files: state · `src/state/squad-store.ts` (171 lines today: it gains the four actions in its type and calls the two new files), `src/state/squad-player-actions.ts` (new: `updatePlayer`, `setPlayerActive`), `src/state/squad-team-deletion.ts` (new: `teamContents`, `deleteTeam`), tests `src/state/squad-store.player-edit.test.ts`, `src/state/squad-store.team-delete.test.ts` and `src/state/squad-store.squad.failures.test.ts`.
