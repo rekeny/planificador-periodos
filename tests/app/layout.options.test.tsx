@@ -76,6 +76,14 @@ describe("root layout, the options of every route", () => {
     });
   });
 
+  it("RF-025 RF-028 RF-076: the match details, matches/[matchId]/edit, is titled «Editar» (common.edit), is a modal and has an opaque header, so its first field starts below it (F-D3-01)", async () => {
+    expect(await optionsOf("matches/[matchId]/edit")).toEqual({
+      headerTransparent: false,
+      title: "Editar",
+      presentation: "modal",
+    });
+  });
+
   it("RF-076: a route the table does not list gets the title «Equipos», as before, and an opaque header", async () => {
     expect(await optionsOf("something/else")).toEqual({
       headerTransparent: false,

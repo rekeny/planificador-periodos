@@ -43,6 +43,7 @@ function optionsTable(t: Translate): Record<string, RouteOptions> {
     "matches/index": { title: t("matches.allTitle") },
     "matches/[matchId]/index": { title: "" },
     "matches/[matchId]/call-up": { title: t("callUp.title") },
+    "matches/[matchId]/edit": { title: t("common.edit"), presentation: MODAL },
     "matches/[matchId]/new-player": {
       title: t("players.new"),
       presentation: MODAL,

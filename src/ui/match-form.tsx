@@ -4,7 +4,7 @@ import { StyleSheet, Text, TextInput } from "react-native";
 import { useStore } from "zustand";
 
 import type { Format } from "@/domain/format";
-import type { NewMatchDraft } from "@/state/new-match-draft";
+import type { MatchFieldsStore } from "@/state/match-fields";
 import { DateTimeField } from "./date-time-field";
 import { FormatPicker } from "./format-picker";
 import { FormScroll } from "./form-scroll";
@@ -13,7 +13,7 @@ import { ScoreFields } from "./score-fields";
 import { TeamNameFields } from "./team-name-fields";
 
 interface MatchFormProps {
-  readonly draft: NewMatchDraft;
+  readonly draft: MatchFieldsStore;
   // The format comes from outside so the details screen can reuse the form with its own match.
   readonly format: Format;
   readonly onFormatChange: (format: Format) => void;

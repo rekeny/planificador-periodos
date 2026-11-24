@@ -3,6 +3,8 @@
 // .mockAppStoresModule())`. A test gives the store its screens read with `useMockSquadStore`,
 // usually a real store on the in-memory database of `mock-database.ts`. This file holds no tests.
 import type { AppDatabase } from "@/data/database-types";
+import { createMatchDetailsDraft } from "@/state/match-details-draft";
+import type { MatchDetailsDraft } from "@/state/match-details-draft";
 import { createMatchesStore } from "@/state/matches-store";
 import type { MatchesStore } from "@/state/matches-store";
 import { mockDatabaseModule } from "./mock-database";
@@ -15,6 +17,17 @@ let currentDraft: NewMatchDraft | undefined;
 let currentSession: MatchSessionStore | undefined;
 let currentMatches: MatchesStore | undefined;
 let fallbackMatches: { db: AppDatabase; store: MatchesStore } | undefined;
+let detailsDrafts: MatchDetailsDraft[] = [];
+
+/** Every details draft `newMatchDetailsDraft(matchId)` handed out since the last `forgetDetailsDrafts()` (T072). */
+export function createdDetailsDrafts(): readonly MatchDetailsDraft[] {
+  return detailsDrafts;
+}
+
+/** Starts the list of `createdDetailsDrafts()` again; a test calls it in `beforeEach`. */
+export function forgetDetailsDrafts(): void {
+  detailsDrafts = [];
+}
 
 /** The squad store that `getSquadStore()` hands out from now on. */
 export function useMockSquadStore(store: SquadStore): void {
@@ -52,8 +65,18 @@ export function mockAppStoresModule(): {
   getNewMatchDraft: () => NewMatchDraft;
   getMatchSessionStore: () => MatchSessionStore;
   getMatchesStore: () => MatchesStore;
+  newMatchDetailsDraft: (matchId: number) => MatchDetailsDraft;
 } {
   return {
+    // A new draft on every call, on the mock database, as the real function builds it (D3 rule 4).
+    newMatchDetailsDraft: (matchId) => {
+      const draft = createMatchDetailsDraft(
+        mockDatabaseModule().getDatabase(),
+        matchId,
+      );
+      detailsDrafts.push(draft);
+      return draft;
+    },
     getMatchesStore: () => currentMatches ?? fallbackMatchesStore(),
     getMatchSessionStore: () => {
       if (currentSession === undefined) {

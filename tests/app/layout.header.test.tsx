@@ -38,6 +38,7 @@ const ROUTES = [
   "matches/[matchId]/index",
   "matches/[matchId]/call-up",
   "matches/[matchId]/new-player",
+  "matches/[matchId]/edit",
 ];
 
 describe("root layout, navigation header", () => {
