@@ -36,6 +36,10 @@ function optionsTable(t: Translate): Record<string, RouteOptions> {
       title: t("players.new"),
       presentation: MODAL,
     },
+    "teams/[teamId]/players/[playerId]": {
+      title: t("common.edit"),
+      presentation: MODAL,
+    },
     "teams/[teamId]/matches/new": {
       title: t("matches.new"),
       presentation: MODAL,

@@ -34,6 +34,7 @@ const ROUTES = [
   "teams/[teamId]/index",
   "teams/[teamId]/edit",
   "teams/[teamId]/players/new",
+  "teams/[teamId]/players/[playerId]",
   "teams/[teamId]/matches/new",
   "matches/[matchId]/index",
   "matches/[matchId]/call-up",

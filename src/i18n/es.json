@@ -50,7 +50,10 @@
     "field": {
       "name": "Nombre",
       "number": "Dorsal"
-    }
+    },
+    "deactivated": "Desactivado",
+    "deactivate": "Desactivar",
+    "reactivate": "Reactivar"
   },
   "grid": {
     "header": {
@@ -142,6 +145,11 @@
       "title": "¿Quitar a {{name}} de la convocatoria?",
       "message": "Tiene marcas en este partido y se borrarán.",
       "confirm": "Quitar"
+    },
+    "deactivatePlayer": {
+      "title": "¿Desactivar a {{name}}?",
+      "message": "No aparecerá en los partidos nuevos. Seguirá en los partidos guardados y podrás reactivarlo.",
+      "confirm": "Desactivar"
     },
     "removeOvertime": {
       "title": "¿Quitar la prórroga {{number}}?",

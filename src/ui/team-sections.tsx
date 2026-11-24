@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import type { SectionListRenderItemInfo } from "react-native";
 
 import type { Player } from "@/domain/squad";
@@ -69,6 +69,7 @@ export function TeamSectionFooter({
 export function renderTeamRow(
   info: SectionListRenderItemInfo<TeamRow, TeamSection>,
   openMatch: (matchId: number) => void,
+  openPlayer: (playerId: number) => void,
 ): ReactElement {
   const row = info.item;
   if (row.kind === "match") {
@@ -76,13 +77,33 @@ export function renderTeamRow(
       <MatchListItem item={row.match} onPress={() => openMatch(row.match.id)} />
     );
   }
+  return <PlayerRow player={row.player} onPress={openPlayer} />;
+}
+
+function PlayerRow({
+  player,
+  onPress,
+}: {
+  player: Player;
+  onPress: (playerId: number) => void;
+}): ReactElement {
+  const { t } = useTranslation();
   return (
-    <View style={styles.row}>
-      <Text style={styles.number}>{row.player.number}</Text>
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => onPress(player.id)}
+      style={styles.row}
+    >
+      <Text style={styles.number}>{player.number}</Text>
       <Text numberOfLines={1} style={styles.name}>
-        {row.player.name}
+        {player.name}
       </Text>
-    </View>
+      {player.isActive ? null : (
+        <Text numberOfLines={1} style={styles.inactive}>
+          {t("player.deactivated")}
+        </Text>
+      )}
+    </Pressable>
   );
 }
 
@@ -96,6 +117,8 @@ const styles = StyleSheet.create({
   },
   empty: { paddingHorizontal: 16, paddingVertical: 12, fontSize: 16 },
   row: {
+    minHeight: 44,
+    alignItems: "center",
     flexDirection: "row",
     gap: 12,
     paddingHorizontal: 16,
@@ -103,4 +126,5 @@ const styles = StyleSheet.create({
   },
   number: { fontSize: 18, fontWeight: "700", minWidth: 32 },
   name: { flex: 1, fontSize: 18 },
+  inactive: { fontSize: 14, color: "#555555" },
 });

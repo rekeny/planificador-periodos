@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 
@@ -12,12 +12,20 @@ import { SaveErrorBanner } from "./save-error-banner";
 
 interface PlayerFormProps {
   readonly onSave: (input: PlayerInput) => SaveResult;
+  // The player's values when editing; empty for a new player.
+  readonly initialValues?: PlayerInput;
+  // Whatever else goes inside the scroll container, under «Guardar» (T076: the player's actions).
+  readonly children?: ReactNode;
 }
 
-export function PlayerForm({ onSave }: PlayerFormProps): ReactElement {
-  const { t } = useTranslation();
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
+const EMPTY: PlayerInput = { name: "", number: "" };
+
+function useSaveState(
+  initialValues: PlayerInput,
+  onSave: (input: PlayerInput) => SaveResult,
+) {
+  const [name, setName] = useState(initialValues.name);
+  const [number, setNumber] = useState(initialValues.number);
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const [failed, setFailed] = useState(false);
   // A ref, not state: a second press in the same instant must see the first one. It is released
@@ -34,6 +42,18 @@ export function PlayerForm({ onSave }: PlayerFormProps): ReactElement {
     if (result.kind === "saved") return;
     saving.current = false;
   };
+
+  return { name, setName, number, setNumber, errors, failed, save };
+}
+
+export function PlayerForm({
+  onSave,
+  initialValues = EMPTY,
+  children,
+}: PlayerFormProps): ReactElement {
+  const { t } = useTranslation();
+  const { name, setName, number, setNumber, errors, failed, save } =
+    useSaveState(initialValues, onSave);
 
   return (
     <FormScroll contentStyle={styles.screen}>
@@ -63,6 +83,7 @@ export function PlayerForm({ onSave }: PlayerFormProps): ReactElement {
         <Text style={styles.saveText}>{t("common.save")}</Text>
       </Pressable>
       {failed ? <SaveErrorBanner /> : null}
+      {children}
     </FormScroll>
   );
 }

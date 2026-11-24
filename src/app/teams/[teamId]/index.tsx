@@ -114,7 +114,11 @@ export default function TeamScreen(): ReactElement | null {
           />
         )}
         renderItem={(info) =>
-          renderTeamRow(info, (matchId) => router.push(`/matches/${matchId}`))
+          renderTeamRow(
+            info,
+            (matchId) => router.push(`/matches/${matchId}`),
+            (playerId) => router.push(`/teams/${id}/players/${playerId}`),
+          )
         }
       />
     </View>
