@@ -1620,3 +1620,15 @@ Branch `001-planificador-v1-d3`. The app code of every device run is the commit 
 ### Not covered by these runs (for T094, by hand)
 
 The question dialog in landscape on iOS (React Native's `Modal` supports portrait by default), a possible flicker when a question closes, whether the long press yields to the horizontal scroll of the grid on a real finger, and the iPad and the Android tablet (these runs are a phone each).
+
+## F-D3-01 · The strip under the iOS navigation header: closed without a fix (2026-11-23)
+
+Form: `small-change-form-ios-header-strip-touches.md` (approved by Fernando, 2026-11-23, and closed the same day). Release build of `main` on the iPhone 17 (iOS 27.2). A Maestro flow of the scratchpad (not added to `e2e/`): a team with 6 and then 9 players, a match, «Convocatoria», then a tap in the middle of the first «Quitar de la convocatoria».
+
+| Run | First row                                 | Result                          |
+| --- | ----------------------------------------- | ------------------------------- |
+| 1   | Under the range banner (5 in the call-up) | The tap worked: Ana was removed |
+| 2   | Right under the header (no banner)        | The tap worked                  |
+| 3   | Right under the header (no banner)        | The tap worked                  |
+
+The finding of 2026-11-20 does not reproduce. Decision (Fernando, 2026-11-23, chat, «Cerrar sin arreglo»): no change of code and no merge before T072. Open check, by hand: the device pass of T079 taps the top field or button of each new modal screen on iOS (D3 rule 15 stays as a check, not as a fix). **Environment:** the Release build needs about 10 GB of free disk; two attempts failed with a full disk until the regenerable outputs (`ios/`, `DerivedData`, the CocoaPods and npm caches) were deleted.
