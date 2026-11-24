@@ -1632,3 +1632,21 @@ Form: `small-change-form-ios-header-strip-touches.md` (approved by Fernando, 202
 | 3   | Right under the header (no banner)        | The tap worked                  |
 
 The finding of 2026-11-20 does not reproduce. Decision (Fernando, 2026-11-23, chat, «Cerrar sin arreglo»): no change of code and no merge before T072. Open check, by hand: the device pass of T079 taps the top field or button of each new modal screen on iOS (D3 rule 15 stays as a check, not as a fix). **Environment:** the Release build needs about 10 GB of free disk; two attempts failed with a full disk until the regenerable outputs (`ios/`, `DerivedData`, the CocoaPods and npm caches) were deleted.
+
+## Maestro of US6 on iOS and Android · T073 (2026-11-24)
+
+Flow: `e2e/us6-matches.yaml`, with its static tests (`tests/e2e/us6-*.test.ts`). It creates two teams and a match with a date and a time, marks cells, opens «Editar» and goes back, checks the list of the team and the list of every match, reopens the app (E-019), edits the details and clears the time (E-032), changes the format 8 → 4 → 8 with the confirmation and without «Guardar» (E-016), and deletes the match after confirming. The matches are reached through the lists, never through a deep link.
+
+**Builds:** Release of `d6bf24d` (the commit of T096; the flow was not yet committed). iOS: `npx expo run:ios --configuration Release --no-bundler` on the iPhone 17 simulator (iOS 27.2), after `simctl erase` of that simulator to free disk. Android: `npx expo prebuild --platform android`, `./gradlew assembleRelease`, installed on the Medium_Phone_API_37.0 emulator with the animations off. Maestro 2.12.1.
+
+| Platform | Run     | Result                                                                                                                     |
+| -------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| iOS      | 1       | Failed at «Editar»: the home field read «ÁguilastRival», the two names had run together                                    |
+| iOS      | 2       | Failed after «Guardar» of the details: the list showed «Rivales – Rival», the away name had been typed into the home field |
+| iOS      | 3       | Passed, 287 steps, 5 min 33 s                                                                                              |
+| Android  | 1 and 2 | Failed on the first tap: the emulator showed «System UI isn't responding» after the cold boot; dismissed with «Wait»       |
+| Android  | 3       | Passed, 294 steps, 11 min 8 s                                                                                              |
+
+**Fixes to the flow (none to the app):** on iOS a single-line field must be closed with «Enter» before the next field is tapped, because the tap landed on the keyboard or on the same field. The time is checked up to «12:00» on iOS and as 18:30 in the real dialog on Android (decision of 2026-11-20).
+
+**Not covered:** a tablet, a phone in landscape, a real device. **Environment:** the Release build of iOS needs about 10 GB of free disk.
