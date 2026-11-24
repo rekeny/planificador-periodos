@@ -1,0 +1,507 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-015 RF-018 RF-019 RF-020 RF-022 RF-023 RF-024 E-018 players are edited, deactivated and reactivated and a team is deleted, while saved matches keep their data"
+---
+# Journey of US7 on a clean install (T078), for a phone in portrait. Written WITHOUT running it: the orchestrator
+# runs it on the iOS simulator and the Android emulator and fixes what the first runs show. Matches are reached
+# through the lists, never with a deep link. Back exists only on Android; on iOS the header button or a swipe
+# is used. A dialog is closed by its button, by a tap on the dark strip at the left edge (2%,50%) and, on
+# Android, by Back. Every single-line field is closed with Enter and the close-keyboard subflow.
+- launchApp:
+    clearState: true
+
+# SETUP: «Alevín A» with Juan 7, Ana 3 and Bea 4; «Cadete B» with the same Juan 7 and Carla 5, and a match.
+- tapOn: "Nuevo equipo"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Alevín A"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo equipo"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Cadete B"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Juan"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "7"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Ana"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "3"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Bea"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "4"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Cadete B"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Juan"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "7"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Carla"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "5"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Local"
+- tapOn:
+    text: "Local"
+    below: "Local"
+- inputText: "Tigres"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: "Convocatoria"
+    timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Cadete B"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+
+# FIRST_MATCH: a match of «Alevín A» created before the edit, with a mark of Ana in P1.
+- tapOn: "Alevín A"
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Local"
+- tapOn:
+    text: "Local"
+    below: "Local"
+- inputText: "Águilas"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: "Convocatoria"
+    timeout: 20000
+- assertVisible: "7|.*7, Juan.*"
+- tapOn: "Ana, P1: casilla vacía"
+- assertVisible: "Ana, P1: X, titular"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: ".*Águilas.*"
+
+# EDIT: Juan 7 -> 9 in the player screen; the erase comes before the new number.
+- tapOn: ".*Juan.*"
+- extendedWaitUntil:
+    visible: "Editar"
+    timeout: 20000
+- assertVisible: "Dorsal"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- eraseText
+- inputText: "9"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- waitForAnimationToEnd
+- assertVisible: "9|.*9, Juan.*"
+- assertNotVisible: "7|.*7, Juan.*"
+
+# OTHER_TEAM: «Cadete B» keeps its own Juan 7.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Cadete B"
+- waitForAnimationToEnd
+- assertVisible: "7|.*7, Juan.*"
+- assertNotVisible: "9|.*9, Juan.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+
+# OLD_MATCH: the match created before the edit, opened from the team list, still shows 7.
+- tapOn: "Alevín A"
+- tapOn: ".*Águilas.*"
+- extendedWaitUntil:
+    visible: "Ana, P1: X, titular"
+    timeout: 20000
+- assertVisible: "7|.*7, Juan.*"
+- assertNotVisible: "9|.*9, Juan.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+
+# NEW_MATCH_9: a new match shows 9.
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Local"
+- tapOn:
+    text: "Local"
+    below: "Local"
+- inputText: "Halcones"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: "Convocatoria"
+    timeout: 20000
+- assertVisible: "9|.*9, Juan.*"
+- assertNotVisible: "7|.*7, Juan.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: ".*Halcones.*"
+
+# DEACTIVATE: the question stays open after a tap outside and Android Back; Cancelar keeps Ana active.
+- tapOn: ".*Ana.*"
+- extendedWaitUntil:
+    visible: "Editar"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "Desactivar"
+- tapOn: "Desactivar"
+- assertVisible: "¿Desactivar a Ana?"
+- assertVisible: "No aparecerá en los partidos nuevos. Seguirá en los partidos guardados y podrás reactivarlo."
+- assertVisible: "Desactivar"
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertVisible: "¿Desactivar a Ana?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- assertVisible: "¿Desactivar a Ana?"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Desactivar a Ana?"
+- assertVisible: "Desactivar"
+- assertNotVisible: "Reactivar"
+- tapOn: "Desactivar"
+- assertVisible: "¿Desactivar a Ana?"
+- tapOn: "Desactivar"
+- waitForAnimationToEnd
+- assertNotVisible: "¿Desactivar a Ana?"
+- assertVisible: ".*Desactivado.*"
+- assertVisible: ".*Ana.*"
+
+# WITHOUT_ANA: a new match has no Ana, the call-up does not offer her, the saved match keeps her.
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Local"
+- tapOn:
+    text: "Local"
+    below: "Local"
+- inputText: "Lobos"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Convocatoria"
+- assertVisible: "2 convocados"
+- assertNotVisible: ".*Ana.*"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: "Convocatoria"
+    timeout: 20000
+- assertVisible: "Bea, P1: casilla vacía"
+- assertNotVisible: ".*Ana.*"
+- tapOn: "Convocatoria"
+- scrollUntilVisible:
+    element:
+      text: "Añadir a la convocatoria"
+- assertVisible: "Añadir a la convocatoria"
+- assertVisible: "No quedan jugadores activos por añadir. Puedes crear uno nuevo."
+- assertNotVisible: ".*Ana.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 90%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- tapOn: ".*Águilas.*"
+- extendedWaitUntil:
+    visible: "Ana, P1: X, titular"
+    timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+
+# REACTIVATE: asks nothing; Ana is in the next new match.
+- tapOn: ".*Ana.*"
+- extendedWaitUntil:
+    visible: "Editar"
+    timeout: 20000
+- assertVisible: "Reactivar"
+- assertNotVisible: "Desactivar"
+- tapOn: "Reactivar"
+- waitForAnimationToEnd
+- assertNotVisible: "¿Desactivar a Ana?"
+- assertNotVisible: ".*Desactivado.*"
+- assertVisible: ".*Ana.*"
+- tapOn: "Nuevo partido"
+- scrollUntilVisible:
+    element:
+      text: "Local"
+- tapOn:
+    text: "Local"
+    below: "Local"
+- inputText: "Osos"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Convocatoria"
+- assertVisible: "3 convocados"
+# On Android the list of the call-up starts below the fold: Ana is scrolled into view first.
+- scrollUntilVisible:
+    element:
+      text: ".*Ana.*"
+- assertVisible: ".*Ana.*"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: "Convocatoria"
+    timeout: 20000
+- assertVisible: "Ana, P1: casilla vacía"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- assertVisible: ".*Osos.*"
+
+# DELETE_TEAM: «Cadete B» has 2 players and 1 match; the question closes only with its buttons.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Todos los partidos"
+- extendedWaitUntil:
+    visible: ".*Tigres.*"
+    timeout: 20000
+- assertVisible: ".*Halcones.*"
+- assertVisible: ".*Cadete B.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Cadete B"
+- tapOn: "Editar equipo"
+- extendedWaitUntil:
+    visible: "Nombre"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "Borrar equipo"
+- tapOn: "Borrar equipo"
+- assertVisible: "¿Borrar el equipo Cadete B?"
+- assertVisible: "Se borrarán también sus 2 jugadores y su partido. No se puede deshacer."
+- assertVisible: "Borrar equipo"
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertVisible: "¿Borrar el equipo Cadete B?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- assertVisible: "¿Borrar el equipo Cadete B?"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Borrar el equipo Cadete B?"
+- assertVisible: "Borrar equipo"
+- tapOn: "Borrar equipo"
+- assertVisible: "¿Borrar el equipo Cadete B?"
+- tapOn: "Borrar equipo"
+- waitForAnimationToEnd
+- assertNotVisible: "¿Borrar el equipo Cadete B?"
+- extendedWaitUntil:
+    visible: "Nuevo equipo"
+    timeout: 20000
+- assertVisible: "Alevín A"
+- assertNotVisible: "Cadete B"
+
+# AFTER_DELETE: the other team keeps its matches; none of the deleted team remains.
+- tapOn: "Todos los partidos"
+- extendedWaitUntil:
+    visible: ".*Águilas.*"
+    timeout: 20000
+- assertVisible: ".*Osos.*"
+- assertNotVisible: ".*Tigres.*"
+- assertNotVisible: ".*Cadete B.*"

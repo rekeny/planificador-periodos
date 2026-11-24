@@ -1650,3 +1650,18 @@ Flow: `e2e/us6-matches.yaml`, with its static tests (`tests/e2e/us6-*.test.ts`).
 **Fixes to the flow (none to the app):** on iOS a single-line field must be closed with «Enter» before the next field is tapped, because the tap landed on the keyboard or on the same field. The time is checked up to «12:00» on iOS and as 18:30 in the real dialog on Android (decision of 2026-11-20).
 
 **Not covered:** a tablet, a phone in landscape, a real device. **Environment:** the Release build of iOS needs about 10 GB of free disk.
+
+## Maestro of US7 on iOS and Android · T078 (2026-11-24)
+
+Flow: `e2e/us7-squad.yaml`, with its static tests (`tests/e2e/us7-*.test.ts`). Two teams with the same name and number in both (Juan 7); a match saved before Juan's number is edited (E-018: it keeps 7, a new match shows 9, the other team still shows 7, RF-020); Ana deactivated after a confirmation that a tap outside and, on Android, Back leave open (RF-022), then «Desactivado», not offered in a new match or in «Añadir a la convocatoria», still with her marks in the saved match (RF-023); reactivated without a question and offered again (RF-024); a team deleted after its confirmation, which is gone from the list of teams and from «Todos los partidos» (RF-015). Matches are opened from the team's list, never through deep links.
+
+**Builds:** Release of `e0b9628`. iOS: `npx expo run:ios --configuration Release --no-bundler` on the iPhone 17 simulator (iOS 27.2). Android: `npx expo prebuild --platform android`, `./gradlew assembleRelease`, installed on the Medium_Phone_API_37.0 emulator with animations off. Maestro 2.12.1.
+
+| Platform | Run | Result                                                                                                                                                                                            |
+| -------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| iOS      | 1   | Failed after Juan's number was saved as 9: the assert of the bare number found nothing, iOS merges the row into «9, Juan»                                                                         |
+| iOS      | 2   | Passed, 252 steps, 5 min 35 s                                                                                                                                                                     |
+| Android  | 1   | Failed in the reactivation scene: the call-up of the new-match form starts under the fold, Ana was not on screen yet (the first tap also met «System UI isn't responding», dismissed with «Wait») |
+| Android  | 2   | Passed, 257 steps                                                                                                                                                                                 |
+
+**Fixes to the flow (none to the app):** the number is asserted with `N|.*N, Juan.*`; Ana is scrolled into view on Android. **Not covered:** a tablet, a phone in landscape, a real device. **Environment:** the iOS Release build needs about 10 GB of free disk: two attempts failed with a full disk, and the data of the iPhone 17 and iPad Pro 11 simulators were erased with Fernando's approval.
