@@ -3,6 +3,9 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { QuestionDialog } from "./choice-dialog-question";
+import type { QuestionDialogProps } from "./choice-dialog-question";
+
 export interface ConfirmDialogProps {
   readonly mode: "confirm";
   readonly visible: boolean;
@@ -13,9 +16,19 @@ export interface ConfirmDialogProps {
   readonly onCancel: () => void;
 }
 
+export type ChoiceDialogProps = ConfirmDialogProps | QuestionDialogProps;
+
+export function ChoiceDialog(props: ChoiceDialogProps): ReactElement {
+  return props.mode === "question" ? (
+    <QuestionDialog {...props} />
+  ) : (
+    <ConfirmDialog {...props} />
+  );
+}
+
 // Closes only with its own buttons: tapping outside does nothing and `onRequestClose`, which
 // `Modal` calls for the Android Back button, is an empty function (D44, D46).
-export function ChoiceDialog(props: ConfirmDialogProps): ReactElement {
+function ConfirmDialog(props: ConfirmDialogProps): ReactElement {
   const { t } = useTranslation();
   const { visible, title, message, confirmLabel, onConfirm, onCancel } = props;
   // A ref, not state: two taps can reach the handler before React re-renders.

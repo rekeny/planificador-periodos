@@ -31,7 +31,14 @@ const viewWith = (options: GridOptions = {}) => viewOf(gridWith(options));
 const ABOVE = { chromeHeight: 74, bannersHeight: 120, legendHeight: 48 };
 
 function gridElement(view: MatchView, heights: object = {}) {
-  return <MatchGrid view={view} onTapCell={jest.fn()} {...heights} />;
+  return (
+    <MatchGrid
+      view={view}
+      onTapCell={jest.fn()}
+      onLongPressCell={jest.fn()}
+      {...heights}
+    />
+  );
 }
 
 afterEach(async () => restoreWindow());

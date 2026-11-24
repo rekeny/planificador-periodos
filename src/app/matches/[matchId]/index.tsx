@@ -23,6 +23,7 @@ import { parseMatchId } from "@/state/route-params";
 import { TABLET_MIN_SHORT_SIDE, buttonsInHeader } from "@/ui/grid/grid-layout";
 import { GridButtons } from "@/ui/grid/grid-toolbar";
 import { MatchGrid } from "@/ui/grid/match-grid";
+import { MatchQuestions } from "@/ui/grid/match-questions";
 import { useMatchActions } from "@/ui/grid/use-match-actions";
 import { NotFound } from "@/ui/not-found";
 import { SaveErrorBanner } from "@/ui/save-error-banner";
@@ -145,9 +146,11 @@ export default function MatchScreen(): ReactElement {
         bannersHeight={heights.bannersHeight}
         legendHeight={heights.legendHeight}
         onTapCell={(cell) => void store.getState().tapCell(cell)}
+        onLongPressCell={(cell) => void store.getState().openCellMenu(cell)}
       />
       {inHeader ? null : <GridButtons {...buttons} />}
       {dialog}
+      <MatchQuestions />
     </View>
   );
 }

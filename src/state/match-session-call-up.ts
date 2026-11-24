@@ -16,6 +16,7 @@ import { validatePlayerInput } from "@/domain/squad-validation";
 import type { Player } from "@/domain/squad";
 import { pruneHistory, type UndoEntry } from "@/domain/undo";
 import { evaluateWarnings } from "@/domain/warnings";
+import { hasPendingQuestion } from "@/state/match-session-pending";
 import type { MatchSessionState } from "@/state/match-session-store";
 import { buildMatchView } from "@/state/match-view";
 import type { SaveResult } from "@/state/save-result";
@@ -26,7 +27,7 @@ type Actions = Pick<
 >;
 type Published = Pick<
   MatchSessionState,
-  "grid" | "warnings" | "view" | "history" | "saveFailed"
+  "grid" | "warnings" | "view" | "history" | "saveFailed" | "pending"
 >;
 
 /** What the slice needs from the store: its state, a way to publish and the open match's team. */
@@ -60,7 +61,14 @@ export function publish(host: CallUpHost, next: Next): SaveResult {
     history,
     teamPlayers,
   });
-  host.set({ grid, warnings, view, history, saveFailed: false });
+  host.set({
+    grid,
+    warnings,
+    view,
+    history,
+    saveFailed: false,
+    pending: null,
+  });
   return { kind: "saved" };
 }
 
@@ -111,6 +119,9 @@ function publishCallUp(
 }
 
 function add(host: CallUpHost, playerId: number): SaveResult {
+  if (hasPendingQuestion(host)) {
+    return { kind: "unchanged" };
+  }
   const current = openMatchOf(host);
   if (current === null) {
     return { kind: "unchanged" };
@@ -133,6 +144,9 @@ function add(host: CallUpHost, playerId: number): SaveResult {
 }
 
 function remove(host: CallUpHost, entryId: number): SaveResult {
+  if (hasPendingQuestion(host)) {
+    return { kind: "unchanged" };
+  }
   const current = openMatchOf(host);
   if (!current?.grid.callUp.some((entry) => entry.id === entryId)) {
     return { kind: "unchanged" };
@@ -152,6 +166,9 @@ function create(
   host: CallUpHost,
   input: { name: string; number: string },
 ): SaveResult {
+  if (hasPendingQuestion(host)) {
+    return { kind: "unchanged" };
+  }
   const current = openMatchOf(host);
   if (current === null) {
     return { kind: "unchanged" };

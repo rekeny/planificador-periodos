@@ -33,6 +33,7 @@ function cellElement(options: CellOptions = {}, onTapCell = jest.fn()) {
       cellWidth={44}
       rowHeight={44}
       onTapCell={onTapCell}
+      onLongPressCell={jest.fn()}
     />
   );
 }
@@ -184,6 +185,7 @@ describe("grid cell", () => {
           cellWidth={cellWidth}
           rowHeight={rowHeight}
           onTapCell={jest.fn()}
+          onLongPressCell={jest.fn()}
         />,
       );
       expect(screen.getByRole("button")).toHaveStyle({

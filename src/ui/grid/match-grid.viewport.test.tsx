@@ -24,6 +24,7 @@ const gridOf = (players: number, format: 4 | 6 | 8 = 8) => (
   <MatchGrid
     view={viewOf(gridWith({ players, format }))}
     onTapCell={jest.fn()}
+    onLongPressCell={jest.fn()}
   />
 );
 

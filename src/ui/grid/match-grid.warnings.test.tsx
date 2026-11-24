@@ -26,7 +26,13 @@ import { restoreWindow, setWindow } from "../../../tests/support/window-size";
 
 async function drawn(grid: MatchGrid) {
   await setWindow(1024, 768);
-  await render(<Grid view={viewOf(grid)} onTapCell={jest.fn()} />);
+  await render(
+    <Grid
+      view={viewOf(grid)}
+      onTapCell={jest.fn()}
+      onLongPressCell={jest.fn()}
+    />,
+  );
 }
 
 afterEach(async () => restoreWindow());

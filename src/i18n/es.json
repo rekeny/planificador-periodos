@@ -59,7 +59,24 @@
     "counter": "J {{played}} · D {{rested}}",
     "undo": "Deshacer",
     "addOvertime": "Añadir prórroga",
-    "removeOvertime": "Quitar prórroga"
+    "removeOvertime": "Quitar prórroga",
+    "subOrStarter": {
+      "question": "¿Entra de cambio o es titular en lugar de otro?",
+      "sub": "Entra de cambio",
+      "starter": "Titular en lugar de otro"
+    },
+    "cellMenu": {
+      "starter": "Titular",
+      "sub": "Entró de cambio",
+      "remove": "Quitar"
+    },
+    "chooseReplaced": {
+      "title": "¿A quién sustituye como titular?"
+    },
+    "removeXReminder": {
+      "message": "Si ha salido por un cambio, déjala marcada: sigue contando como jugado",
+      "removeAnyway": "Quitar de todos modos"
+    }
   },
   "common": {
     "save": "Guardar",

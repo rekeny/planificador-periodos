@@ -27,6 +27,7 @@ import { PlayerColumn } from "./player-column";
 export interface MatchGridProps {
   readonly view: MatchView;
   readonly onTapCell: (cell: Cell) => void;
+  readonly onLongPressCell: (cell: Cell) => void;
   // What the screen measures above the rows, in points.
   readonly chromeHeight?: number;
   readonly bannersHeight?: number;
@@ -111,10 +112,12 @@ function Rows({
   view,
   layout,
   onTapCell,
+  onLongPressCell,
 }: {
   readonly view: MatchView;
   readonly layout: ViewportLayout;
   readonly onTapCell: (cell: Cell) => void;
+  readonly onLongPressCell: (cell: Cell) => void;
 }): ReactElement {
   return (
     <>
@@ -128,6 +131,7 @@ function Rows({
               cellWidth={layout.cellWidth}
               rowHeight={layout.rowHeight}
               onTapCell={onTapCell}
+              onLongPressCell={onLongPressCell}
             />
           ))}
         </View>
@@ -165,7 +169,7 @@ function HeaderRow({
 
 /** The grid: the player column stays fixed while the headers and cells scroll sideways (RF-076, RF-077). */
 export function MatchGrid(props: MatchGridProps): ReactElement {
-  const { view, onTapCell } = props;
+  const { view, onTapCell, onLongPressCell } = props;
   const [headerRowHeight, setHeaderRowHeight] = useState(0);
   const [viewport, setViewport] = useState<Size | null>(null);
   const layout = useLayout(props, headerRowHeight, viewport);
@@ -207,7 +211,12 @@ export function MatchGrid(props: MatchGridProps): ReactElement {
                 cellWidth={layout.cellWidth}
                 onMeasured={setHeaderRowHeight}
               />
-              <Rows view={view} layout={layout} onTapCell={onTapCell} />
+              <Rows
+                view={view}
+                layout={layout}
+                onTapCell={onTapCell}
+                onLongPressCell={onLongPressCell}
+              />
             </View>
           </ScrollView>
         </View>

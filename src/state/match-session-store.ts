@@ -3,11 +3,14 @@ import type { StoreApi } from "zustand/vanilla";
 import type { AppDatabase } from "@/data/database-types";
 import { loadGridRecords } from "@/data/grid-repository";
 import { listPlayers } from "@/data/player-repository";
+import type { CellMenuChoice } from "@/domain/cell-menu";
 import type { Cell, MatchGrid } from "@/domain/grid";
 import type { UndoEntry } from "@/domain/undo";
 import { evaluateWarnings, type Warnings } from "@/domain/warnings";
 import { createCallUpActions } from "@/state/match-session-call-up";
 import { createMarksActions } from "@/state/match-session-marks";
+import { createMenuActions } from "@/state/match-session-menu";
+import { createQuestionsActions } from "@/state/match-session-questions";
 import { createUndoActions } from "@/state/match-session-undo";
 import { gridFromRecords } from "@/state/match-session-grid";
 import { buildMatchView, type MatchView } from "@/state/match-view";
@@ -19,6 +22,7 @@ export interface MatchSessionState {
   readonly warnings: Warnings | null; // evaluateWarnings(grid) (RF-060)
   readonly view: MatchView | null; //    what the interface draws
   readonly history: readonly UndoEntry[]; // memory only (RF-057, RF-082)
+  readonly pending: PendingQuestion | null; // D3: the question waiting for the coach
   readonly saveFailed: boolean; //       RF-085
   openMatch(id: number): void;
   closeMatch(): void;
@@ -29,7 +33,20 @@ export interface MatchSessionState {
   addOvertime(): SaveResult; //                       RF-058
   removeLastOvertime(): SaveResult; //                RF-059
   undo(): SaveResult; //                              RF-055, RF-057, RF-086
+  answerSub(): SaveResult; //                         RF-046
+  answerStarter(): SaveResult; //                     RF-047 (opens the choice, writes nothing)
+  chooseReplaced(entryId: number): SaveResult; //     RF-047, RF-057
+  confirmRemove(): SaveResult; //                     RF-050, RF-054
+  cancelQuestion(): void; //                          RF-045, RF-050
+  openCellMenu(cell: Cell): SaveResult; //            RF-052 (opens the menu, writes nothing)
+  chooseCellMenuOption(choice: CellMenuChoice): SaveResult; // RF-052, RF-053
 }
+
+export type PendingQuestion =
+  | { readonly kind: "subOrStarter"; readonly cell: Cell } //          RF-045
+  | { readonly kind: "chooseReplaced"; readonly cell: Cell } //        RF-047, RF-053
+  | { readonly kind: "confirmRemoveStarter"; readonly cell: Cell } //  RF-050, RF-052
+  | { readonly kind: "cellMenu"; readonly cell: Cell }; //             RF-052
 
 export type MatchSessionStore = StoreApi<MatchSessionState>;
 
@@ -38,6 +55,7 @@ const EMPTY = {
   warnings: null,
   view: null,
   history: [],
+  pending: null,
   saveFailed: false,
 } as const;
 
@@ -72,6 +90,8 @@ export function createMatchSessionStore(db: AppDatabase): MatchSessionStore {
     ...createCallUpActions({ db, get, set, teamId: () => teamId }),
     ...createMarksActions({ db, get, set, teamId: () => teamId }),
     ...createUndoActions({ db, get, set, teamId: () => teamId }),
+    ...createQuestionsActions({ db, get, set, teamId: () => teamId }),
+    ...createMenuActions({ db, get, set, teamId: () => teamId }),
     openMatch(id) {
       try {
         const loaded = load(db, id);

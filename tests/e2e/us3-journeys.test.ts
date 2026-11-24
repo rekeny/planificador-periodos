@@ -24,7 +24,7 @@ const tapEmpty = (name: string, period = "P1"): string =>
   tap(cell(name, period, "empty"));
 
 describe("T056 Maestro US3 journeys: marks, Undo and overtimes", () => {
-  it("RF-042 RF-055: the grid starts with six periods and no overtime, then five starters are marked in P1 and the sixth tap changes nothing and shows nothing", () => {
+  it("RF-042 RF-055: the grid starts with six periods and no overtime, then five starters are marked in P1, the sixth tap opens the question, «Cancelar» closes it, and nothing changes", () => {
     expect(planning).toEqual(expect.arrayContaining([see("P1"), see("P6")]));
     expect(planning).toContain(notSee("PR1"));
     let from = at(planning, see("P6"));
@@ -35,6 +35,9 @@ describe("T056 Maestro US3 journeys: marks, Undo and overtimes", () => {
       planning,
       [
         tapEmpty("Fran"),
+        see(es.grid.subOrStarter.question),
+        tap(es.common.cancel),
+        notSee(es.grid.subOrStarter.question),
         empty("Fran"),
         notSee(cell("Fran", "P1", "starter")),
         notSee(cell("Fran", "P1", "sub")),

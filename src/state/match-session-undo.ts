@@ -8,12 +8,16 @@ import {
   publish,
   type CallUpHost,
 } from "@/state/match-session-call-up";
+import { hasPendingQuestion } from "@/state/match-session-pending";
 import type { MatchSessionState } from "@/state/match-session-store";
 import type { SaveResult } from "@/state/save-result";
 
 type Actions = Pick<MatchSessionState, "undo">;
 
 function undo(host: CallUpHost): SaveResult {
+  if (hasPendingQuestion(host)) {
+    return { kind: "unchanged" };
+  }
   const current = openMatchOf(host);
   const history = host.get().history;
   // Nothing to undo: neither sets nor clears saveFailed.

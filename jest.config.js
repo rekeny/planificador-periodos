@@ -24,6 +24,8 @@ module.exports = {
   preset: "jest-expo",
   globalSetup: "<rootDir>/tests/setup/time-zone.js",
   setupFiles: ["<rootDir>/tests/setup/fast-check.ts"],
+  // After the test framework is installed, because the testing library of expo-router needs `expect`.
+  setupFilesAfterEnv: ["<rootDir>/tests/setup/gesture-handler.ts"],
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
   testPathIgnorePatterns: [
     "/node_modules/",
