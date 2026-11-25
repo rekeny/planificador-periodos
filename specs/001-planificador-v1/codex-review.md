@@ -1,34 +1,35 @@
 # Codex review
 
-- Date: 2026-11-25 10:12
-- Branch: 001-planificador-v1-d3 against origin/main
-- Commit: 31322a0
+- Date: 2026-11-25 15:20
+- Branch: 001-planificador-v1-d3 against 866d988
+- Commit: 82fef27
 
-**Verdict: 1 BLOCKING, 0 IMPORTANT, 1 MINOR.**
+**Not approved: 2 BLOCKING, 0 IMPORTANT, 1 MINOR.** Reviewed `git diff 866d988...HEAD` at `82fef27`.
 
-1. **BLOCKING — Match deletion leaves earlier, noncontiguous routes behind.**  
-   [leave-deleted.ts:64](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/src/ui/leave-deleted.ts:64)
+1. **BLOCKING · RF-052 — Long-pressing an empty cell marks it on release.**  
+   [grid-cell.tsx:44](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/src/ui/grid/grid-cell.tsx:44) disables the long-press gesture for empty cells. Consequently, `longPressed` stays false and the Pressable’s release calls `onTapCell`. RF-052 requires no change.
 
-   With the stack `/ → /matches/1 → /matches → /matches/1 → /matches/1/edit`, deleting match 1 dismisses only the final two screens. The earlier `/matches/1` remains; Back reaches the deleted match’s route. This contradicts the deletion cleanup required by `docs/security.md` and leaves F-D3-03 incomplete.
+   The existing empty-cell test drives only the gesture; it omits the Pressable’s release. An additional regression executed entirely in memory reproduces the unexpected tap.
 
-   Reproduced using the real helper and installed StackRouter. **Fix:** check the entire stack for matching routes and remove all of them, or reset to a safe list when an earlier occurrence exists. Add a `renderRouter` regression for this stack.
+   **Fix:** consume long presses on every cell, suppress the subsequent tap, and open the menu only for marked cells. Test the complete press–hold–release sequence.
 
-2. **MINOR — The security report retains incorrect confirmation claims.**  
-   [review.md:1694](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/review.md:1694)
+2. **BLOCKING · RF-076 — Question dialogs do not support landscape on iPhone.**  
+   [choice-dialog-question.tsx:56](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/src/ui/choice-dialog-question.tsx:56) omits `supportedOrientations`. The installed React Native implementation defaults to portrait on iPhone. Changing mocked window dimensions in Jest does not exercise this native restriction.
 
-   The paragraph still says match deletion lacks a double-press guard and that outside taps close confirmations. `ConfirmDialog` guards confirmation synchronously and ignores outside taps and Android Back.
+   **Fix:** explicitly support portrait and landscape in the dialog modes, add a configuration regression, and verify opening and rotating each dialog on iPhone.
 
-   **Fix:** correct this paragraph to match the implementation and the amended SEC-D3-1 finding.
+3. **MINOR · Incorrect file attribution in the implementation explanation.**  
+   [summary.md:840](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/summary.md:840) attributes details editing, deletion and format changes to `match-list-repository.ts`; that file implements only lists.
 
-Category results:
+   **Fix:** attribute those operations to `match-repository.ts`.
 
-| Category                                       | Result                                                                                                   |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| RF/E implementation, coverage and scope        | Finding 1; all RF/E IDs have test references. No unrelated feature additions found.                      |
-| Constitution, layers, conventions and glossary | No additional findings.                                                                                  |
-| Test integrity                                 | No deleted, skipped or weakened assertions found. Finding 1 needs regression coverage.                   |
-| Security                                       | Navigation issue in finding 1. No additional network, logging, query, dependency or permission findings. |
-| Explanations and reports                       | Finding 2.                                                                                               |
-| Simplicity and efficiency                      | No findings.                                                                                             |
+| Review category                                | Result                                                                                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| RF/E implementation, coverage and scope        | Findings 1–2. No unrelated feature additions found.                                                                           |
+| Constitution, layers, conventions and glossary | No additional findings.                                                                                                       |
+| Test integrity                                 | Findings 1–2 expose coverage gaps. No deleted, skipped or weakened assertions found.                                          |
+| Security                                       | No findings: changed queries are parameterised; no new network calls, player-data logging, dependencies or permissions found. |
+| Explanations and reports                       | Finding 3.                                                                                                                    |
+| Simplicity and efficiency                      | No findings.                                                                                                                  |
 
-Validation passed: TypeScript, ESLint, changed-file formatting, traceability and focused/skipped-test checks. **379 tests across 33 domain/data/state suites passed with cache writes disabled.** Full verification and UI tests were not validated in this environment; device checks remain pending. No repository files were changed.
+TypeScript, ESLint, traceability and focused/skipped-test checks passed. Selected runs passed 605 domain/data/state tests and 48 focused checks, with overlapping selections; four session properties also passed. The additional RF-052 regression failed as described. Jest cache writes were disabled for this read-only environment. Full verification, mutation testing and device checks were not rerun. No repository files were changed by this review.
