@@ -1827,3 +1827,10 @@ Category results (Codex):
 Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed; selected runs passed 605 domain/data/state tests and 48 focused checks. The additional RF-052 regression failed as described. Full verification, mutation testing and device checks were not rerun. No repository files were changed by Codex.
 
 Open items for the orchestrator: none recorded by Codex beyond the three findings above. Findings 1 and 2 are BLOCKING and must be fixed (phase 6) before closing; finding 3 is a correction to `summary.md`.
+
+### Fixes of 2026-11-25
+
+- `39a2468` F-D3-06 RF-052: `src/ui/grid/grid-cell.tsx` keeps the long-press gesture enabled on every cell, so the release that ends a long press is never a tap; `onLongPressCell` is called only for a marked cell. New test: the full press-in, hold, press-out, press sequence on an empty cell calls neither callback (red before the fix: `onTapCell` was called).
+- `fb1aee4` F-D3-07 RF-076: new `src/ui/modal-orientations.ts` (`ALL_ORIENTATIONS`) passed as `supportedOrientations` by the two `Modal`s of the app (`src/ui/choice-dialog.tsx`, `src/ui/choice-dialog-question.tsx`). New `src/ui/modal-orientations.test.ts` reads every non-test `.tsx` under `src/` and asserts each `<Modal>` passes it (red before the fix). Rotating each dialog on a real iPhone is still a device check.
+- `56bbae6` MINOR: `summary.md` now attributes details editing, deletion and format change to `match-repository.ts`.
+- Verify: `STRYKER_INCREMENTAL=1 npm run verify` passed types, lint, format and focused-tests; the full Jest run (4,444 tests) failed 1 to 5 tests per attempt (4 attempts), always different suites of `tests/app`, with «Exceeded timeout of 30000 ms» on a loaded machine; every one of those suites passes when run alone (for example 44 of 44 and 18 of 18). The same load flake is described above (2026-11-24). Traceability, Expo Doctor, npm audit, osv-scanner, gitleaks and semgrep were run by hand and are green; mutation testing is skipped (no domain change). A clean full `verify.sh` run is pending (CI).
