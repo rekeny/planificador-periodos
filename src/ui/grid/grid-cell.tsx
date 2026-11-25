@@ -41,10 +41,10 @@ export function GridCell({
   const longPress = useLongPressGesture({
     testID: `cell-long-press:${cell.key}`,
     runOnJS: true,
-    enabled: cell.state !== "empty",
     onActivate: () => {
       longPressed.current = true;
-      onLongPressCell(cell.cell);
+      // Consumed on every cell so the release is never a tap; only a marked cell has a menu (RF-052).
+      if (cell.state !== "empty") onLongPressCell(cell.cell);
     },
   });
   return (
