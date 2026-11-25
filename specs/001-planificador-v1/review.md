@@ -1704,3 +1704,23 @@ No blocking and no important finding.
 ### Verdict (Security, D3 part 2)
 
 No blocking and no important finding; one minor (SEC-D3-1, optional) and three informative notes. The change adds no dependency, permission, network call or log of children's data, keeps every write behind a button and a confirmation, and keeps the data layer parameterised and transactional. The audit list of `docs/security.md` holds for this diff.
+
+## Codex review · D3 part 2, PR 25 (2026-11-25)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 origin/main` on commit 5793d2b (diff `origin/main...HEAD`, reviewed through 3048082).
+
+Verdict: **not approved**. Counts: 2 BLOCKING, 1 IMPORTANT, 1 MINOR. Status of every finding: open.
+
+Findings, copied from Codex:
+
+1. **BLOCKING · RF-029 · Deleting a match can leave its deleted grid open.** `src/ui/match-details-actions.tsx:48`. Opening `/matches/1` directly, then Edit, then confirming deletion: `dismiss(2)` keeps the root grid mounted, so its session stays open. A stack with two details screens also leaves the deleted grid behind. Suggested fix: explicitly close the session and remove every route of the deleted match, with a list fallback; add regressions for both stack shapes.
+
+2. **BLOCKING · RF-023, RF-032 · A retained session can add a deactivated player.** `src/state/squad-player-actions.ts:107`. Open a match with an active player outside its call-up, push the player's edit route, deactivate them, return: the cached `playersToAdd` still offers them and `addToCallUp` checks existence but not `isActive`, so the add succeeds. A retained new-match draft also saves its stale selection. Reproduced on the migrated SQLite test database. Suggested fix: refresh candidates without clearing Undo or form edits, and revalidate current activity before adding players or creating a match; test deactivation after opening the session or draft.
+
+3. **IMPORTANT · Team deletion can strand the app on a deleted root route.** `src/app/teams/[teamId]/edit.tsx:39`. Opening `/teams/1` directly, Edit, then delete: `canDismiss()` is true but `dismissAll()` keeps `/teams/1`, which becomes a root NotFound screen with no previous screen, so the planned return to the teams list does not happen. Suggested fix: make deletion explicitly end at `/`, removing the deleted team's routes; add a regression starting at the team route.
+
+4. **MINOR · SEC-D3-1 · The security report wrongly says double confirmation is unguarded.** `specs/001-planificador-v1/review.md` (Security, D3 part 2, line ~1681). `ConfirmDialog` has a synchronous `confirmed` ref, and an existing test already checks that two immediate presses delete once. Suggested fix: correct the finding and its prose; describe any extra handler guard as optional defence.
+
+Codex also reported no additional findings for scope, architecture, constitution, glossary, tests (no deleted, skipped or weakened assertions), security, explanations, or simplicity. Checks that passed: TypeScript, ESLint, traceability, focused/skipped-test checks, final formatting. Jest was blocked by cache-write permissions, so full verification was not rerun. Device checks remain pending. No files were changed by Codex.
+
+Open items for the orchestrator: the severity of finding 3 is recorded as IMPORTANT in the Codex file; no reclassification was made.

@@ -1,32 +1,38 @@
 # Codex review
 
-- Date: 2026-11-21 23:06
-- Branch: docs/d3-planner-review against origin/main
-- Commit: d2b26bc
+- Date: 2026-11-25 09:36
+- Branch: 001-planificador-v1-d3 against origin/main
+- Commit: 5793d2b
 
-Reviewed `d2b26bc` using `git diff origin/main...HEAD`. This is a documentation-only D3 planning change.
+Reviewed `git diff origin/main...HEAD` through `3048082`. **Two BLOCKING findings prevent approval.**
 
-**Findings: 0 BLOCKING, 1 IMPORTANT, 2 MINOR.**
+1. **BLOCKING — Deleting a match can leave its deleted grid open.**  
+   [match-details-actions.tsx:48](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/src/ui/match-details-actions.tsx:48)  
+   Open `/matches/1` directly, open Edit, then confirm deletion. `dismiss(2)` retains the root grid, so it never unmounts and its session remains open. A stack containing two details screens also leaves the deleted grid behind. This breaks RF-029.  
+   **Fix:** explicitly close the session and remove every route belonging to the deleted match, with a list fallback. Add regressions for both stack shapes.
 
-1. **IMPORTANT — T062 knowingly weakens existing properties until another commit.**  
-   [tasks.md:1240](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:1240) explicitly postpones adapting the random-sequence tests until T100. Once a question becomes pending, subsequent taps stop exercising marking, while the properties remain green. This conflicts with the requirement to preserve meaningful tests in every task commit.  
-   **Fix:** adapt both properties in T062, alongside the behavior change. Leave the additional action guards in T100.
+2. **BLOCKING — A retained session can add a deactivated player.**  
+   [squad-player-actions.ts:107](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/src/state/squad-player-actions.ts:107)  
+   Open a match while a player is active and outside its call-up. Push the player’s edit route, deactivate them, then return. The cached `playersToAdd` still offers them; `addToCallUp` checks their current existence but ignores `isActive`, so adding succeeds. A retained new-match draft also saves its stale selection. This violates RF-023 and RF-032. The sequence was reproduced against the migrated SQLite test database.  
+   **Fix:** refresh candidates without clearing Undo or form edits, and revalidate current activity before adding players or creating a match. Test deactivation **after** opening the session or draft.
 
-2. **MINOR — T093 needs a regression for choosing across dialog stages.**  
-   [tasks.md:1285](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:1285) combines the existing double-tap guard with content changes while `visible` remains true. The current guard resets only when visibility changes; the listed component scenario checks replacement content but never presses its options. T064 would catch this later, but T093 could pass independently with an unusable second stage.  
-   **Fix:** require a test that chooses an option, changes stages without closing, then successfully chooses again. Rearm the guard per stage while suppressing duplicate presses within that stage.
+3. **IMPORTANT — Team deletion can strand the app on a deleted root route.**  
+   [edit.tsx:39](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/src/app/teams/[teamId]/edit.tsx:39)  
+   Open `/teams/1` directly, press Edit, then delete. `canDismiss()` is true, but `dismissAll()` retains `/teams/1`, which becomes a root NotFound screen without a previous screen. The planned return to the teams list does not happen.  
+   **Fix:** ensure deletion explicitly ends at `/`, removing the deleted team’s routes. Add a regression starting at the team route rather than its edit form.
 
-3. **MINOR — Current approval records contradict one another.**  
-   [tasks.md:15](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:15) still says approval is pending. The approval columns in `plan.md:1132` and `plan.md:1136` do likewise, although the plan header records Fernando’s decisions.  
-   **Fix:** update these current status fields with the recorded approvals and dates; retain device checks as pending.
+4. **MINOR — The security report incorrectly claims double confirmation is unguarded.**  
+   [review.md:1681](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/review.md:1681)  
+   SEC-D3-1 overlooks `ConfirmDialog`’s synchronous `confirmed` ref. An existing test already checks that two immediate confirmation presses delete once.  
+   **Fix:** correct the finding and associated security prose; describe any additional handler guard as optional defense.
 
-Category results:
+For the remaining requested categories:
 
-- **Requirements, examples and scope:** no additional findings. Full v1 remains incomplete: 11 RFs lack test names, all assigned to pending D3 work. Existing example names do not establish complete implementation.
-- **Constitution, layers, conventions and glossary:** no additional findings. ADR-006 covers the glossary additions.
-- **Test integrity:** findings 1–2. This diff changes no executable tests.
-- **Security:** no findings introduced; no runtime, dependency, permission or query changes.
-- **Explanations and reports:** finding 3. `summary.md` remains unchanged and describes earlier deliveries.
-- **Simplicity and efficiency:** no findings.
+- **Scope:** no additions outside the approved spec found. Device acceptance checks remain explicitly pending.
+- **Architecture, constitution, conventions and glossary:** no additional findings.
+- **Tests:** no deleted, skipped or weakened assertions found. The missing regression sequences are identified above.
+- **Security:** no additional findings involving network calls, player-data logs, parameterized queries, dependencies or permissions.
+- **Explanations:** the correction above is required.
+- **Simplicity, clarity and efficiency:** no additional findings.
 
-Passed: TypeScript, lint, changed-file formatting, traceability, focused/skipped-test detection and `git diff --check`. Full verification, Jest, Stryker and native checks were not rerun. GitHub access failed, so PR/CI status was not confirmed.
+TypeScript, ESLint, traceability, focused/skipped-test checks and final formatting checks passed. Installed Expo Router reducer checks confirmed the navigation outcomes. Jest was blocked by cache-write permissions; full verification and device checks were not rerun. No files were changed.
