@@ -31,6 +31,7 @@ export interface MatchSessionState {
   addToCallUp(playerId: number): SaveResult; //       RF-032
   removeFromCallUp(entryId: number): SaveResult; //   RF-033, RF-034
   createPlayerInMatch(input: { name: string; number: string }): SaveResult; // RF-035
+  refreshCandidates(): void; //                       RF-023, RF-032 (players deactivated since)
   tapCell(cell: Cell): SaveResult; //                 RF-044, RF-048, RF-049, RF-051
   addOvertime(): SaveResult; //                       RF-058
   removeLastOvertime(): SaveResult; //                RF-059

@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useRootNavigationState, useRouter } from "expo-router";
 import { useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,6 +7,7 @@ import { Pressable, StyleSheet, Text } from "react-native";
 import type { Format } from "@/domain/format";
 import { getMatchSessionStore, getMatchesStore } from "@/state/app-stores";
 import { ChoiceDialog } from "./choice-dialog";
+import { leaveDeletedMatch, stackRoutes } from "./leave-deleted";
 import { SaveErrorBanner } from "./save-error-banner";
 
 interface MatchDetailsActions {
@@ -27,10 +28,10 @@ export function useMatchDetailsActions(
 ): MatchDetailsActions {
   const { t } = useTranslation();
   const router = useRouter();
+  const routes = stackRoutes(useRootNavigationState());
   const [newFormat, setNewFormat] = useState<Format | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [failed, setFailed] = useState(false);
-
   function changeFormat(format: Format): void {
     setNewFormat(null);
     const result = getMatchSessionStore().getState().changeFormat(format);
@@ -40,12 +41,9 @@ export function useMatchDetailsActions(
   function deleteMatch(): void {
     setDeleting(false);
     const result = getMatchesStore().getState().deleteMatch(matchId);
-    if (result.kind === "saveFailed") {
-      setFailed(true);
-      return;
-    }
-    // The details and the grid under them leave together; the grid's unmount closes the session.
-    router.dismiss(2);
+    setFailed(result.kind === "saveFailed");
+    // Only a saved delete leaves, and every route of the match goes; the grid's unmount closes the session.
+    if (result.kind === "saved") leaveDeletedMatch(router, routes, matchId);
   }
 
   const footer = (

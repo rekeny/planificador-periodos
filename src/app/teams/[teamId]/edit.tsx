@@ -1,10 +1,15 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useLocalSearchParams,
+  useRootNavigationState,
+  useRouter,
+} from "expo-router";
 import type { ReactElement } from "react";
 import { useStore } from "zustand";
 
 import { getSquadStore } from "@/state/app-stores";
 import { parseTeamId } from "@/state/route-params";
 import type { TeamInput } from "@/state/squad-store";
+import { leaveDeletedTeam, stackRoutes } from "@/ui/leave-deleted";
 import { NotFound } from "@/ui/not-found";
 import { TeamDeleteActions } from "@/ui/team-delete-actions";
 import { TeamForm } from "@/ui/team-form";
@@ -12,6 +17,7 @@ import { useOpenRouteTeam } from "@/ui/use-open-route-team";
 
 export default function EditTeamScreen(): ReactElement | null {
   const router = useRouter();
+  const routes = stackRoutes(useRootNavigationState());
   const { teamId } = useLocalSearchParams<{ teamId: string }>();
   const id = parseTeamId(teamId);
   const store = getSquadStore();
@@ -33,12 +39,8 @@ export default function EditTeamScreen(): ReactElement | null {
 
   const onDelete = () => {
     const result = store.getState().deleteTeam(id);
-    // The same handler goes back to the list of teams. A restored stack with only this form has
-    // nothing to dismiss, so it is replaced by the list.
-    if (result.kind === "saved") {
-      if (router.canDismiss()) router.dismissAll();
-      else router.replace("/");
-    }
+    // The same handler ends on the list of teams, with no route of the team left.
+    if (result.kind === "saved") leaveDeletedTeam(router, routes);
     return result;
   };
 

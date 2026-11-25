@@ -33,6 +33,8 @@ export interface NewMatchDraftState extends MatchFieldsState {
   reset(teamId: number, formId?: string): boolean;
   setFormat(format: Format): void;
   toggle(playerId: number): void;
+  /** Re-reads the squad: a player deactivated since is dropped; the typed fields and checks stay. */
+  refreshPlayers(): void;
   create(): CreateResult;
 }
 
@@ -105,6 +107,45 @@ function toggle(set: Set, get: Get, playerId: number): void {
   set({ callUpSelection: rows, callUpRange: rangeOf(format, rows) });
 }
 
+// The rows from the squad as it is now: whoever is no longer active is gone, the coach's own
+// deselections stay, and a player who was not in the draft yet (new, reactivated) starts selected.
+function currentRows(
+  db: AppDatabase,
+  teamId: number,
+  rows: readonly CallUpRow[],
+): readonly CallUpRow[] {
+  const checked = new Map(rows.map((row) => [row.player.id, row.selected]));
+  return initialCallUp(listPlayers(db, teamId)).map((player) => ({
+    player,
+    selected: checked.get(player.id) ?? true,
+  }));
+}
+
+// The squad as it is now, or null when it cannot be read (the list then stays as it is).
+function readRows(
+  db: AppDatabase,
+  teamId: number,
+  rows: readonly CallUpRow[],
+): readonly CallUpRow[] | null {
+  try {
+    return currentRows(db, teamId, rows);
+  } catch {
+    return null;
+  }
+}
+
+function refreshPlayers(
+  db: AppDatabase,
+  teamId: number | null,
+  set: Set,
+  get: Get,
+): void {
+  const rows =
+    teamId === null ? null : readRows(db, teamId, get().callUpSelection);
+  if (rows === null) return;
+  set({ callUpSelection: rows, callUpRange: rangeOf(get().format, rows) });
+}
+
 export function createNewMatchDraft(
   db: AppDatabase,
   now: () => Date,
@@ -141,7 +182,12 @@ export function createNewMatchDraft(
   function create(get: Get): CreateResult {
     if (openedTeamId === null) return { kind: "unchanged" };
     if (created !== null) return created;
-    const result = saveDraft(db, openedTeamId, get());
+    const rows = readRows(db, openedTeamId, get().callUpSelection);
+    if (rows === null) return { kind: "saveFailed" }; // players that cannot be read are not guessed
+    const result = saveDraft(db, openedTeamId, {
+      ...get(),
+      callUpSelection: rows,
+    });
     if (result.kind === "saved") created = result; // only a saved match is remembered
     return result;
   }
@@ -154,6 +200,7 @@ export function createNewMatchDraft(
       set({ format, callUpRange: rangeOf(format, get().callUpSelection) }),
     ...matchFieldSetters(set, () => teamName),
     toggle: (playerId) => toggle(set, get, playerId),
+    refreshPlayers: () => refreshPlayers(db, openedTeamId, set, get),
     create: () => create(get),
   }));
 }

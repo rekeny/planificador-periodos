@@ -23,7 +23,10 @@ import type { SaveResult } from "@/state/save-result";
 
 type Actions = Pick<
   MatchSessionState,
-  "addToCallUp" | "removeFromCallUp" | "createPlayerInMatch"
+  | "addToCallUp"
+  | "removeFromCallUp"
+  | "createPlayerInMatch"
+  | "refreshCandidates"
 >;
 type Published = Pick<
   MatchSessionState,
@@ -131,7 +134,8 @@ function add(host: CallUpHost, playerId: number): SaveResult {
     // The read comes first: once the entry is committed no read is left that could fail (RF-085).
     const teamPlayers = listPlayers(host.db, current.teamId);
     const player = teamPlayers.find((candidate) => candidate.id === playerId);
-    if (player === undefined) {
+    // A player deactivated since the session opened is not added (RF-023, RF-032).
+    if (player === undefined || !player.isActive) {
       return { kind: "unchanged" };
     }
     const record = saveEntry(host.db, current.matchId, callUpEntryFor(player));
@@ -193,10 +197,34 @@ function create(
   return publishCallUp(host, current, grid, written.teamPlayers);
 }
 
+// Rebuilds the view with the players as they are now, so the screen stops offering a player
+// deactivated meanwhile. The grid, the history and the form of a question stay as they are.
+function refresh(host: CallUpHost): void {
+  const current = openMatchOf(host);
+  if (current === null || hasPendingQuestion(host)) return;
+  try {
+    const teamPlayers = listPlayers(host.db, current.teamId);
+    const { warnings, history } = host.get();
+    if (warnings === null) return;
+    host.set({
+      view: buildMatchView({
+        matchId: current.matchId,
+        grid: current.grid,
+        warnings,
+        history,
+        teamPlayers,
+      }),
+    });
+  } catch {
+    // A failed read keeps the list; adding still checks the player (RF-085).
+  }
+}
+
 export function createCallUpActions(host: CallUpHost): Actions {
   return {
     addToCallUp: (playerId) => add(host, playerId),
     removeFromCallUp: (entryId) => remove(host, entryId),
     createPlayerInMatch: (input) => create(host, input),
+    refreshCandidates: () => refresh(host),
   };
 }
