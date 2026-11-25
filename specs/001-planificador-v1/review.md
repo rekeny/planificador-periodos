@@ -1665,3 +1665,7 @@ Flow: `e2e/us7-squad.yaml`, with its static tests (`tests/e2e/us7-*.test.ts`). T
 | Android  | 2   | Passed, 257 steps                                                                                                                                                                                 |
 
 **Fixes to the flow (none to the app):** the number is asserted with `N|.*N, Juan.*`; Ana is scrolled into view on Android. **Not covered:** a tablet, a phone in landscape, a real device. **Environment:** the iOS Release build needs about 10 GB of free disk: two attempts failed with a full disk, and the data of the iPhone 17 and iPad Pro 11 simulators were erased with Fernando's approval.
+
+## CI of PR 25 · two tests timed out (2026-11-25)
+
+The `verify` check of PR 25 at `1b03fab` failed with two tests that passed locally: `tests/app/new-match.time-states.android.test.tsx` (the suite took 37.7 s) and the property test of `src/ui/grid/match-grid.viewport.test.tsx` (8.1 s), both with «Exceeded timeout of 5000 ms for a test». Nothing in the behaviour failed: 4,410 of 4,412 tests passed. The same grid test had already timed out twice on the developer's machine under load (2026-11-23 and 2026-11-24). Fix: `testTimeout: 30000` in `jest.config.js`, so a slow or loaded machine does not fail a test that is only slow. No test was changed or weakened. `jest.config.js` is test configuration (D3 rule 1), so the full local Stryker run was done: 94.92 % in 5 min 41 s, `verify.sh` green (363 suites, 4,412 tests).
