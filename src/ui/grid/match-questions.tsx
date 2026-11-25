@@ -1,4 +1,5 @@
 import type { TFunction } from "i18next";
+import { useIsFocused } from "expo-router";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { useStore } from "zustand";
@@ -85,10 +86,13 @@ function contentOf(
 }
 
 // The question dialog of the match screen: one dialog whose content follows the session's pending
-// question. It only draws it and calls the store's answers; the rules stay in the domain.
+// question. It only draws it and calls the store's answers; the rules stay in the domain. Only the
+// focused grid presents it: the stack can hold two grids of the same match over one shared session,
+// and each would open its own dialog (F-D3-08).
 export function MatchQuestions(): ReactElement {
   const { t } = useTranslation();
   const store = getMatchSessionStore();
+  const focused = useIsFocused();
   const pending = useStore(store, (state) => state.pending);
   const view = useStore(store, (state) => state.view);
   const { title, options } = contentOf(pending, view, t);
@@ -106,7 +110,7 @@ export function MatchQuestions(): ReactElement {
   return (
     <ChoiceDialog
       mode="question"
-      visible={pending !== null}
+      visible={focused && pending !== null}
       title={title}
       options={options}
       stage={`${pending?.kind ?? ""}:${JSON.stringify(pending?.cell ?? "")}`}
