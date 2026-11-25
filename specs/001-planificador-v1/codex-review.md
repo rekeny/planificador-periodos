@@ -1,32 +1,24 @@
 # Codex review
 
-- Date: 2026-11-25 20:00
+- Date: 2026-11-25 21:59
 - Branch: 001-planificador-v1-d3 against 866d988
-- Commit: 9c3675f
+- Commit: b242b06
 
-Reviewed `git diff 866d988...HEAD`: **0 BLOCKING, 1 IMPORTANT, 1 MINOR finding.**
+Reviewed `git diff 866d988...HEAD` through `b242b06`, after reading the required repository documents and specification files.
 
-1. **IMPORTANT — Present questions only from the focused grid.**  
-   [match-questions.tsx:109](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/src/ui/grid/match-questions.tsx:109)  
-   The stack `/ → /matches/1 → /matches → /matches/1` keeps two grids for the same match mounted. Both observe the shared `pending` question and make their Modal visible. Android presents these as separate native dialog windows. A component regression confirmed **two visible Modals instead of one**.
+**No confirmed BLOCKING or IMPORTANT findings. One MINOR finding:**
 
-   **Fix:** gate question presentation by route focus while retaining the session and Undo history. Add a regression using the existing repeated-match stack fixture.
+- **MINOR — The summary describes an already addressed navigation risk as unresolved.** [summary.md:926](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/summary.md:926) says restored grid/details stacks are untested and their destination unspecified. The diff adds stack-aware deletion handling, a `/matches` fallback and regression tests for those stacks. The paragraph at line 932 also documents the fix. **Fix:** replace the stale bullet with the implemented behavior and retain only the outstanding device verification.
 
-2. **MINOR — Update the deletion explanation to describe the final implementation.**  
-   [summary.md:859](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/summary.md:859)  
-   The main explanation still says match deletion uses `router.dismiss(2)`; the adjacent team-deletion explanation also describes superseded logic. Current code uses `leaveDeletedMatch` and `leaveDeletedTeam`.
+Results for the six requested categories:
 
-   **Fix:** rewrite these paragraphs around the helpers’ current stack cleanup and fallback behavior.
+1. **Requirements, examples and scope:** no additional findings from implementation and traceability inspection. The documented device acceptance checks remain pending.
+2. **Constitution, layers, conventions and glossary:** no findings.
+3. **Test integrity:** no deleted, skipped or weakened tests found. Existing assertions were preserved or strengthened. Runtime verification has the limitation below.
+4. **Security:** no findings. Added queries are parameterized; no new network calls, player-data logging, dependencies or permissions were introduced.
+5. **Explanations and reports:** the MINOR finding above.
+6. **Simplicity, clarity and efficiency:** no findings.
 
-| Review category                                | Result                                                                                                      |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| RF/E implementation, testing and scope         | Finding 1; all RF/E IDs have test references. No unrelated additions found.                                 |
-| Constitution, layers, conventions and glossary | No findings.                                                                                                |
-| Test integrity                                 | No deleted, skipped or weakened assertions found. Finding 1 needs regression coverage.                      |
-| Security                                       | No findings: parameterized queries; no new network calls, player-data logging, dependencies or permissions. |
-| Explanations and reports                       | Finding 2.                                                                                                  |
-| Simplicity and efficiency                      | No findings.                                                                                                |
+Type checking, lint, traceability and focused/skipped-test checks passed. A targeted Jest run, with cache persistence suppressed in memory because the filesystem is read-only, produced **989 passing tests across 79 passing suites**; **59 suites failed**, with interface tests encountering Reanimated mock-loading errors involving `default.createAnimatedComponent`. I could not establish whether that failure originates in the versioned setup or the installed dependency environment, so I have not classified it as a branch defect.
 
-TypeScript, ESLint, traceability and focused/skipped-test checks passed. **113 selected domain/data/state tests passed**, with Jest cache persistence disabled in memory. Full verification and device tests were not rerun; GitHub was unreachable. No repository files were changed.
-
-Historical task/report content was inspected selectively; the requested complete prerequisite reading was not completed.
+A green full verification was **not reconfirmed**. Reproduce the interface tests in a clean, writable installation before closing verification. No repository files were changed.

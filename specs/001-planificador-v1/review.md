@@ -1871,3 +1871,30 @@ Notes for the orchestrator: Codex states that the requested complete prerequisit
 - **F-D3-08 IMPORTANT, fixed** in `0365a99` (RF-045): `MatchQuestions` only makes its dialog visible while its route is focused (`useIsFocused` of `expo-router`), so the stack `/ → /matches/1 → /matches → /matches/1` opens one dialog, from the focused grid. The session and the Undo history are untouched. Regression: `tests/app/match-screen.questions.stacks.test.tsx` (red before the fix with two Modals, green after; it also answers the question). The other Modal of the grid screen, the overtime confirmation of `useMatchActions`, is local state of the grid whose button was pressed, so it cannot open twice.
 - **MINOR, fixed** in the commit of `summary.md` of this list: the paragraphs on deleting a match and a team now describe `leaveDeletedMatch` and `leaveDeletedTeam` (`src/ui/leave-deleted.ts`).
 - **Verification:** `STRYKER_INCREMENTAL=1 npm run verify` green after `0365a99` ("All checks passed").
+
+## Codex review run 5 (2026-11-25, whole D3)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 866d988 < /dev/null` on commit b242b06 (branch `001-planificador-v1-d3` against `866d988`, review dated 2026-11-25 21:59). Scope: the whole D3 (T062 to T078). Purpose: confirm the fix F-D3-08 of run 4.
+
+Verdict: **no blocking finding and no important finding**. Counts: 0 BLOCKING, 0 IMPORTANT, 1 MINOR. Status: open. The minor finding is a suggestion; it does not prevent closing.
+
+Findings, copied from Codex:
+
+1. **MINOR · Remove the stale bullet about untested restored stacks.** `specs/001-planificador-v1/summary.md:926`. The bullet says restored grid/details stacks are untested and their destination unspecified. The diff adds stack-aware deletion handling, a `/matches` fallback and regression tests for those stacks, and the paragraph at `summary.md:932` documents the fix. Suggested fix: replace the stale bullet with the implemented behaviour and keep only the outstanding device verification.
+
+Confirmation of F-D3-08 (run 4, finding 1, RF-045): Codex raised no finding on `0365a99`, so the fix is not reported as open. Codex did not explicitly confirm it either; this is absence of a finding.
+
+Category results (Codex):
+
+| Category                                       | Result                                                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| RF/E implementation, coverage and scope        | No additional findings. The documented device acceptance checks remain pending.                                    |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                       |
+| Test integrity                                 | No deleted, skipped or weakened tests found. Existing assertions preserved or strengthened.                        |
+| Security                                       | No findings: parameterised queries, no new network calls, no player-data logging, no new dependency or permission. |
+| Explanations and reports                       | Finding 1.                                                                                                         |
+| Simplicity and efficiency                      | No findings.                                                                                                       |
+
+Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed. A targeted Jest run produced 989 passing tests in 79 passing suites, and 59 suites failed with Reanimated mock-loading errors (`default.createAnimatedComponent`). Codex could not establish whether this comes from the versioned setup or the installed dependency environment, so it did not classify it as a branch defect. A green full verification was not reconfirmed by this review. No repository files were changed by Codex.
+
+Open items for the orchestrator: the 59 failing suites in the Codex targeted run need a reproduction in a clean, writable installation before closing verification (question: is this the same Reanimated environment issue as the earlier load runs, or a new one?). Finding 1 is a MINOR correction to `summary.md`.

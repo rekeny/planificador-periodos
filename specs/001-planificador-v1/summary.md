@@ -923,7 +923,7 @@ By hand, with `npm run ios`:
   - `initialNumToRender={40}` in the team list: with the default of 10 the list drew too few rows; it should be seen on a team with many players and matches.
   - The Jest timeout of 30 s hides a slow test instead of fixing it; if tests keep growing, look at which ones are slow.
   - Saving the edit-team form over the team screen may behave differently on a device than in Jest (a possible Jest-only difference).
-  - Not tested: a restored stack with only the grid and the details, where `dismiss(2)` would pop everything (the spec does not say what should show).
+  - Restored stacks (only the grid and the details) are handled by `leaveDeletedMatch` and covered by tests; what remains pending is to see it on a device.
   - The distance between «Editar» and «Convocatoria», and between the two buttons of the list of teams, is not testable in Jest (T079).
 - No landscape phone, no tablet and no real device have run the Maestro flows.
 
