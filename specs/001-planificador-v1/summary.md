@@ -820,3 +820,113 @@ npx jest tests/scripts/check-npm-audit
 
 - Renewal of the exceptions before 2027-02-08 (the 90-day maximum).
 - Optional hardening of the script (SEC-OSV-EU-1 and SEC-OSV-EU-2), as a separate change.
+
+## D3 · US5, US6 and US7: subs during the match, matches, and the squad (PRs 24 and 25, 2026-11-22 to 2026-11-25)
+
+PR 24 (`001 D3`, merged as `0245808` after T076) holds T062 to T076, T093 and T095 to T100. PR 25 holds T077, T078 and the Jest timeout. T079 (full verification, Codex and Security review of D3, and the status "Closed") and T094 (device check of US5) are not done yet. ADR-006 added five glossary terms before the code used them (`PendingQuestion`, `replaceableStarters`, `MatchFieldsState` and `MatchFieldsStore`, `MatchDetailsDraft`, `compareMatches`).
+
+### What was done and what changes for the user
+
+- **US5, recording subs.** A tap that the rules cannot simply answer now asks a question instead of doing nothing: a sixth X in a period asks «sub or starter?», a tap on an X of a period with a sub asks to confirm the removal (the reminder), a starter in place of another asks which X is replaced. A **long press** on a cell opens a small menu (starter, sub, remove). «Cancelar», a tap outside and Android Back close any question and change nothing. The only thing the app still refuses is the sixth X (RF-055).
+- **US6, matches.** The coach can open a saved match from the team screen (new «Partidos» section) or from a new «Todos los partidos» list, newest first, no time last. «Editar» opens the match details and «Guardar» saves them. Changing the format asks for confirmation and is saved at once; «Borrar partido» asks for confirmation, deletes the match and goes back to the list.
+- **US7, the squad.** A player can be edited (name, number), deactivated (kept in old matches, hidden from new ones) and reactivated. A whole team can be deleted from its edit form, after a confirmation that says how many players and matches go with it.
+- The two known D2 limits (a full period did nothing, and a saved match could not be reopened) are gone.
+
+### How: files and new pieces
+
+| Area                | Files                                                                                                                                                                                                                                           | Tasks                                                |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Domain              | `src/domain/match-order.ts` (`compareMatches`)                                                                                                                                                                                                  | T067                                                 |
+| Data                | `match-list-repository.ts` (lists), `match-repository.ts` (edit details, delete, change format), player and team repositories (edit, active flag, `countTeamContents`, `deleteTeam`)                                                            | T068, T074                                           |
+| Session store       | `match-session-commit.ts`, `-pending.ts`, `-questions.ts`, `-menu.ts`, `-format.ts` (new slices of the store of D2)                                                                                                                             | T062, T063, T097, T100, T070                         |
+| Other stores        | `matches-store.ts`, `match-fields.ts`, `match-details-draft.ts`, `squad-player-actions.ts`, `squad-team-deletion.ts`                                                                                                                            | T069, T095, T075                                     |
+| Interface           | `choice-dialog` (question mode), `grid/match-questions.tsx`, `grid/grid-cell.tsx` (long press), `match-list-item.tsx`, `team-sections.tsx`, `use-team-matches.ts`, `match-details-actions.tsx`, `player-actions.tsx`, `team-delete-actions.tsx` | T093, T064, T065, T071, T099, T072, T096, T076, T077 |
+| Routes              | `matches/index.tsx`, `matches/[matchId]/edit.tsx`, `teams/[teamId]/players/[playerId].tsx`, `_layout.tsx` (`screenOptionsFor` is now a table by route name)                                                                                     | T071, T072, T076                                     |
+| Maestro and tooling | `e2e/us5-subs.yaml`, `us5-undo-after-call-up.yaml`, `us6-matches.yaml`, `us7-squad.yaml`; `tests/setup/gesture-handler.ts`; `testTimeout: 30000` in `jest.config.js`                                                                            | T066, T073, T078                                     |
+
+Property tests of whole sessions (T098): `tests/support/session-arbitraries.ts`, `session-interpreter.ts` and `session-history-model.ts`. No dependency was added. Numbers at the end of D3: `verify.sh` green with **363 suites and 4,412 tests**; mutation testing of `src/domain/` at **94.92 %** (5 min 17 s to 5 min 56 s on a clean machine), above the 80 % threshold. The 27 survivors classified at the D2 close are the same ones.
+
+### Why: decisions along the way
+
+- **One pending question, and nothing else acts while it is open (D3-7, T100).** The state holds one `pending: PendingQuestion | null`. Opening a question is not a write: nothing is read or saved and the action returns `unchanged`. Every committed change publishes `pending: null`, so the question it answered closes by itself. The other seven actions check `hasPendingQuestion` first and do nothing, because a publish from them would close the question silently.
+- **A single way to save a mark: `commitMarkChange`.** A tap, an answer and a menu choice all end in it. It reads the team's players first, writes the cells in one transaction last, pushes exactly one undo entry and publishes. Nothing that can fail is left after the write (D3 rule 2), so a failure leaves the grid, the history and the database as they were, closes the question and sets `saveFailed` (D3-4). The starter in place of another is one step and one undo entry (T097, E-026).
+- **The long-press menu uses gesture handler, in JavaScript.** `onActivate` with `runOnJS: true` keeps the callback on the JavaScript thread, so `react-native-reanimated` and `react-native-worklets` are not imported in `src/`. The press yields to a scroll by itself (it fails when the finger moves more than 10 pt or lifts before 500 ms). The cell ignores the `onPress` that still fires on release after a long press, with a ref flag reset in `onPressIn`.
+- **One dialog for the questions.** The existing `ChoiceDialog` got a question mode instead of a second dialog. Going from one question to the next changes the content of the open dialog, because closing a native modal and opening another is fragile. A `stage` key re-arms the double-tap guard for each question. The card's `maxHeight` is the window minus the backdrop padding, found in review: with the full height it overflowed a phone in landscape.
+- **F-D3-02, found by Maestro, not by Jest.** On iOS the backdrop and the card were accessibility elements and merged all their text into one: Maestro saw «Ana, P3: X, titular, …, Cancelar», so «Cancelar» could not be tapped, and VoiceOver could not reach it either. Fix: `accessible={false}` on both, in `choice-dialog-question.tsx`. Jest cannot reproduce the merge, so the test only pins the prop; the Maestro run is the proof.
+- **The match lists and the team screen are one `SectionList`.** Two `FlatList`s in one screen would nest virtualized lists. The sections («Jugadores», «Partidos») are built in `team-sections.tsx`. The list loads on every focus, and the team screen draws the matches only when the store's `teamId` is the route's, so a list of another team never shows. `initialNumToRender={40}` was needed because section headers count as rows and the default of 10 drew only the first players.
+- **Each details screen has its own draft.** `createMatchDetailsDraft` is built in a `useState` initialiser, so two screens never share unsaved text, and creating a store while rendering is not updating a shared one (F-03 of D2). The fields both drafts need (`MatchFieldsState`) live in one file, so the new-match draft and the details draft behave the same. A draft never holds the format: it is saved on its own.
+- **Format change at once, with confirmation.** Choosing another format asks first, then `changeFormat` writes, applies the domain change, prunes the undo history (RF-086) and publishes. A failed one closes the dialog and shows `error.saveFailed` inside the details (RF-085).
+- **Deleting a match leaves with `leaveDeletedMatch` (`src/ui/leave-deleted.ts`).** It pops every route of the deleted match at the top of the stack (the details and the grid under them), so the app ends on the screen below the grid; the grid's unmount closes the session and the tests check that «not found» never flashes. When the grid is the root of the stack (a restored session) or the match also sits earlier in the stack, under other screens, the stack is reset (`dismissAll()` when it has more than one route, then `replace("/matches")`), so Back never reaches a route of the deleted match. The SDK 58 docs were read first (`dismiss(count)`).
+- **The open team stays in the store after it is deleted.** `deleteTeam` of the team that is open sets a «deleted» flag, and then adding, editing or deactivating a player returns `unchanged`. The edit-team form leaves with `leaveDeletedTeam` (`src/ui/leave-deleted.ts`), which always ends on `/`, the list of teams, with no route of the team left: `dismissAll()` when the root of the stack is the list, and a reset (`dismissAll()` if there is more than one route, then `replace("/")`) when the form or the team screen is the root of a restored stack.
+- **Deleting a team is one `DELETE`.** The schema's cascades remove players, matches and cells, so a failure rolls everything back. No function deletes a single player (a test checks it).
+- **The tests of whole sessions have three deliberate breaks (T098).** Four properties of 1,000 runs each check that no column ever has a sixth X and that a new store on the same database reads what was published. Each was proven to fail by breaking the code on purpose and reverting: (a) `chooseReplaced` called `markStarter`: a column of 6 X after 5 tests; (b) `commitMarkChange` skipped `saveCellChanges`: the database property failed on the first test; (c) `changeFormat` skipped `pruneHistory`: the RF-086 property failed after 3 tests. The generators mix in pieces that go together (fill a column with 5 X, then tap and answer), because purely random actions almost never reached a full column.
+- **The Maestro flows lost their first runs, and none was a bug of the app** (the one real defect, F-D3-02, is above and was found by `us5-subs`).
+
+| Flow          | iOS (runs)                                                                                                                       | Android (runs)                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `us5-subs`    | 5: F-D3-02; a tap outside at 5%,5% landed in the status bar (now `2%,50%`); options read as one element «5, Eva» (`(\d+, )?Eva`) | 2: the first tap was lost after a cold start of the emulator               |
+| `us6-matches` | 3: «Enter» must close the keyboard before the next field, or two names ran together (twice)                                      | 3: «System UI isn't responding» after the cold boot, dismissed with «Wait» |
+| `us7-squad`   | 2: the row is one element «9, Juan», so the number is asserted with `9\|.*9, Juan.*`                                             | 2: the call-up starts under the fold, so Ana is scrolled into view first   |
+
+- **F-D3-01 closed without a fix.** The tap-through strip under the iOS header did not reproduce on a Release build of `main` in three runs (Fernando, 2026-11-23). The check stays by hand: tap the top field or button of each new modal screen on iOS.
+- **The CI of PR 25 failed on timeouts, not on behaviour.** Two tests that passed locally exceeded Jest's default 5 s on the shared runner (one suite took 37.7 s). `testTimeout: 30000` in `jest.config.js`; no test was changed. The same grid test had already timed out twice on the developer's machine under load.
+
+Problems found along the way, all about the environment: a Release build of iOS needs about 10 GB of free disk and failed several times with a full disk, so `ios/`, `DerivedData` and a simulator's data were deleted (the latter with Fernando's approval); `pod install` needs a UTF-8 `LANG`; the Gradle cache (`~/.gradle`) did not exist after the cleanup and the first Android build downloaded it again (3.2 GB); under load the full Stryker run took 31 to 34 minutes instead of about 5.
+
+### To learn, with the real code
+
+- **Read first, write last.** In `commitMarkChange`, `listPlayers` comes before `saveCellChanges`, inside one `try`. If the read fails nothing was written; if the write fails the database rolled back. After the `try`, only `publish` runs, which cannot fail. It is the same idea as «validate, then act».
+- **`accessible={false}` on a container.** In React Native a `View` or `Pressable` with `accessible` true becomes one element for VoiceOver and for Maestro, and its children's text merges into it. `<Pressable accessible={false} style={styles.backdrop} onPress={onCancel}>` keeps the tap but lets the buttons inside be found one by one. The same merge is why a team row reads «9, Juan» on iOS.
+- **A gesture in JavaScript.** In `grid-cell.tsx` the long press is a gesture handler `Gesture` with `runOnJS: true` and `onActivate`, wrapped in a `GestureDetector`. The app needs a `GestureHandlerRootView` above it (around the `Stack` in `_layout.tsx`), or development mode throws.
+- **A `SectionList`.** One list with sections, each with its own header and items, instead of two lists in one screen. `renderItem` receives the section, so the player rows and the match rows can be different components.
+- **A draft in `useState`.** `const [draft] = useState(() => newMatchDetailsDraft(matchId))` runs the function once, on the first render, and keeps the same draft until the screen unmounts. Each screen gets its own.
+- **`router.dismiss(2)` and `dismissAll()`.** Expo Router stacks screens; `dismiss(n)` pops n of them, `canDismiss()` asks whether there is anything to pop.
+- **A property test with a model.** `session-history-model.ts` is a tiny, obviously correct model of the undo history; the property compares the real store with it after every random step. Breaking the code on purpose proves the test can fail.
+- **A table of options.** `screenOptionsFor` was a chain of `if`; now `optionsTable` maps a route name to its title and presentation, and one test pins every entry.
+
+### To check it
+
+```bash
+npm run verify                                  # types, lint, tests (363 suites, 4,412), coverage, traceability, doctor, security
+npx stryker run --incremental --incrementalFile reports/stryker-incremental.json --force   # about 6 min; 94.92 %
+node scripts/check-traceability.mjs
+```
+
+Maestro (Release build, one simulator or emulator open; see "How to run Maestro (T061)" above):
+
+```bash
+npx expo run:ios --configuration Release --no-bundler    # needs about 10 GB of free disk
+maestro test e2e/us5-subs.yaml
+maestro test e2e/us5-undo-after-call-up.yaml
+maestro test e2e/us3-planning.yaml
+maestro test e2e/us6-matches.yaml
+maestro test e2e/us7-squad.yaml
+```
+
+By hand, with `npm run ios`:
+
+1. In a match, fill a period with 5 X and tap a sixth cell: the question appears; «Cancelar» and a tap outside close it with no change; «Sub» marks it.
+2. Long-press a cell: the menu opens; choose «Quitar». Then press Undo once: one step reverts it.
+3. Open a team: «Jugadores» and «Partidos» scroll as one list. Open a match from it and from «Todos los partidos».
+4. «Editar» a match, change the format: the confirmation appears and the change is saved without «Guardar». «Borrar partido» returns to the list and the match is gone.
+5. Edit a player's number, deactivate and reactivate him; delete a team and read the counts in the confirmation.
+
+### Pending
+
+- **Device checks, not done:** T094 (questions, long-press menu and grid on phone and tablet) and D2's T057, T060 and T092 (grid layout, the iPad 100 ms measurement, `us4-warnings` on a tablet). T079 (full verification, Codex and Security review of D3, device pass and the status "Closed") comes after them.
+- **Open risks written in `review.md` and `tasks.md`:**
+  - The question dialog in landscape on iOS: React Native's `Modal` supports portrait by default and this has not been seen.
+  - A possible flicker when a question closes (the dialog's content becomes empty while it fades out).
+  - Whether the long press yields to the grid's horizontal scroll with a real finger.
+  - Tablet layouts of the new screens (the Maestro runs were phones only).
+  - `tests/setup/gesture-handler.ts` mocks internal paths of `react-native-gesture-handler` (`lib/module/...`, `src/v3/...`): an update of the package can break it. It affects the tests, not the app.
+  - `initialNumToRender={40}` in the team list: with the default of 10 the list drew too few rows; it should be seen on a team with many players and matches.
+  - The Jest timeout of 30 s hides a slow test instead of fixing it; if tests keep growing, look at which ones are slow.
+  - Saving the edit-team form over the team screen may behave differently on a device than in Jest (a possible Jest-only difference).
+  - Restored stacks (only the grid and the details) are handled by `leaveDeletedMatch` and covered by tests; what remains pending is to see it on a device.
+  - The distance between «Editar» and «Convocatoria», and between the two buttons of the list of teams, is not testable in Jest (T079).
+- No landscape phone, no tablet and no real device have run the Maestro flows.
+
+### Codex review of PR 25 and its fixes (2026-11-25)
+
+Before the merge, Codex reviewed the branch and found two blocking defects and one important one, all about leaving a screen after something was deleted or deactivated, which Jest tests of single screens had not seen. Deleting a match with `router.dismiss(2)` assumed the usual stack (team or list, grid, details); with the grid as the root of the stack, or with two details screens, the deleted match's grid stayed mounted. Deleting a team used `dismissAll()`, which left `/teams/1` as a root «not found» screen when the team screen had been opened directly. And a player deactivated while a match session or a new-match form was open could still be added to the call-up or saved. The fixes (F-D3-03 to F-D3-05, in `review.md`) were done with the tests first: `src/ui/leave-deleted.ts` reads the real stack with `useRootNavigationState` and pops exactly the routes of what was deleted (a restored stack with the grid as root ends on the list of every match), `addToCallUp` and `create()` of the new-match draft revalidate who is still active, and the call-up screen and the new-match form refresh their candidates on focus without clearing Undo or what the coach typed. The lesson for the learner: a navigation call such as `dismiss(2)` is a guess about the stack the user came through, so a destructive action needs a test for every shape the stack can have. The Security note SEC-D3-1 was corrected: the double press was already guarded by `ConfirmDialog`; the real defect was this navigation.

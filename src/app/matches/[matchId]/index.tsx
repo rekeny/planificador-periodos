@@ -2,15 +2,11 @@ import {
   useFocusEffect,
   useLocalSearchParams,
   useNavigation,
-  useRouter,
 } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import type { ReactElement } from "react";
-import { useTranslation } from "react-i18next";
 import {
-  Pressable,
   StyleSheet,
-  Text,
   View,
   useWindowDimensions,
   type LayoutChangeEvent,
@@ -22,34 +18,14 @@ import type { MatchView } from "@/state/match-view";
 import { parseMatchId } from "@/state/route-params";
 import { TABLET_MIN_SHORT_SIDE, buttonsInHeader } from "@/ui/grid/grid-layout";
 import { GridButtons } from "@/ui/grid/grid-toolbar";
+import { MatchBodyActions } from "@/ui/grid/match-body-actions";
+import { MatchHeaderButtons } from "@/ui/grid/match-header-buttons";
 import { MatchGrid } from "@/ui/grid/match-grid";
 import { MatchQuestions } from "@/ui/grid/match-questions";
 import { useMatchActions } from "@/ui/grid/use-match-actions";
 import { NotFound } from "@/ui/not-found";
 import { SaveErrorBanner } from "@/ui/save-error-banner";
 import { WarningStrip } from "@/ui/warnings/warning-strip";
-
-function CallUpButton({
-  id,
-  inHeader,
-}: {
-  readonly id: number;
-  readonly inHeader: boolean;
-}): ReactElement {
-  const { t } = useTranslation();
-  const router = useRouter();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => router.push(`/matches/${id}/call-up`)}
-      style={inHeader ? styles.headerAction : styles.action}
-    >
-      <Text style={inHeader ? styles.headerActionText : styles.actionText}>
-        {t("callUp.title")}
-      </Text>
-    </Pressable>
-  );
-}
 
 const heightOf = (event: LayoutChangeEvent): number =>
   event.nativeEvent.layout.height;
@@ -118,12 +94,7 @@ export default function MatchScreen(): ReactElement {
     navigation.setOptions({
       headerRight:
         showing && inHeader
-          ? () => (
-              <View style={styles.headerRight}>
-                <CallUpButton id={id} inHeader />
-                <GridButtons {...buttons} />
-              </View>
-            )
+          ? () => <MatchHeaderButtons id={id} buttons={buttons} />
           : undefined,
     });
   });
@@ -133,7 +104,7 @@ export default function MatchScreen(): ReactElement {
   return (
     <View style={styles.screen}>
       {saveFailed ? <SaveErrorBanner /> : null}
-      {inHeader ? null : <CallUpButton id={id} inHeader={false} />}
+      {inHeader ? null : <MatchBodyActions id={id} />}
       <WarningStrip
         view={view}
         compact={inHeader}
@@ -157,15 +128,4 @@ export default function MatchScreen(): ReactElement {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  action: {
-    alignItems: "center",
-    margin: 16,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: "#1d4ed8",
-  },
-  actionText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
-  headerRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  headerAction: { paddingHorizontal: 12, paddingVertical: 10 },
-  headerActionText: { color: "#1d4ed8", fontSize: 16, fontWeight: "600" },
 });

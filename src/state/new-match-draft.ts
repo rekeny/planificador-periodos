@@ -8,9 +8,11 @@ import { callUpRangeWarning } from "@/domain/call-up-range";
 import type { CallUpRangeWarning } from "@/domain/call-up-range";
 import { isFormat } from "@/domain/format";
 import type { Format } from "@/domain/format";
-import { isoDate, isoTime } from "@/domain/match-date";
+import { isoDate } from "@/domain/match-date";
 import { newMatchDefaults } from "@/domain/match-input";
 import type { Player } from "@/domain/squad";
+import { EMPTY_FIELDS, matchFieldSetters } from "@/state/match-fields";
+import type { MatchFieldsState } from "@/state/match-fields";
 import { saveDraft } from "@/state/new-match-save";
 import type { CreateResult } from "@/state/new-match-save";
 
@@ -19,37 +21,20 @@ export interface CallUpRow {
   readonly selected: boolean;
 }
 
-export interface NewMatchDraftState {
+export interface NewMatchDraftState extends MatchFieldsState {
   /** The team the draft was reset for; null when it is empty (never reset or the reset failed). */
   readonly teamId: number | null;
   /** The mounted form that owns the draft; null when it is empty or was reset without a form. */
   readonly formId: string | null;
   readonly format: Format;
-  /** "YYYY-MM-DD". */
-  readonly date: string;
-  /** "HH:MM", or null when the coach gave none. */
-  readonly time: string | null;
-  // The fields below keep the text as typed; the domain normalises them when T086 saves.
-  readonly homeName: string;
-  readonly awayName: string;
-  readonly homeScore: string;
-  readonly awayScore: string;
-  readonly notes: string;
   readonly callUpSelection: readonly CallUpRow[];
   readonly callUpRange: CallUpRangeWarning | null;
   /** True when the team loaded and the draft is ready; false leaves it empty and unsaveable. */
   reset(teamId: number, formId?: string): boolean;
   setFormat(format: Format): void;
-  setDate(parts: { year: number; month: number; day: number }): void;
-  setTime(parts: { hour: number; minute: number }): void;
-  clearTime(): void;
-  setMyTeamAs(side: "home" | "away"): void;
-  setHomeName(text: string): void;
-  setAwayName(text: string): void;
-  setHomeScore(text: string): void;
-  setAwayScore(text: string): void;
-  setNotes(text: string): void;
   toggle(playerId: number): void;
+  /** Re-reads the squad: a player deactivated since is dropped; the typed fields and checks stay. */
+  refreshPlayers(): void;
   create(): CreateResult;
 }
 
@@ -57,14 +42,6 @@ export type NewMatchDraft = StoreApi<NewMatchDraftState>;
 
 type Set = NewMatchDraft["setState"];
 type Get = NewMatchDraft["getState"];
-
-const EMPTY_FIELDS = {
-  homeName: "",
-  awayName: "",
-  homeScore: "",
-  awayScore: "",
-  notes: "",
-};
 
 // What an empty draft holds: no team, no text, nobody called up.
 const EMPTY_DRAFT = {
@@ -130,6 +107,45 @@ function toggle(set: Set, get: Get, playerId: number): void {
   set({ callUpSelection: rows, callUpRange: rangeOf(format, rows) });
 }
 
+// The rows from the squad as it is now: whoever is no longer active is gone, the coach's own
+// deselections stay, and a player who was not in the draft yet (new, reactivated) starts selected.
+function currentRows(
+  db: AppDatabase,
+  teamId: number,
+  rows: readonly CallUpRow[],
+): readonly CallUpRow[] {
+  const checked = new Map(rows.map((row) => [row.player.id, row.selected]));
+  return initialCallUp(listPlayers(db, teamId)).map((player) => ({
+    player,
+    selected: checked.get(player.id) ?? true,
+  }));
+}
+
+// The squad as it is now, or null when it cannot be read (the list then stays as it is).
+function readRows(
+  db: AppDatabase,
+  teamId: number,
+  rows: readonly CallUpRow[],
+): readonly CallUpRow[] | null {
+  try {
+    return currentRows(db, teamId, rows);
+  } catch {
+    return null;
+  }
+}
+
+function refreshPlayers(
+  db: AppDatabase,
+  teamId: number | null,
+  set: Set,
+  get: Get,
+): void {
+  const rows =
+    teamId === null ? null : readRows(db, teamId, get().callUpSelection);
+  if (rows === null) return;
+  set({ callUpSelection: rows, callUpRange: rangeOf(get().format, rows) });
+}
+
 export function createNewMatchDraft(
   db: AppDatabase,
   now: () => Date,
@@ -166,7 +182,12 @@ export function createNewMatchDraft(
   function create(get: Get): CreateResult {
     if (openedTeamId === null) return { kind: "unchanged" };
     if (created !== null) return created;
-    const result = saveDraft(db, openedTeamId, get());
+    const rows = readRows(db, openedTeamId, get().callUpSelection);
+    if (rows === null) return { kind: "saveFailed" }; // players that cannot be read are not guessed
+    const result = saveDraft(db, openedTeamId, {
+      ...get(),
+      callUpSelection: rows,
+    });
     if (result.kind === "saved") created = result; // only a saved match is remembered
     return result;
   }
@@ -177,17 +198,9 @@ export function createNewMatchDraft(
     reset: (teamId, formId) => reset(set, teamId, formId ?? null),
     setFormat: (format) =>
       set({ format, callUpRange: rangeOf(format, get().callUpSelection) }),
-    setDate: (parts) => set({ date: isoDate(parts) }),
-    setTime: (parts) => set({ time: isoTime(parts) }),
-    clearTime: () => set({ time: null }),
-    setMyTeamAs: (side) =>
-      set(side === "home" ? { homeName: teamName } : { awayName: teamName }),
-    setHomeName: (homeName) => set({ homeName }),
-    setAwayName: (awayName) => set({ awayName }),
-    setHomeScore: (homeScore) => set({ homeScore }),
-    setAwayScore: (awayScore) => set({ awayScore }),
-    setNotes: (notes) => set({ notes }),
+    ...matchFieldSetters(set, () => teamName),
     toggle: (playerId) => toggle(set, get, playerId),
+    refreshPlayers: () => refreshPlayers(db, openedTeamId, set, get),
     create: () => create(get),
   }));
 }

@@ -34,10 +34,12 @@ const ROUTES = [
   "teams/[teamId]/index",
   "teams/[teamId]/edit",
   "teams/[teamId]/players/new",
+  "teams/[teamId]/players/[playerId]",
   "teams/[teamId]/matches/new",
   "matches/[matchId]/index",
   "matches/[matchId]/call-up",
   "matches/[matchId]/new-player",
+  "matches/[matchId]/edit",
 ];
 
 describe("root layout, navigation header", () => {

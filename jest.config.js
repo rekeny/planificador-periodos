@@ -22,6 +22,10 @@ const domainThreshold = {
 /** @type {import('jest').Config} */
 module.exports = {
   preset: "jest-expo",
+  // 5 s is Jest's default. The screen tests render whole route trees and the grid property test runs
+  // many cases: on a loaded machine or the two-core CI runner a few of them passed 5 s (CI of
+  // PR 25, and two local runs), and the failure was the timeout, not the behaviour.
+  testTimeout: 30000,
   globalSetup: "<rootDir>/tests/setup/time-zone.js",
   setupFiles: ["<rootDir>/tests/setup/fast-check.ts"],
   // After the test framework is installed, because the testing library of expo-router needs `expect`.

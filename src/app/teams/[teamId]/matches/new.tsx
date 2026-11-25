@@ -31,7 +31,10 @@ export default function NewMatchScreen(): ReactElement | null {
       const first = !started.current;
       started.current = true;
       const current = draft.getState();
-      if (!first && current.teamId === id && current.formId === formId) return;
+      if (!first && current.teamId === id && current.formId === formId) {
+        current.refreshPlayers(); // a player deactivated meanwhile leaves the list, nothing else changes
+        return;
+      }
       setFailed(!current.reset(id, formId));
       setOpened(true);
     }, [draft, id, formId]),

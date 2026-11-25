@@ -14,13 +14,21 @@
       "category": "Categoría",
       "defaultFormat": "Variante por defecto"
     },
-    "players": "Jugadores"
+    "players": "Jugadores",
+    "matches": "Partidos",
+    "delete": "Borrar equipo"
   },
   "players": {
     "new": "Nuevo jugador"
   },
   "matches": {
-    "new": "Nuevo partido"
+    "new": "Nuevo partido",
+    "allTitle": "Todos los partidos",
+    "empty": "Todavía no hay partidos.",
+    "item": {
+      "sides": "{{home}} – {{away}}",
+      "score": "{{home}}–{{away}}"
+    }
   },
   "match": {
     "field": {
@@ -32,6 +40,7 @@
       "date": "Fecha",
       "time": "Hora"
     },
+    "delete": "Borrar partido",
     "clearTime": "Quitar hora",
     "noTime": "Sin hora",
     "addTime": "Añadir hora",
@@ -42,7 +51,10 @@
     "field": {
       "name": "Nombre",
       "number": "Dorsal"
-    }
+    },
+    "deactivated": "Desactivado",
+    "deactivate": "Desactivar",
+    "reactivate": "Reactivar"
   },
   "grid": {
     "header": {
@@ -120,10 +132,34 @@
     "addEmpty": "No quedan jugadores activos por añadir. Puedes crear uno nuevo."
   },
   "confirm": {
+    "formatChange": {
+      "title": "¿Cambiar la variante?",
+      "message": "Cambiar la variante puede hacer perder información: se borrarán las marcas de los periodos que desaparezcan.",
+      "confirm": "Cambiar variante"
+    },
+    "deleteMatch": {
+      "title": "¿Borrar este partido?",
+      "message": "Se borrarán el partido y su cuadrícula. No se puede deshacer.",
+      "confirm": "Borrar partido"
+    },
     "removeFromCallUp": {
       "title": "¿Quitar a {{name}} de la convocatoria?",
       "message": "Tiene marcas en este partido y se borrarán.",
       "confirm": "Quitar"
+    },
+    "deleteTeam": {
+      "title": "¿Borrar el equipo {{name}}?",
+      "message": "Se borrarán también {{players}} y {{matches}}. No se puede deshacer.",
+      "players_one": "su jugador",
+      "players_other": "sus {{count}} jugadores",
+      "matches_one": "su partido",
+      "matches_other": "sus {{count}} partidos",
+      "confirm": "Borrar equipo"
+    },
+    "deactivatePlayer": {
+      "title": "¿Desactivar a {{name}}?",
+      "message": "No aparecerá en los partidos nuevos. Seguirá en los partidos guardados y podrás reactivarlo.",
+      "confirm": "Desactivar"
     },
     "removeOvertime": {
       "title": "¿Quitar la prórroga {{number}}?",

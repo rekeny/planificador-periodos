@@ -2,7 +2,7 @@ import { createStore } from "zustand/vanilla";
 import type { StoreApi } from "zustand/vanilla";
 import type { AppDatabase } from "@/data/database-types";
 import { createPlayer, listPlayers } from "@/data/player-repository";
-import type { PlayerRecord, TeamRecord } from "@/data/records";
+import type { TeamRecord } from "@/data/records";
 import {
   createTeam,
   getTeam,
@@ -10,10 +10,8 @@ import {
   updateTeam,
 } from "@/data/team-repository";
 import type { TeamValues } from "@/data/team-repository";
-import { duplicateNumbers } from "@/domain/duplicate-numbers";
 import { isFormat } from "@/domain/format";
 import type { Format } from "@/domain/format";
-import { comparePlayers } from "@/domain/player-order";
 import type { Player, Team } from "@/domain/squad";
 import {
   validatePlayerInput,
@@ -21,6 +19,15 @@ import {
 } from "@/domain/squad-validation";
 import { compareTeams } from "@/domain/team-order";
 import type { SaveResult } from "@/state/save-result";
+import {
+  playersView,
+  setPlayerActive,
+  toPlayer,
+  updatePlayer,
+  writableTeamId,
+} from "@/state/squad-player-actions";
+import type { SquadContext } from "@/state/squad-player-actions";
+import { deleteTeam, teamContents } from "@/state/squad-team-deletion";
 
 export interface TeamInput {
   readonly name: string;
@@ -45,6 +52,11 @@ export interface SquadState {
   createTeam(input: TeamInput): SaveResult;
   updateTeam(id: number, input: TeamInput): SaveResult;
   addPlayer(input: PlayerInput): SaveResult;
+  updatePlayer(playerId: number, input: PlayerInput): SaveResult;
+  setPlayerActive(playerId: number, isActive: boolean): SaveResult;
+  /** What deleting the team would remove, or null when it is not found. Never called to render. */
+  teamContents(teamId: number): { players: number; matches: number } | null;
+  deleteTeam(teamId: number): SaveResult;
 }
 
 const SAVED: SaveResult = { kind: "saved" };
@@ -59,21 +71,8 @@ function toTeam(record: TeamRecord): Team {
   return { ...record, defaultFormat: record.defaultFormat };
 }
 
-function toPlayer(record: PlayerRecord): Player {
-  return { ...record };
-}
-
 function sortedTeams(db: AppDatabase): readonly Team[] {
   return listTeams(db).map(toTeam).sort(compareTeams);
-}
-
-function playersView(
-  players: readonly Player[],
-): Pick<SquadState, "players" | "duplicateNumbers"> {
-  return {
-    players: [...players].sort(comparePlayers),
-    duplicateNumbers: duplicateNumbers(players),
-  };
 }
 
 const NO_PLAYERS = playersView([]);
@@ -82,7 +81,9 @@ type Set = StoreApi<SquadState>["setState"];
 type Get = StoreApi<SquadState>["getState"];
 export type SquadStore = StoreApi<SquadState>;
 
-function openTeam(db: AppDatabase, set: Set, id: number): void {
+function openTeam(context: SquadContext, id: number): void {
+  const { db, set } = context;
+  context.deletedOpenTeam.value = false;
   try {
     const record = getTeam(db, id);
     if (record === undefined) {
@@ -130,9 +131,10 @@ function saveTeam(
   return SAVED;
 }
 
-function addPlayer(db: AppDatabase, set: Set, get: Get, input: PlayerInput) {
-  const { team, status, players } = get();
-  if (status !== "open" || team === null) {
+function addPlayer(context: SquadContext, input: PlayerInput) {
+  const { db, set, get } = context;
+  const teamId = writableTeamId(context);
+  if (teamId === null) {
     return UNCHANGED;
   }
   const checked = validatePlayerInput(input);
@@ -140,8 +142,8 @@ function addPlayer(db: AppDatabase, set: Set, get: Get, input: PlayerInput) {
     return checked;
   }
   try {
-    const record = createPlayer(db, { teamId: team.id, ...checked.value });
-    set(playersView([...players, toPlayer(record)]));
+    const record = createPlayer(db, { teamId, ...checked.value });
+    set(playersView([...get().players, toPlayer(record)]));
     return SAVED;
   } catch {
     return SAVE_FAILED;
@@ -149,23 +151,37 @@ function addPlayer(db: AppDatabase, set: Set, get: Get, input: PlayerInput) {
 }
 
 export function createSquadStore(db: AppDatabase): SquadStore {
-  return createStore<SquadState>()((set, get) => ({
-    teams: [],
-    team: null,
-    ...NO_PLAYERS,
-    status: "closed",
-    loadTeams() {
-      try {
-        set({ teams: sortedTeams(db) });
-      } catch {
-        set({ teams: [] });
-      }
-    },
-    openTeam: (id) => openTeam(db, set, id),
-    createTeam: (input) =>
-      saveTeam({ db, set, get }, input, (values) => createTeam(db, values)),
-    updateTeam: (id, input) =>
-      saveTeam({ db, set, get }, input, (values) => updateTeam(db, id, values)),
-    addPlayer: (input) => addPlayer(db, set, get, input),
-  }));
+  return createStore<SquadState>()((set, get) => {
+    const context: SquadContext = {
+      db,
+      set,
+      get,
+      deletedOpenTeam: { value: false },
+    };
+    return {
+      teams: [],
+      team: null,
+      ...NO_PLAYERS,
+      status: "closed",
+      loadTeams() {
+        try {
+          set({ teams: sortedTeams(db) });
+        } catch {
+          set({ teams: [] });
+        }
+      },
+      openTeam: (id) => openTeam(context, id),
+      createTeam: (input) =>
+        saveTeam({ db, set, get }, input, (values) => createTeam(db, values)),
+      updateTeam: (id, input) =>
+        saveTeam({ db, set, get }, input, (values) =>
+          updateTeam(db, id, values),
+        ),
+      addPlayer: (input) => addPlayer(context, input),
+      updatePlayer: (id, input) => updatePlayer(context, id, input),
+      setPlayerActive: (id, isActive) => setPlayerActive(context, id, isActive),
+      teamContents: (id) => teamContents(context, id),
+      deleteTeam: (id) => deleteTeam(context, id),
+    };
+  });
 }

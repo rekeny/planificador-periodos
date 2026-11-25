@@ -81,6 +81,18 @@ describe("grid cell, long press", () => {
     expect(onTapCell).not.toHaveBeenCalled();
   });
 
+  it("RF-052: the full press-hold-release on an empty cell calls neither onLongPressCell nor onTapCell", async () => {
+    const { id, onTapCell, onLongPressCell } = await renderCell({
+      state: "empty",
+    });
+    await fireEvent(button(), "pressIn");
+    await hold(id);
+    await fireEvent(button(), "pressOut");
+    await fireEvent.press(button());
+    expect(onLongPressCell).not.toHaveBeenCalled();
+    expect(onTapCell).not.toHaveBeenCalled();
+  });
+
   it.each<[string, Finger]>([
     ["fails because the finger moved (the grid scrolls)", "fails"],
     ["is cancelled by the system", "isCancelled"],

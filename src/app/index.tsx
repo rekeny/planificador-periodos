@@ -19,13 +19,22 @@ export default function TeamListScreen(): ReactElement {
   }, [store]);
 
   const newTeam = (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => router.push("/teams/new")}
-      style={styles.newTeam}
-    >
-      <Text style={styles.newTeamText}>{t("teams.new")}</Text>
-    </Pressable>
+    <View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push("/teams/new")}
+        style={styles.newTeam}
+      >
+        <Text style={styles.newTeamText}>{t("teams.new")}</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push("/matches")}
+        style={styles.allMatches}
+      >
+        <Text style={styles.newTeamText}>{t("matches.allTitle")}</Text>
+      </Pressable>
+    </View>
   );
 
   if (teams.length === 0) {
@@ -72,6 +81,14 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     backgroundColor: "#1d4ed8",
+  },
+  allMatches: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: "#475569",
   },
   newTeamText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
   empty: {

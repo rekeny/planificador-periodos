@@ -30,6 +30,7 @@ export const ADD_EMPTY =
 export const REMOVE = /Quitar de la convocatoria/;
 const CHROME = [
   "Convocatoria",
+  "Editar",
   "Añadir a la convocatoria",
   "Quitar de la convocatoria",
   "Crear jugador nuevo",

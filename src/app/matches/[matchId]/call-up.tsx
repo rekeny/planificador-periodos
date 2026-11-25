@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -26,6 +26,13 @@ export default function CallUpScreen(): ReactElement {
   const view = useStore(store, (state) => state.view);
   const saveFailed = useStore(store, (state) => state.saveFailed);
   const [asking, setAsking] = useState<RowView | null>(null);
+
+  // A player deactivated while this screen was under another one stops being offered (RF-023).
+  useFocusEffect(
+    useCallback(() => {
+      store.getState().refreshCandidates();
+    }, [store]),
+  );
 
   if (id === null || status !== "open" || view === null || view.matchId !== id)
     return <NotFound />;

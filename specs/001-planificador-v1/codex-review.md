@@ -1,32 +1,24 @@
 # Codex review
 
-- Date: 2026-11-21 23:06
-- Branch: docs/d3-planner-review against origin/main
-- Commit: d2b26bc
+- Date: 2026-11-25 21:59
+- Branch: 001-planificador-v1-d3 against 866d988
+- Commit: b242b06
 
-Reviewed `d2b26bc` using `git diff origin/main...HEAD`. This is a documentation-only D3 planning change.
+Reviewed `git diff 866d988...HEAD` through `b242b06`, after reading the required repository documents and specification files.
 
-**Findings: 0 BLOCKING, 1 IMPORTANT, 2 MINOR.**
+**No confirmed BLOCKING or IMPORTANT findings. One MINOR finding:**
 
-1. **IMPORTANT — T062 knowingly weakens existing properties until another commit.**  
-   [tasks.md:1240](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:1240) explicitly postpones adapting the random-sequence tests until T100. Once a question becomes pending, subsequent taps stop exercising marking, while the properties remain green. This conflicts with the requirement to preserve meaningful tests in every task commit.  
-   **Fix:** adapt both properties in T062, alongside the behavior change. Leave the additional action guards in T100.
+- **MINOR — The summary describes an already addressed navigation risk as unresolved.** [summary.md:926](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/summary.md:926) says restored grid/details stacks are untested and their destination unspecified. The diff adds stack-aware deletion handling, a `/matches` fallback and regression tests for those stacks. The paragraph at line 932 also documents the fix. **Fix:** replace the stale bullet with the implemented behavior and retain only the outstanding device verification.
 
-2. **MINOR — T093 needs a regression for choosing across dialog stages.**  
-   [tasks.md:1285](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:1285) combines the existing double-tap guard with content changes while `visible` remains true. The current guard resets only when visibility changes; the listed component scenario checks replacement content but never presses its options. T064 would catch this later, but T093 could pass independently with an unusable second stage.  
-   **Fix:** require a test that chooses an option, changes stages without closing, then successfully chooses again. Rearm the guard per stage while suppressing duplicate presses within that stage.
+Results for the six requested categories:
 
-3. **MINOR — Current approval records contradict one another.**  
-   [tasks.md:15](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/tasks.md:15) still says approval is pending. The approval columns in `plan.md:1132` and `plan.md:1136` do likewise, although the plan header records Fernando’s decisions.  
-   **Fix:** update these current status fields with the recorded approvals and dates; retain device checks as pending.
+1. **Requirements, examples and scope:** no additional findings from implementation and traceability inspection. The documented device acceptance checks remain pending.
+2. **Constitution, layers, conventions and glossary:** no findings.
+3. **Test integrity:** no deleted, skipped or weakened tests found. Existing assertions were preserved or strengthened. Runtime verification has the limitation below.
+4. **Security:** no findings. Added queries are parameterized; no new network calls, player-data logging, dependencies or permissions were introduced.
+5. **Explanations and reports:** the MINOR finding above.
+6. **Simplicity, clarity and efficiency:** no findings.
 
-Category results:
+Type checking, lint, traceability and focused/skipped-test checks passed. A targeted Jest run, with cache persistence suppressed in memory because the filesystem is read-only, produced **989 passing tests across 79 passing suites**; **59 suites failed**, with interface tests encountering Reanimated mock-loading errors involving `default.createAnimatedComponent`. I could not establish whether that failure originates in the versioned setup or the installed dependency environment, so I have not classified it as a branch defect.
 
-- **Requirements, examples and scope:** no additional findings. Full v1 remains incomplete: 11 RFs lack test names, all assigned to pending D3 work. Existing example names do not establish complete implementation.
-- **Constitution, layers, conventions and glossary:** no additional findings. ADR-006 covers the glossary additions.
-- **Test integrity:** findings 1–2. This diff changes no executable tests.
-- **Security:** no findings introduced; no runtime, dependency, permission or query changes.
-- **Explanations and reports:** finding 3. `summary.md` remains unchanged and describes earlier deliveries.
-- **Simplicity and efficiency:** no findings.
-
-Passed: TypeScript, lint, changed-file formatting, traceability, focused/skipped-test detection and `git diff --check`. Full verification, Jest, Stryker and native checks were not rerun. GitHub access failed, so PR/CI status was not confirmed.
+A green full verification was **not reconfirmed**. Reproduce the interface tests in a clean, writable installation before closing verification. No repository files were changed.

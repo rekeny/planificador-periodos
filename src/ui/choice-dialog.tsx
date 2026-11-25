@@ -5,6 +5,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { QuestionDialog } from "./choice-dialog-question";
 import type { QuestionDialogProps } from "./choice-dialog-question";
+import { ALL_ORIENTATIONS } from "./modal-orientations";
 
 export interface ConfirmDialogProps {
   readonly mode: "confirm";
@@ -51,6 +52,7 @@ function ConfirmDialog(props: ConfirmDialogProps): ReactElement {
       transparent
       animationType="fade"
       visible={visible}
+      supportedOrientations={ALL_ORIENTATIONS}
       onRequestClose={() => undefined}
     >
       <View style={styles.backdrop}>

@@ -1,14 +1,23 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
+import { useMemo } from "react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, SectionList, StyleSheet, Text, View } from "react-native";
 import { useStore } from "zustand";
 
 import { getSquadStore } from "@/state/app-stores";
 import { parseTeamId } from "@/state/route-params";
+import {
+  buildTeamSections,
+  renderTeamRow,
+  TeamSectionFooter,
+  TeamSectionHeader,
+  teamRowKey,
+} from "@/ui/team-sections";
 import { NotFound } from "@/ui/not-found";
 import { useOpenRouteTeam } from "@/ui/use-open-route-team";
+import { useTeamMatches } from "@/ui/use-team-matches";
 import { DuplicateNumberBanner } from "@/ui/warnings/duplicate-number-banner";
 
 // Material symbol on Android, SF Symbol on iOS: one icon, no new dependency.
@@ -31,8 +40,34 @@ function EditButton({ teamId }: { teamId: number }): ReactElement | null {
   );
 }
 
-export default function TeamScreen(): ReactElement | null {
+function TeamActions({ teamId }: { teamId: number }): ReactElement {
   const { t } = useTranslation();
+  const router = useRouter();
+  return (
+    <View style={styles.actions}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push(`/teams/${teamId}/matches/new`)}
+        style={[styles.action, styles.primary]}
+      >
+        <Text numberOfLines={1} style={styles.primaryText}>
+          {t("matches.new")}
+        </Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push(`/teams/${teamId}/players/new`)}
+        style={[styles.action, styles.secondary]}
+      >
+        <Text numberOfLines={1} style={styles.secondaryText}>
+          {t("players.new")}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+export default function TeamScreen(): ReactElement | null {
   const router = useRouter();
   const { teamId } = useLocalSearchParams<{ teamId: string }>();
   const id = parseTeamId(teamId);
@@ -44,6 +79,11 @@ export default function TeamScreen(): ReactElement | null {
   const team = useStore(store, (state) => state.team);
   const players = useStore(store, (state) => state.players);
   const duplicates = useStore(store, (state) => state.duplicateNumbers);
+  const matches = useTeamMatches(id);
+  const sections = useMemo(
+    () => buildTeamSections(players, matches),
+    [players, matches],
+  );
 
   if (id === null) return <NotFound />;
   if (!ready) return null;
@@ -58,38 +98,28 @@ export default function TeamScreen(): ReactElement | null {
           headerRight: () => <EditButton teamId={id} />,
         }}
       />
-      <View style={styles.actions}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push(`/teams/${id}/matches/new`)}
-          style={[styles.action, styles.primary]}
-        >
-          <Text numberOfLines={1} style={styles.primaryText}>
-            {t("matches.new")}
-          </Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push(`/teams/${id}/players/new`)}
-          style={[styles.action, styles.secondary]}
-        >
-          <Text numberOfLines={1} style={styles.secondaryText}>
-            {t("players.new")}
-          </Text>
-        </Pressable>
-      </View>
+      <TeamActions teamId={id} />
       <DuplicateNumberBanner numbers={duplicates} />
-      <FlatList
-        data={players}
-        keyExtractor={(player) => String(player.id)}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <Text style={styles.number}>{item.number}</Text>
-            <Text numberOfLines={1} style={styles.name}>
-              {item.name}
-            </Text>
-          </View>
+      <SectionList
+        sections={sections}
+        initialNumToRender={40}
+        keyExtractor={teamRowKey}
+        renderSectionHeader={({ section }) => (
+          <TeamSectionHeader sectionKey={section.key} />
         )}
+        renderSectionFooter={({ section }) => (
+          <TeamSectionFooter
+            sectionKey={section.key}
+            empty={section.data.length === 0}
+          />
+        )}
+        renderItem={(info) =>
+          renderTeamRow(
+            info,
+            (matchId) => router.push(`/matches/${matchId}`),
+            (playerId) => router.push(`/teams/${id}/players/${playerId}`),
+          )
+        }
       />
     </View>
   );
@@ -118,12 +148,4 @@ const styles = StyleSheet.create({
   secondary: { backgroundColor: "transparent" },
   primaryText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
   secondaryText: { color: "#1d4ed8", fontSize: 16, fontWeight: "600" },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  number: { fontSize: 18, fontWeight: "700", minWidth: 32 },
-  name: { flex: 1, fontSize: 18 },
 });

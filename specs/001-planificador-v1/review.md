@@ -1620,3 +1620,281 @@ Branch `001-planificador-v1-d3`. The app code of every device run is the commit 
 ### Not covered by these runs (for T094, by hand)
 
 The question dialog in landscape on iOS (React Native's `Modal` supports portrait by default), a possible flicker when a question closes, whether the long press yields to the horizontal scroll of the grid on a real finger, and the iPad and the Android tablet (these runs are a phone each).
+
+## F-D3-01 · The strip under the iOS navigation header: closed without a fix (2026-11-23)
+
+Form: `small-change-form-ios-header-strip-touches.md` (approved by Fernando, 2026-11-23, and closed the same day). Release build of `main` on the iPhone 17 (iOS 27.2). A Maestro flow of the scratchpad (not added to `e2e/`): a team with 6 and then 9 players, a match, «Convocatoria», then a tap in the middle of the first «Quitar de la convocatoria».
+
+| Run | First row                                 | Result                          |
+| --- | ----------------------------------------- | ------------------------------- |
+| 1   | Under the range banner (5 in the call-up) | The tap worked: Ana was removed |
+| 2   | Right under the header (no banner)        | The tap worked                  |
+| 3   | Right under the header (no banner)        | The tap worked                  |
+
+The finding of 2026-11-20 does not reproduce. Decision (Fernando, 2026-11-23, chat, «Cerrar sin arreglo»): no change of code and no merge before T072. Open check, by hand: the device pass of T079 taps the top field or button of each new modal screen on iOS (D3 rule 15 stays as a check, not as a fix). **Environment:** the Release build needs about 10 GB of free disk; two attempts failed with a full disk until the regenerable outputs (`ios/`, `DerivedData`, the CocoaPods and npm caches) were deleted.
+
+## Maestro of US6 on iOS and Android · T073 (2026-11-24)
+
+Flow: `e2e/us6-matches.yaml`, with its static tests (`tests/e2e/us6-*.test.ts`). It creates two teams and a match with a date and a time, marks cells, opens «Editar» and goes back, checks the list of the team and the list of every match, reopens the app (E-019), edits the details and clears the time (E-032), changes the format 8 → 4 → 8 with the confirmation and without «Guardar» (E-016), and deletes the match after confirming. The matches are reached through the lists, never through a deep link.
+
+**Builds:** Release of `d6bf24d` (the commit of T096; the flow was not yet committed). iOS: `npx expo run:ios --configuration Release --no-bundler` on the iPhone 17 simulator (iOS 27.2), after `simctl erase` of that simulator to free disk. Android: `npx expo prebuild --platform android`, `./gradlew assembleRelease`, installed on the Medium_Phone_API_37.0 emulator with the animations off. Maestro 2.12.1.
+
+| Platform | Run     | Result                                                                                                                     |
+| -------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| iOS      | 1       | Failed at «Editar»: the home field read «ÁguilastRival», the two names had run together                                    |
+| iOS      | 2       | Failed after «Guardar» of the details: the list showed «Rivales – Rival», the away name had been typed into the home field |
+| iOS      | 3       | Passed, 287 steps, 5 min 33 s                                                                                              |
+| Android  | 1 and 2 | Failed on the first tap: the emulator showed «System UI isn't responding» after the cold boot; dismissed with «Wait»       |
+| Android  | 3       | Passed, 294 steps, 11 min 8 s                                                                                              |
+
+**Fixes to the flow (none to the app):** on iOS a single-line field must be closed with «Enter» before the next field is tapped, because the tap landed on the keyboard or on the same field. The time is checked up to «12:00» on iOS and as 18:30 in the real dialog on Android (decision of 2026-11-20).
+
+**Not covered:** a tablet, a phone in landscape, a real device. **Environment:** the Release build of iOS needs about 10 GB of free disk.
+
+## Maestro of US7 on iOS and Android · T078 (2026-11-24)
+
+Flow: `e2e/us7-squad.yaml`, with its static tests (`tests/e2e/us7-*.test.ts`). Two teams with the same name and number in both (Juan 7); a match saved before Juan's number is edited (E-018: it keeps 7, a new match shows 9, the other team still shows 7, RF-020); Ana deactivated after a confirmation that a tap outside and, on Android, Back leave open (RF-022), then «Desactivado», not offered in a new match or in «Añadir a la convocatoria», still with her marks in the saved match (RF-023); reactivated without a question and offered again (RF-024); a team deleted after its confirmation, which is gone from the list of teams and from «Todos los partidos» (RF-015). Matches are opened from the team's list, never through deep links.
+
+**Builds:** Release of `e0b9628`. iOS: `npx expo run:ios --configuration Release --no-bundler` on the iPhone 17 simulator (iOS 27.2). Android: `npx expo prebuild --platform android`, `./gradlew assembleRelease`, installed on the Medium_Phone_API_37.0 emulator with animations off. Maestro 2.12.1.
+
+| Platform | Run | Result                                                                                                                                                                                            |
+| -------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| iOS      | 1   | Failed after Juan's number was saved as 9: the assert of the bare number found nothing, iOS merges the row into «9, Juan»                                                                         |
+| iOS      | 2   | Passed, 252 steps, 5 min 35 s                                                                                                                                                                     |
+| Android  | 1   | Failed in the reactivation scene: the call-up of the new-match form starts under the fold, Ana was not on screen yet (the first tap also met «System UI isn't responding», dismissed with «Wait») |
+| Android  | 2   | Passed, 257 steps                                                                                                                                                                                 |
+
+**Fixes to the flow (none to the app):** the number is asserted with `N|.*N, Juan.*`; Ana is scrolled into view on Android. **Not covered:** a tablet, a phone in landscape, a real device. **Environment:** the iOS Release build needs about 10 GB of free disk: two attempts failed with a full disk, and the data of the iPhone 17 and iPad Pro 11 simulators were erased with Fernando's approval.
+
+## CI of PR 25 · two tests timed out (2026-11-25)
+
+The `verify` check of PR 25 at `1b03fab` failed with two tests that passed locally: `tests/app/new-match.time-states.android.test.tsx` (the suite took 37.7 s) and the property test of `src/ui/grid/match-grid.viewport.test.tsx` (8.1 s), both with «Exceeded timeout of 5000 ms for a test». Nothing in the behaviour failed: 4,410 of 4,412 tests passed. The same grid test had already timed out twice on the developer's machine under load (2026-11-23 and 2026-11-24). Fix: `testTimeout: 30000` in `jest.config.js`, so a slow or loaded machine does not fail a test that is only slow. No test was changed or weakened. `jest.config.js` is test configuration (D3 rule 1), so the full local Stryker run was done: 94.92 % in 5 min 41 s, `verify.sh` green (363 suites, 4,412 tests).
+
+## Security · D3 part 2, PR 25 (T067 to T078) · 2026-11-25
+
+Role `security`. Scope: `git diff origin/main...HEAD` at `4c2090c` (18 commits, 148 files). No source code was changed by this audit.
+
+### Findings
+
+| ID       | Severity | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Decision needed                                                                                                                                                                          |
+| -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SEC-D3-1 | Minor    | **Corrected on 2026-11-25 after the Codex review (finding 4).** The first text said the delete button of the match details had no guard against a second press. That was wrong: `ConfirmDialog` guards the confirm button with a synchronous `confirmed` ref, and `tests/app/match-details.delete.test.tsx` already checks that two immediate presses delete once. What remains is only the navigation after the delete: the handler ran `router.dismiss(2)` whatever the result, and `dismiss(2)` assumes the usual stack. That is the real defect and Codex found it as blocking finding 1: it is fixed as F-D3-03. | Fixed (F-D3-03).                                                                                                                                                                         |
+| SEC-D3-2 | Info     | Ownership of a write is enforced in the screens and the stores, not in the repositories: `deleteMatch`, `deleteTeam`, `updatePlayer` and `setPlayerActive` in `src/data/` act on any id they receive. This is acceptable because the ids come from route parameters parsed by `parseMatchId`, `parsePlayerId` and `parseTeamId`, the screens compare them with the open session or team before drawing, and the squad store re-reads the open team's players and returns `unchanged` for a player that is not in it (`saveToPlayer`). No screen of another team or match can reach them.                              | None. The rule is already in `docs/security.md` (no route writes on open, ids parsed). If a future route calls a repository with an id that does not come from an owned screen, recheck. |
+| SEC-D3-3 | Info     | After `deleteMatch` the match session store stays open for the deleted match until the grid unmounts (`router.dismiss(2)`, whose unmount closes the session). Until then, a mark would fail on the foreign key and the grid would show the save-error banner; no row is created and nothing corrupts. The details screen only exists on top of its grid (it draws only while the session is open for its own match), so the grid always unmounts together with it.                                                                                                                                                    | None.                                                                                                                                                                                    |
+| SEC-D3-4 | Info     | `jest.config.js` `testTimeout: 30000` is test configuration only (not in the app bundle) and does not touch dependencies, permissions or CI permissions. `tests/setup/gesture-handler.ts` is not in this diff. A hung test now fails after 30 s instead of 5 s; Stryker has its own timeout.                                                                                                                                                                                                                                                                                                                          | None.                                                                                                                                                                                    |
+
+No blocking and no important finding.
+
+### What was checked
+
+- **Dependencies and configuration:** `git diff origin/main...HEAD` on `package.json`, `package-lock.json`, `app.json`, `app.config.js`, `.github/`, `scripts/`, `plugins/` and `osv-scanner.toml` is empty. Only `jest.config.js` changed (4 lines). `app.json` still has `allowBackup: false`, the scheme `planificadorperiodos` and the blocked permissions. No new dependency, permission or native code.
+- **Tools** (the ones `scripts/verify.sh` runs, not the full verify): `npm audit --omit=dev` with `scripts/check-npm-audit.mjs`: no unapproved high or critical advisory. `osv-scanner scan source --lockfile=package-lock.json`: no issues (9 filtered by the 7 approved exceptions, which expire on 2027-02-08 and 2027-02-10). `gitleaks git --redact --no-banner`: no leaks in 259 commits. `semgrep` (`p/typescript`, `p/react`, `p/secrets`) over `src` and `scripts`: no findings.
+- **Data layer** (`match-repository.ts`, `match-list-repository.ts`, `player-repository.ts`, `team-repository.ts`, `records.ts`): every query is a Drizzle builder with bound parameters (`eq`, `and`, `gt`, `inArray`, `count`, `innerJoin`); no `sql` template, no string concatenation. `updateMatchDetails` and `updatePlayer` pick each field by name, so extra properties never reach the row, and none can change the team, the format or the overtime count. `changeMatchFormat` runs the format update and the mark delete in one `db.transaction`, with the subquery of the match's own call-up entries, so only that match's period marks above the new count go and overtime marks stay; the CHECK of the table refuses a format outside 4, 6 and 8. `deleteMatch` and `deleteTeam` are one statement each and rely on `PRAGMA foreign_keys = ON` (`database.ts` line 21) and the `onDelete: "cascade"` references of the schema (players, matches, call-up entries, marks), so they are atomic. `countTeamContents` only reads. The repositories import only Drizzle and the data layer's own files (the single `@/domain` import in `src/data/` is a type, in `grid-repository.ts`, from before D3). `src/app/` and `src/ui/` import nothing from `@/data`, `drizzle-orm` or `expo-sqlite`.
+- **Navigation:** the new routes `matches/index`, `matches/[matchId]/edit` and `teams/[teamId]/players/[playerId]` parse every param with `parseMatchId`, `parseTeamId` and `parsePlayerId` (canonical positive integers only) and draw `NotFound` for `null`. The details screen draws only while the session is open for its own match (`status === "open" && view.matchId === id`) and its draft reads the match, never writes on open; as the first route of a restored stack or a deep link it shows `NotFound`. The player screen draws only a player whose `teamId` equals the route's team. No route calls a write on open: the writes are `Guardar`, the confirm buttons and «Reactivar» (a tap on a button; it asks nothing by design, RF-024, and is reversible). The deep links `planificadorperiodos://teams/1/edit` and `.../matches/N` only draw a form or open a read; nothing is deleted by arriving. After a delete the screens leave with `router.dismiss(2)` (match), and `router.dismissAll()` or `router.replace("/")` when the stack has nothing to dismiss (team); a stale route to a deleted team or match draws `NotFound`.
+- **Destructive actions:** deleting a match, deleting a team, changing the format and deactivating a player all go through `ChoiceDialog` in confirm mode, and the store call is made only from the confirm handler. «Borrar equipo» reads the counts first and opens nothing when the read fails (no guess); every confirm button is guarded against a second press by the synchronous `confirmed` ref of `ConfirmDialog` (corrected on 2026-11-25 after the Codex reviews: this section first said the match delete had no guard; SEC-D3-1 is only about the navigation after the delete, fixed as F-D3-03). «Cancelar» closes the dialog without writing; a tap outside it and Android Back do not close it (RF-015, RF-022, RF-029, RF-039). The format change does nothing when the chosen format is the current one, and a read or write that throws publishes nothing.
+- **Logging and egress:** in the 37 non-test `.ts` and `.tsx` files of `src/` that D3 changed, there is no `console`, no `fetch`, `XMLHttpRequest`, `WebSocket` or `EventSource`, no `expo-linking` or `Linking`, no `AsyncStorage`, no `persist` or `devtools`. The only two `throw new Error` are fixed strings with no data («Unknown format in the database», «Unknown default format in the database»), and every `catch` swallows the error without logging it. The names of children and teams appear only in dialog titles and lists, drawn by the UI; `interpolation.escapeValue: false` is the usual setting for React Native (no HTML).
+- **E2E flows** (`e2e/us6-matches.yaml`, `e2e/us7-squad.yaml`): invented names and a clean install (`clearState: true`); no token, URL or key; matches are reached through the lists, not through deep links.
+
+### Could not be checked
+
+- The real `expo-sqlite` driver on a device or simulator: the transaction and the cascades are proved with `better-sqlite3` in Jest (and `foreign_keys = ON` is set in `database.ts`), the same as for earlier tasks. The Maestro runs of T073 and T078 on iOS and Android exercise the deletes end to end (the deleted team and match disappear from the lists), which covers it in practice.
+- The behaviour of `router.dismiss(2)` when the count is larger than the stack (SEC-D3-1) was read from the code, not run.
+- Release-only items stay as in the earlier audits (SEC-T061-1, SEC-T061-2 and SEC-T061-5): the `INTERNET` block through `eas.json`, the dev-client residue in the release manifest and `Info.plist`, MobSF, `ITSAppUsesNonExemptEncryption`, the renewal of the osv exceptions before 2027-02-08.
+
+### Verdict (Security, D3 part 2)
+
+No blocking and no important finding; one minor (SEC-D3-1, optional) and three informative notes. The change adds no dependency, permission, network call or log of children's data, keeps every write behind a button and a confirmation, and keeps the data layer parameterised and transactional. The audit list of `docs/security.md` holds for this diff.
+
+## Codex review · D3 part 2, PR 25 (2026-11-25)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 origin/main` on commit 5793d2b (diff `origin/main...HEAD`, reviewed through 3048082).
+
+Verdict: **not approved**. Counts: 2 BLOCKING, 1 IMPORTANT, 1 MINOR. Status: all four fixed on 2026-11-25 (below); a second Codex run on the fixed branch follows.
+
+**Fixes of 2026-11-25** (tests first, red then green; `verify.sh` and the second Codex run are recorded below this list):
+
+- **F-D3-03 (finding 1, RF-029).** `src/ui/leave-deleted.ts` reads the real stack with `useRootNavigationState` and pops every route of the deleted match: `dismiss(n)` when something sits below them (the team or the list), and `dismissAll()` plus `replace("/matches")` when the grid is the root. It navigates only when the delete is `saved`. **Decision for Fernando to know:** a restored stack with the grid as its root ends on the list of every match (`/matches`), not on the list of teams; four existing tests of the deletion open from a root grid and pin a screen that needs no squad store.
+- **F-D3-04 (finding 2, RF-023 RF-032).** `addToCallUp` revalidates the player's current activity before writing and answers `unchanged` for a player deactivated after the session opened; a new session action `refreshCandidates()` (called on focus of the call-up screen) rebuilds the candidates without touching Undo; the new-match draft has `refreshPlayers()` (called on focus of the form: deactivated players leave, the coach's deselections, format and typed fields stay) and `create()` re-reads the squad and, if it cannot, answers `saveFailed` and writes no match.
+- **F-D3-05 (finding 3, RF-015).** Deleting a team always ends on `/`: `leaveDeletedTeam` does `dismissAll()` when the list is the root, and `dismissAll()` (if more than one route) plus `replace("/")` otherwise.
+- **Finding 4.** The SEC-D3-1 row of the Security section was corrected (the double press was guarded; the defect was the navigation, fixed as F-D3-03) and the line of `docs/security.md` follows.
+
+Findings, copied from Codex:
+
+1. **BLOCKING · RF-029 · Deleting a match can leave its deleted grid open.** `src/ui/match-details-actions.tsx:48`. Opening `/matches/1` directly, then Edit, then confirming deletion: `dismiss(2)` keeps the root grid mounted, so its session stays open. A stack with two details screens also leaves the deleted grid behind. Suggested fix: explicitly close the session and remove every route of the deleted match, with a list fallback; add regressions for both stack shapes.
+
+2. **BLOCKING · RF-023, RF-032 · A retained session can add a deactivated player.** `src/state/squad-player-actions.ts:107`. Open a match with an active player outside its call-up, push the player's edit route, deactivate them, return: the cached `playersToAdd` still offers them and `addToCallUp` checks existence but not `isActive`, so the add succeeds. A retained new-match draft also saves its stale selection. Reproduced on the migrated SQLite test database. Suggested fix: refresh candidates without clearing Undo or form edits, and revalidate current activity before adding players or creating a match; test deactivation after opening the session or draft.
+
+3. **IMPORTANT · Team deletion can strand the app on a deleted root route.** `src/app/teams/[teamId]/edit.tsx:39`. Opening `/teams/1` directly, Edit, then delete: `canDismiss()` is true but `dismissAll()` keeps `/teams/1`, which becomes a root NotFound screen with no previous screen, so the planned return to the teams list does not happen. Suggested fix: make deletion explicitly end at `/`, removing the deleted team's routes; add a regression starting at the team route.
+
+4. **MINOR · SEC-D3-1 · The security report wrongly says double confirmation is unguarded.** `specs/001-planificador-v1/review.md` (Security, D3 part 2, line ~1681). `ConfirmDialog` has a synchronous `confirmed` ref, and an existing test already checks that two immediate presses delete once. Suggested fix: correct the finding and its prose; describe any extra handler guard as optional defence.
+
+Codex also reported no additional findings for scope, architecture, constitution, glossary, tests (no deleted, skipped or weakened assertions), security, explanations, or simplicity. Checks that passed: TypeScript, ESLint, traceability, focused/skipped-test checks, final formatting. Jest was blocked by cache-write permissions, so full verification was not rerun. Device checks remain pending. No files were changed by Codex.
+
+Open items for the orchestrator: the severity of finding 3 is recorded as IMPORTANT in the Codex file; no reclassification was made.
+
+**Verification after the fixes (2026-11-25):** `verify.sh` green (369 suites, 4,433 tests), full local Stryker run (`tests/support/` changed): 94.92 % in 5 min 28 s.
+
+## Codex review, second run · D3 part 2, PR 25 (2026-11-25)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 origin/main < /dev/null` on commit 31322a0 (branch `001-planificador-v1-d3` against `origin/main`, review dated 2026-11-25 10:12).
+
+Verdict: **not approved**. Counts: 1 BLOCKING, 0 IMPORTANT, 1 MINOR. Status: open, pending fixes in phase 6.
+
+Findings, copied from Codex:
+
+1. **BLOCKING · RF-029 · Match deletion leaves earlier, noncontiguous routes behind.** `src/ui/leave-deleted.ts:64`. With the stack `/ → /matches/1 → /matches → /matches/1 → /matches/1/edit`, deleting match 1 dismisses only the final two screens. The earlier `/matches/1` remains; Back reaches the deleted match's route. This contradicts the deletion cleanup required by `docs/security.md` and leaves F-D3-03 incomplete. Reproduced using the real helper and installed StackRouter. Suggested fix: check the entire stack for matching routes and remove all of them, or reset to a safe list when an earlier occurrence exists. Add a `renderRouter` regression for this stack.
+
+2. **MINOR · SEC-D3-1 · The security report retains incorrect confirmation claims.** `specs/001-planificador-v1/review.md:1694`. The paragraph still says match deletion lacks a double-press guard and that outside taps close confirmations. `ConfirmDialog` guards confirmation synchronously and ignores outside taps and Android Back. Suggested fix: correct this paragraph to match the implementation and the amended SEC-D3-1 finding.
+
+Category results (Codex):
+
+| Category                                       | Result                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| RF/E implementation, coverage and scope        | Finding 1; all RF/E IDs have test references. No unrelated feature additions found.                      |
+| Constitution, layers, conventions and glossary | No additional findings.                                                                                  |
+| Test integrity                                 | No deleted, skipped or weakened assertions found. Finding 1 needs regression coverage.                   |
+| Security                                       | Navigation issue in finding 1. No additional network, logging, query, dependency or permission findings. |
+| Explanations and reports                       | Finding 2.                                                                                               |
+| Simplicity and efficiency                      | No findings.                                                                                             |
+
+Validation (Codex): TypeScript, ESLint, changed-file formatting, traceability and focused/skipped-test checks passed. 379 tests across 33 domain/data/state suites passed with cache writes disabled. Full verification and UI tests were not validated in this environment; device checks remain pending. No repository files were changed by Codex.
+
+Open items for the orchestrator: none recorded by Codex beyond the two findings above. The MINOR finding is a correction to this file's own Security section; the BLOCKING finding must be fixed (phase 6) before closing.
+
+**Fix of the second run, finding 1 (F-D3-03b, 2026-11-25).** `leaveDeletedMatch` in `src/ui/leave-deleted.ts` now counts the routes of the deleted match in the whole stack: with only the contiguous block at the top and something below it, it keeps `dismiss(count)`; with earlier occurrences (for example `/ → /matches/1 → /matches → /matches/1 → /matches/1/edit`) it empties the stack with `dismissAll()` and `replace("/matches")`, so no route of the match is left and Back never reaches it. Tests first: `tests/app/match-details.delete.earlier.test.tsx` (3 stacks, 6 tests). Finding 2 (the SEC-D3-1 paragraph) was corrected as shown above. The finding 3 of the first run (team deletion) stays fixed as F-D3-05 and its tests pass; the second Codex run did not repeat it. A third Codex run follows.
+
+## Security D3 part 1 (T062–T066) · 2026-11-25
+
+Role `security`. Scope: `git diff 866d988 9f20708` (PR 24 merged, last task commit T066), limited to T062–T066 and the tasks done between them (T100, T097, T063, T093, F-D3-02): 74 files, of which 20 non-test `src/` files, 8 files under `tests/support/` and `tests/setup/`, two Jest configs and two Maestro flows. No source code was changed by this audit.
+
+### Findings
+
+No blocking, no important and no minor finding. Four informative notes.
+
+| ID         | Severity | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Decision needed                                                                                                                                         |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SEC-D3P1-1 | Info     | `react-native-gesture-handler` is imported in `src/` for the first time (`grid-cell.tsx`: `GestureDetector`, `useLongPressGesture`; `_layout.tsx`: `GestureHandlerRootView`). It is not a new dependency: `~3.3.0` was already in `package.json` (since the template) and recorded in `plan.md` rule 10 ("No new dependency"), and `package.json`, `package-lock.json` and `app.json` are unchanged in the diff. MIT, Software Mansion, installed version 3.3.0 (published 2026-11-16), single copy in the tree (also used by `expo-router` and `react-native-drawer-layout`). Its Android manifest is empty (`<manifest/>`, no permission), and its `android/`, `apple/`, `shared/` and `src/` code has no network or `java.net` use. The callbacks run on the JavaScript thread (`runOnJS: true`) and `react-native-reanimated` and `react-native-worklets` are still not imported in `src/`, as the plan says. | None.                                                                                                                                                   |
+| SEC-D3P1-2 | Info     | The question and menu dialog (`choice-dialog-question.tsx`, `match-questions.tsx`) is a pure view of `pending`: the store, not the dialog, decides what each answer does. An answer acts only when the pending question is of its own kind and asks the domain again (`answer`, `chooseOption`, `chooseReplaced`); an entry id that is not a starter of the column, or a menu choice the domain does not accept, returns `unchanged`. Cancelling (button, backdrop tap or Android Back) always goes through `cancelQuestion` and writes nothing. One thing to know, only about availability: the dialog's `chosen` guard is reset when `visible` or `stage` changes, so an answer that leaves the same question open would lock its options until «Cancelar»; no reachable path does it (a stale or invalid choice needs a key the dialog never offers, and the other answers close the question).                | None. A future answer that keeps the same question open must change `stage`.                                                                            |
+| SEC-D3P1-3 | Info     | `tests/setup/gesture-handler.ts` (loaded for every Jest test through `setupFilesAfterEnv`) mocks two internal paths of the package (`lib/module/GestureHandlerRootViewContext` and `v3/detectors/HostGestureDetector`). It is test configuration only, outside the app bundle, and `jest.stryker.config.js` clears it for the domain run. It depends on the package layout, so a minor upgrade of gesture-handler may break the tests (a visible failure, not a silent one).                                                                                                                                                                                                                                                                                                                                                                                                                                      | None. Recheck the mocks when gesture-handler is updated.                                                                                                |
+| SEC-D3P1-4 | Info     | `docs/security.md` "Audit of each change" has no line for the question dialog or the long press. They add no new control (no write on open, no route, no deletion: a long press only asks), so the existing lines hold. If Fernando wants the pending-question rule written down ("while a question is open nothing else acts, and a question is never a write"), it is a one-line documentation change for the Planner or the orchestrator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Optional: add that line to `docs/security.md`; I did not, because this role does not edit the documents outside `review.md` for a change without a gap. |
+
+### What was checked
+
+- **Dependencies and configuration:** `git diff 866d988 9f20708` on `package.json`, `package-lock.json`, `app.json`, `app.config.js`, `plugins/`, `.github/`, `scripts/` and `osv-scanner.toml` is empty; only `jest.config.js` and `jest.stryker.config.js` changed (test configuration, 2 lines each). `android.allowBackup: false`, the backup plugin, the blocked permissions and the link scheme are therefore as in the earlier audits. No new permission, native module or config plugin.
+- **Tools** (the ones `scripts/verify.sh` runs, not the full verify): `npm audit --omit=dev --json` through `scripts/check-npm-audit.mjs`: no unapproved high or critical advisory. `osv-scanner scan source --lockfile=package-lock.json`: no issues (9 filtered by the 7 approved exceptions, all Stryker-only `qs`). `gitleaks git --redact --no-banner`: no leaks in 265 commits. `semgrep` (`p/typescript`, `p/react`, `p/secrets`) over `src` and `scripts`: no findings.
+- **Egress and logs:** in the non-test files of the diff there is no `console`, `fetch`, `XMLHttpRequest`, `WebSocket`, `Linking`, `AsyncStorage`, `persist`, `devtools` or `eval`. The player's name appears only as text of the dialog title (the cell's accessible label) and of the «¿A quién sustituye?» options, drawn on screen; the `stage` string holds only the question kind and the cell's ids and column, and is never logged or stored. Nothing is stored outside the database: `pending` is in memory and `closeMatch`, `openMatch` and a failed load reset it (`EMPTY`).
+- **Data layer:** no file of `src/data/` changed. The state layer reuses `saveCellChanges` and `listPlayers` through the new `commitMarkChange`, which reads first and writes in one transaction, keeps one undo entry per change and, when the read or the write throws, closes the question, sets `saveFailed` and publishes no grid. The layers hold: `src/ui/` imports only `@/state`, `@/i18n`, `@/domain/cell-menu` as a type and the dialog files; `src/state/` imports no `react-native`. `ask` and `drop` do not read or write the database.
+- **Navigation:** no route was added or changed in meaning. `matches/[matchId]/index.tsx` only gains `onLongPressCell` (calls `openCellMenu`, which writes nothing) and `<MatchQuestions />`; the id is still parsed with `parseMatchId`. A deep link to a match (`planificadorperiodos://matches/1`, used in the two Maestro flows to check persistence after a restart) opens the match for reading and resets any question; nothing is deleted or written by arriving.
+- **Destructive actions and the question flow (RF-045 to RF-055):** every mark change is the answer to a tap on a cell, a long press plus a menu choice, or a button of the dialog, never an effect or a route. A question is not a write (`ask` reads and saves nothing, pushes no undo entry, publishes no failure flag). While a question is open, `tapCell`, `openCellMenu`, `undo`, `addOvertime`, `removeLastOvertime`, `addToCallUp`, `removeFromCallUp` and `createPlayerInMatch` return `unchanged` (`hasPendingQuestion`, T100), so no write races the dialog. Removing an X is reversible with Undo, and the reminder asks before taking away an X in a period with a sub (constitution principle 2). A second press in the same instant is guarded by the `chosen` ref of `QuestionDialog`, as `ConfirmDialog` does with `confirmed`. The long press never also taps (`longPressed` ref reset on press-in), works only on marked cells (`enabled`) and a failed or cancelled gesture (the grid scrolls) opens nothing.
+- **Texts:** the new dialog texts are in `src/i18n/es.json` (`grid.subOrStarter`, `grid.cellMenu`, `grid.chooseReplaced`, `grid.removeXReminder`); no loose text in JSX.
+- **E2E flows** (`e2e/us5-subs.yaml`, `e2e/us5-undo-after-call-up.yaml`, step change in `e2e/us3-planning.yaml`): invented names, no token, URL or key; the only link is the app's own scheme.
+
+### Could not be checked
+
+- The long press against the grid's scroll and the cell's tap on a real device: Jest drives the gesture with the package's test utility and the Maestro runs of T066 exercise it on the simulators; the feel on a phone and a tablet is for T094 (device checklist), not a security matter.
+- The behaviour of the Modal's `onRequestClose` on a real Android Back button: read from the code, covered by T094.
+- Release-only items stay as in the earlier audits (SEC-T061-1, SEC-T061-2 and SEC-T061-5): the `INTERNET` block through `eas.json`, the dev-client residue in the release manifest and `Info.plist`, MobSF, `ITSAppUsesNonExemptEncryption`, the renewal of the osv exceptions before 2027-02-08.
+
+### Verdict (Security, D3 part 1)
+
+Clean. No blocking, important or minor finding; four informative notes. The first runtime use of `react-native-gesture-handler` brings no dependency, permission, network call, log of children's data or native setting change, every write stays behind an explicit tap or menu choice, and nothing acts while a question is open. The audit list of `docs/security.md` holds for this diff.
+
+## Codex review run 3 (2026-11-25, whole D3)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 866d988 < /dev/null` on commit 82fef27 (branch `001-planificador-v1-d3` against `866d988`, review dated 2026-11-25 15:20). Scope: the whole D3 (T062 to T078).
+
+Verdict: **not approved**. Counts: 2 BLOCKING, 0 IMPORTANT, 1 MINOR. Status: open, pending fixes in phase 6.
+
+Findings, copied from Codex:
+
+1. **BLOCKING · RF-052 · Long-pressing an empty cell marks it on release.** `src/ui/grid/grid-cell.tsx:44`. The long-press gesture is disabled for empty cells, so `longPressed` stays false and the Pressable's release calls `onTapCell`. RF-052 requires no change. The existing empty-cell test drives only the gesture and omits the Pressable's release; an in-memory regression reproduces the unexpected tap. Suggested fix: consume long presses on every cell, suppress the following tap, and open the menu only for marked cells. Test the full press-hold-release sequence.
+
+2. **BLOCKING · RF-076 · Question dialogs do not support landscape on iPhone.** `src/ui/choice-dialog-question.tsx:56`. The dialog omits `supportedOrientations`; the installed React Native implementation defaults to portrait on iPhone. Changing mocked window dimensions in Jest does not exercise this native restriction. Suggested fix: explicitly support portrait and landscape in the dialog modes, add a configuration regression, and verify opening and rotating each dialog on iPhone.
+
+3. **MINOR · Incorrect file attribution in the implementation explanation.** `specs/001-planificador-v1/summary.md:840`. Details editing, deletion and format changes are attributed to `match-list-repository.ts`, which implements only lists. Suggested fix: attribute those operations to `match-repository.ts`.
+
+Category results (Codex):
+
+| Category                                       | Result                                                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| RF/E implementation, coverage and scope        | Findings 1 and 2. No unrelated feature additions found.                                                            |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                       |
+| Test integrity                                 | Findings 1 and 2 expose coverage gaps. No deleted, skipped or weakened assertions found.                           |
+| Security                                       | No findings: parameterised queries, no new network calls, no player-data logging, no new dependency or permission. |
+| Explanations and reports                       | Finding 3.                                                                                                         |
+| Simplicity and efficiency                      | No findings.                                                                                                       |
+
+Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed; selected runs passed 605 domain/data/state tests and 48 focused checks. The additional RF-052 regression failed as described. Full verification, mutation testing and device checks were not rerun. No repository files were changed by Codex.
+
+Open items for the orchestrator: none recorded by Codex beyond the three findings above. Findings 1 and 2 are BLOCKING and must be fixed (phase 6) before closing; finding 3 is a correction to `summary.md`.
+
+### Fixes of 2026-11-25
+
+- `39a2468` F-D3-06 RF-052: `src/ui/grid/grid-cell.tsx` keeps the long-press gesture enabled on every cell, so the release that ends a long press is never a tap; `onLongPressCell` is called only for a marked cell. New test: the full press-in, hold, press-out, press sequence on an empty cell calls neither callback (red before the fix: `onTapCell` was called).
+- `fb1aee4` F-D3-07 RF-076: new `src/ui/modal-orientations.ts` (`ALL_ORIENTATIONS`) passed as `supportedOrientations` by the two `Modal`s of the app (`src/ui/choice-dialog.tsx`, `src/ui/choice-dialog-question.tsx`). New `src/ui/modal-orientations.test.ts` reads every non-test `.tsx` under `src/` and asserts each `<Modal>` passes it (red before the fix). Rotating each dialog on a real iPhone is still a device check.
+- `56bbae6` MINOR: `summary.md` now attributes details editing, deletion and format change to `match-repository.ts`.
+- Verify: `STRYKER_INCREMENTAL=1 npm run verify` passed types, lint, format and focused-tests; the full Jest run (4,444 tests) failed 1 to 5 tests per attempt (4 attempts), always different suites of `tests/app`, with «Exceeded timeout of 30000 ms» on a loaded machine; every one of those suites passes when run alone (for example 44 of 44 and 18 of 18). The same load flake is described above (2026-11-24). Traceability, Expo Doctor, npm audit, osv-scanner, gitleaks and semgrep were run by hand and are green; mutation testing is skipped (no domain change). A clean full `verify.sh` run is pending (CI).
+
+- Clean verify (2026-11-25, machine idle, after the leftover Jest run of the earlier attempts ended): `STRYKER_INCREMENTAL=1 npm run verify` exit 0, 371 suites, 4,444 tests, traceability, Expo Doctor, osv-scanner, gitleaks and semgrep green. The earlier timeouts were load, not a defect.
+
+## Codex review run 4 (2026-11-25, whole D3)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 866d988 < /dev/null` on commit 9c3675f (branch `001-planificador-v1-d3` against `866d988`, review dated 2026-11-25 20:00). Scope: the whole D3 (T062 to T078). Purpose: confirm the fixes F-D3-06 and F-D3-07 of run 3.
+
+Verdict: **no blocking finding**. Counts: 0 BLOCKING, 1 IMPORTANT, 1 MINOR. Status: open, pending fixes in phase 6 (the important finding must be fixed unless the developer accepts recording it as pending).
+
+Findings, copied from Codex:
+
+1. **IMPORTANT · Present questions only from the focused grid.** `src/ui/grid/match-questions.tsx:109`. The stack `/ → /matches/1 → /matches → /matches/1` keeps two grids for the same match mounted. Both observe the shared `pending` question and make their Modal visible. Android presents these as separate native dialog windows. A component regression confirmed two visible Modals instead of one. Suggested fix: gate question presentation by route focus while retaining the session and Undo history; add a regression using the existing repeated-match stack fixture.
+
+2. **MINOR · Update the deletion explanation to describe the final implementation.** `specs/001-planificador-v1/summary.md:859`. The main explanation still says match deletion uses `router.dismiss(2)`; the adjacent team-deletion explanation also describes superseded logic. Current code uses `leaveDeletedMatch` and `leaveDeletedTeam`. Suggested fix: rewrite these paragraphs around the helpers' current stack cleanup and fallback behavior.
+
+Category results (Codex):
+
+| Category                                       | Result                                                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| RF/E implementation, coverage and scope        | Finding 1; all RF/E IDs have test references. No unrelated additions found.                                        |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                       |
+| Test integrity                                 | No deleted, skipped or weakened assertions found. Finding 1 needs regression coverage.                             |
+| Security                                       | No findings: parameterised queries, no new network calls, no player-data logging, no new dependency or permission. |
+| Explanations and reports                       | Finding 2.                                                                                                         |
+| Simplicity and efficiency                      | No findings.                                                                                                       |
+
+Fixes of run 3: Codex raised no finding on F-D3-06 (RF-052, `39a2468`), F-D3-07 (RF-076, `fb1aee4`) or the MINOR of run 3 (`56bbae6`). This is absence of a finding, not an explicit confirmation.
+
+Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed; 113 selected domain/data/state tests passed. Full verification and device tests were not rerun; GitHub was unreachable from the review. No repository files were changed by Codex.
+
+Notes for the orchestrator: Codex states that the requested complete prerequisite reading was not completed (historical task and report content was inspected selectively). Codex's verdict on the important finding is not blocking; the orchestrator decides whether it is fixed or recorded as pending.
+
+### Fixes of 2026-11-25 (run 4)
+
+- **F-D3-08 IMPORTANT, fixed** in `0365a99` (RF-045): `MatchQuestions` only makes its dialog visible while its route is focused (`useIsFocused` of `expo-router`), so the stack `/ → /matches/1 → /matches → /matches/1` opens one dialog, from the focused grid. The session and the Undo history are untouched. Regression: `tests/app/match-screen.questions.stacks.test.tsx` (red before the fix with two Modals, green after; it also answers the question). The other Modal of the grid screen, the overtime confirmation of `useMatchActions`, is local state of the grid whose button was pressed, so it cannot open twice.
+- **MINOR, fixed** in the commit of `summary.md` of this list: the paragraphs on deleting a match and a team now describe `leaveDeletedMatch` and `leaveDeletedTeam` (`src/ui/leave-deleted.ts`).
+- **Verification:** `STRYKER_INCREMENTAL=1 npm run verify` green after `0365a99` ("All checks passed").
+
+## Codex review run 5 (2026-11-25, whole D3)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 866d988 < /dev/null` on commit b242b06 (branch `001-planificador-v1-d3` against `866d988`, review dated 2026-11-25 21:59). Scope: the whole D3 (T062 to T078). Purpose: confirm the fix F-D3-08 of run 4.
+
+Verdict: **no blocking finding and no important finding**. Counts: 0 BLOCKING, 0 IMPORTANT, 1 MINOR. Status: open. The minor finding is a suggestion; it does not prevent closing.
+
+Findings, copied from Codex:
+
+1. **MINOR · Remove the stale bullet about untested restored stacks.** `specs/001-planificador-v1/summary.md:926`. The bullet says restored grid/details stacks are untested and their destination unspecified. The diff adds stack-aware deletion handling, a `/matches` fallback and regression tests for those stacks, and the paragraph at `summary.md:932` documents the fix. Suggested fix: replace the stale bullet with the implemented behaviour and keep only the outstanding device verification.
+
+Confirmation of F-D3-08 (run 4, finding 1, RF-045): Codex raised no finding on `0365a99`, so the fix is not reported as open. Codex did not explicitly confirm it either; this is absence of a finding.
+
+Category results (Codex):
+
+| Category                                       | Result                                                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| RF/E implementation, coverage and scope        | No additional findings. The documented device acceptance checks remain pending.                                    |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                       |
+| Test integrity                                 | No deleted, skipped or weakened tests found. Existing assertions preserved or strengthened.                        |
+| Security                                       | No findings: parameterised queries, no new network calls, no player-data logging, no new dependency or permission. |
+| Explanations and reports                       | Finding 1.                                                                                                         |
+| Simplicity and efficiency                      | No findings.                                                                                                       |
+
+Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed. A targeted Jest run produced 989 passing tests in 79 passing suites, and 59 suites failed with Reanimated mock-loading errors (`default.createAnimatedComponent`). Codex could not establish whether this comes from the versioned setup or the installed dependency environment, so it did not classify it as a branch defect. A green full verification was not reconfirmed by this review. No repository files were changed by Codex.
+
+Open items for the orchestrator: the 59 failing suites in the Codex targeted run need a reproduction in a clean, writable installation before closing verification (question: is this the same Reanimated environment issue as the earlier load runs, or a new one?). Finding 1 is a MINOR correction to `summary.md`.

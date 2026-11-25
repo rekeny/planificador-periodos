@@ -39,16 +39,22 @@ function plainText(node: JsonNode | string): string {
   return (node.children ?? []).map(plainText).join("");
 }
 
+// The label of the «Todos los partidos» button (`matches.allTitle`, T071), written out because the
+// key is added to es.json by that task.
+const ALL_MATCHES = "Todos los partidos";
+
 /**
  * The text of every Text on the screen, in order, exactly as drawn (empty ones included), except
- * the label of the «Nuevo equipo» button (T034): it is on every list and not what these tests read.
+ * the labels of the «Nuevo equipo» (T034) and «Todos los partidos» (T071) buttons: they are on
+ * the list of teams and not what these tests read.
  */
 export function screenTexts(): string[] {
   const texts: string[] = [];
   nodesOf().forEach((root) =>
     walk(root, (element) => {
-      if (element.type === "Text" && plainText(element) !== es.teams.new) {
-        texts.push(plainText(element));
+      const text = element.type === "Text" ? plainText(element) : null;
+      if (text !== null && text !== es.teams.new && text !== ALL_MATCHES) {
+        texts.push(text);
       }
     }),
   );

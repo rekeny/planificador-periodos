@@ -19,7 +19,15 @@ import { pressSave } from "./new-team-form";
 export const NUMBER_INVALID =
   "El dorsal debe ser de 0 a 99 o 00, sin ceros a la izquierda.";
 export const DUPLICATE_BANNER = /Hay jugadores con el mismo dorsal/;
-const CHROME = ["Editar", "Nuevo jugador", "Nuevo partido", "Jugadores"];
+// The «Partidos» heading and its empty text (T099) are chrome too: `playerOrder` reads the players.
+const CHROME = [
+  "Editar",
+  "Nuevo jugador",
+  "Nuevo partido",
+  "Jugadores",
+  "Partidos",
+  "Todavía no hay partidos.",
+];
 
 type Players = readonly (readonly [string, string])[];
 

@@ -1,0 +1,617 @@
+appId: com.fernando.planificadorperiodos
+name: "RF-028 RF-029 RF-039 RF-057 RF-074 RF-075 RF-082 RF-083 E-016 E-032: matches are created, listed, reopened, edited, changed of format and deleted from the team screen and from the list of every match"
+---
+# Journey of US6 on a clean install (T073), for a phone in portrait. Written WITHOUT running it: the orchestrator
+# runs it on the iOS simulator and the Android emulator and fixes what the first runs show. Matches are reached
+# through the lists, never with a deep link. Back exists only on Android; on iOS the header button or the swipe
+# of the sheet is used. A dialog is closed by its button, by a tap on the dark strip at the left edge (2%,50%)
+# and, on Android, by Back. The grid of 8 periods may scroll sideways on a phone, so swipes move it between steps.
+# The iOS time wheels cannot be seen by Maestro: iOS keeps the 12:00 that «Añadir hora» gives, Android picks 18:30.
+- launchApp:
+    clearState: true
+- evalScript: ${output.today = ('0' + new Date().getDate()).slice(-2) + '/' + ('0' + (new Date().getMonth() + 1)).slice(-2) + '/' + new Date().getFullYear()}
+
+# SETUP: two teams, «Alevín A» with three players and «Cadete B» with none.
+- tapOn: "Nuevo equipo"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Alevín A"
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo equipo"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Cadete B"
+- tapOn: "Nombre"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Alevín A"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Ana"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "1"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Bea"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "2"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+- tapOn: "Nuevo jugador"
+- tapOn:
+    text: "Nombre"
+    below: "Nombre"
+- inputText: "Carla"
+- tapOn:
+    text: "Dorsal"
+    below: "Dorsal"
+- inputText: "3"
+- tapOn: "Dorsal"
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Guardar"
+
+# CREATE: a match of 8 periods on 1 March 2026 with the time the picker gives.
+- tapOn: "Nuevo partido"
+- tapOn: "8 periodos"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "(?i)date picker|selector de fecha"
+      - repeat:
+          times: 14
+          while:
+            notVisible: "(?i).*mar.* 2026.*"
+          commands:
+            - tapOn: "(?i)previous.*|anterior.*"
+      - tapOn: "1"
+      - tapOn:
+          point: "50%, 15%"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Fecha"
+      - repeat:
+          times: 14
+          while:
+            notVisible: "(?i).*mar.* 2026.*"
+          commands:
+            - tapOn: "(?i)change to previous month|cambiar al mes anterior"
+      - tapOn: "(?i).*(march 1, 2026|1 de marzo de 2026).*"
+      - tapOn: "Aceptar"
+- assertVisible: "01/03/2026"
+- scrollUntilVisible:
+    element:
+      text: "Hora"
+- assertVisible: "Sin hora"
+- assertVisible: "Añadir hora"
+- assertNotVisible: "Quitar hora"
+- tapOn: "Añadir hora"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "12:00"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "(?i)18 hours?|18 horas?"
+      - tapOn: "(?i)30 minutes?|30 minutos?"
+      - tapOn: "Aceptar"
+      - assertVisible: "18:30"
+- assertVisible: "Quitar hora"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Local"
+- tapOn:
+    text: "Local"
+    below: "Local"
+- inputText: "Águilas"
+# «Local» is a single-line field: Enter closes the keyboard before the next field is tapped (on iOS
+# the next tap landed in this field and the two names ran together: «ÁguilastRival»).
+- pressKey: Enter
+- tapOn:
+    text: "Visitante"
+    below: "Visitante"
+- inputText: "Rival"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: "Convocatoria"
+    timeout: 20000
+
+# MARKS: Ana in P1 and P5 and Bea in P2, then «Editar» and back keep them, and «Deshacer» removes the last.
+- tapOn: "Ana, P1: casilla vacía"
+- assertVisible: "Ana, P1: X, titular"
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- tapOn: "Ana, P5: casilla vacía"
+- assertVisible: "Ana, P5: X, titular"
+- swipe:
+    start: 30%, 50%
+    end: 90%, 50%
+- tapOn: "Bea, P2: casilla vacía"
+- assertVisible: "Bea, P2: X, titular"
+- tapOn: "Editar"
+- extendedWaitUntil:
+    visible: "Variante"
+    timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 50%, 12%
+          end: 50%, 95%
+- assertNotVisible: "Variante"
+- swipe:
+    start: 30%, 50%
+    end: 90%, 50%
+- assertVisible: "Bea, P2: X, titular"
+- tapOn: "Deshacer"
+- assertVisible: "Bea, P2: casilla vacía"
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- assertVisible: "Ana, P5: X, titular"
+- swipe:
+    start: 30%, 50%
+    end: 90%, 50%
+- assertVisible: "Ana, P1: X, titular"
+
+# LISTED_ONCE: Back from the grid of a new match lists it once and does not show the form again.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- extendedWaitUntil:
+    visible: "Nuevo partido"
+    timeout: 20000
+- assertNotVisible: "Guardar"
+- assertVisible: ".*Águilas.*"
+- assertNotVisible:
+    text: ".*Águilas.*"
+    index: 1
+
+# SECOND_TEAM: «Cadete B» gets its own match, with today's date and no time.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Cadete B"
+- tapOn: "Nuevo partido"
+- tapOn:
+    text: "Local"
+    below: "Local"
+- inputText: "Zorros"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: "Convocatoria"
+    timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Cadete B"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+
+# LISTS: every match, newest date first, and the list of one team.
+- tapOn: "Todos los partidos"
+- extendedWaitUntil:
+    visible: ".*Zorros.*"
+    timeout: 20000
+- assertVisible: ".*Águilas.*"
+- assertVisible:
+    text: ".*Águilas.*"
+    below: ".*Zorros.*"
+- assertVisible: ".*Alevín A.*"
+- assertVisible: ".*Cadete B.*"
+- assertVisible: ".*${output.today}.*"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: ".*01/03/2026 12:00.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible: ".*01/03/2026 18:30.*"
+- assertVisible: ".*6 periodos.*"
+- assertVisible: ".*8 periodos.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Alevín A"
+- extendedWaitUntil:
+    visible: "Partidos"
+    timeout: 20000
+- assertVisible: "Partidos"
+- assertVisible: ".*Águilas.*"
+- assertNotVisible: ".*Zorros.*"
+- assertNotVisible: ".*Cadete B.*"
+
+# REOPEN: the app is closed and opened again; the match is reached through the team and keeps its marks.
+- stopApp
+- launchApp
+- assertVisible: "Nuevo equipo"
+- assertVisible: "Alevín A"
+- tapOn: "Alevín A"
+- tapOn: ".*Águilas.*"
+- extendedWaitUntil:
+    visible: "Ana, P1: X, titular"
+    timeout: 20000
+- assertVisible: "Ana, P1: X, titular"
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- assertVisible: "Ana, P5: X, titular"
+- swipe:
+    start: 30%, 50%
+    end: 90%, 50%
+- assertVisible: "Bea, P2: casilla vacía"
+- assertVisible:
+    text: "Deshacer"
+    enabled: false
+
+# EDIT: home, away and score are changed, the time is cleared and «Guardar» saves it.
+- tapOn: "Editar"
+- extendedWaitUntil:
+    visible: "Variante"
+    timeout: 20000
+- tapOn: "Águilas"
+- eraseText
+- inputText: "Cóndores"
+# Enter closes the keyboard of this single-line field before «Rival» is tapped: with it open the
+# tap landed on the keyboard and «Rivales» replaced the home name.
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- tapOn: "Rival"
+- eraseText
+- inputText: "Rivales"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      text: "Notas"
+- tapOn:
+    text: "Resultado final"
+    below: "Resultado final"
+    index: 0
+- inputText: "72"
+- runFlow: subflows/close-number-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      text: "Notas"
+- tapOn:
+    text: "Resultado final"
+    below: "Resultado final"
+    index: 1
+- inputText: "65"
+- runFlow: subflows/close-number-keyboard.yaml
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Hora"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "12:00"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible: "18:30"
+- tapOn: "Quitar hora"
+- assertVisible: "Sin hora"
+- assertVisible: "Añadir hora"
+- assertNotVisible: "Quitar hora"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertNotVisible: "12:00"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertNotVisible: "18:30"
+- assertVisible: "01/03/2026"
+- scrollUntilVisible:
+    element:
+      text: "Guardar"
+- tapOn: "Guardar"
+- waitForAnimationToEnd
+- assertNotVisible: "Guardar"
+- assertVisible: "Ana, P1: X, titular"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- extendedWaitUntil:
+    visible: ".*Cóndores – Rivales.*"
+    timeout: 20000
+- assertVisible: ".*72–65.*"
+- assertNotVisible: ".*Águilas.*"
+- assertVisible: ".*01/03/2026.*"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertNotVisible: ".*01/03/2026 12:00.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertNotVisible: ".*01/03/2026 18:30.*"
+
+# FORMAT_TO_4: 8 to 4 asks first; Cancelar keeps the typed detail; once confirmed the details are left with no «Guardar».
+- tapOn: ".*Cóndores.*"
+- extendedWaitUntil:
+    visible: "Ana, P1: X, titular"
+    timeout: 20000
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- assertVisible: "Ana, P5: X, titular"
+- swipe:
+    start: 30%, 50%
+    end: 90%, 50%
+- tapOn: "Editar"
+- extendedWaitUntil:
+    visible: "Variante"
+    timeout: 20000
+- tapOn: "Cóndores"
+- eraseText
+- inputText: "Gigantes"
+- pressKey: Enter
+- runFlow: subflows/close-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      text: "4 periodos"
+    direction: UP
+- tapOn: "4 periodos"
+- assertVisible: "¿Cambiar la variante?"
+- assertVisible: "Cambiar la variante puede hacer perder información: se borrarán las marcas de los periodos que desaparezcan."
+- assertVisible: "Cambiar variante"
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertVisible: "¿Cambiar la variante?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- assertVisible: "¿Cambiar la variante?"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Cambiar la variante?"
+- scrollUntilVisible:
+    element:
+      text: "Gigantes"
+    direction: UP
+- assertVisible: "Gigantes"
+- tapOn: "4 periodos"
+- assertVisible: "¿Cambiar la variante?"
+- tapOn: "Cambiar variante"
+- assertNotVisible: "¿Cambiar la variante?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 50%, 12%
+          end: 50%, 95%
+- extendedWaitUntil:
+    visible: "Ana, P4: casilla vacía"
+    timeout: 20000
+- assertNotVisible: "Ana, P5: casilla vacía"
+- assertNotVisible: "Ana, P5: X, titular"
+- assertVisible: "Ana, P1: X, titular"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- extendedWaitUntil:
+    visible: ".*4 periodos.*"
+    timeout: 20000
+- assertVisible: ".*Cóndores.*"
+- assertNotVisible: ".*Gigantes.*"
+
+# FORMAT_TO_8: the current format asks nothing; 4 to 8 asks again and the P5 mark is gone.
+- tapOn: ".*Cóndores.*"
+- extendedWaitUntil:
+    visible: "Ana, P1: X, titular"
+    timeout: 20000
+- tapOn: "Editar"
+- extendedWaitUntil:
+    visible: "Variante"
+    timeout: 20000
+- tapOn: "4 periodos"
+- assertNotVisible: "¿Cambiar la variante?"
+- assertNotVisible: "Cambiar variante"
+- tapOn: "8 periodos"
+- assertVisible: "¿Cambiar la variante?"
+- tapOn: "Cambiar variante"
+- assertNotVisible: "¿Cambiar la variante?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 50%, 12%
+          end: 50%, 95%
+- swipe:
+    start: 90%, 50%
+    end: 30%, 50%
+- assertVisible: "Ana, P5: casilla vacía"
+- swipe:
+    start: 30%, 50%
+    end: 90%, 50%
+- assertVisible: "Ana, P1: X, titular"
+
+# DELETE: the match is opened from «Todos los partidos» and deleted after the confirmation.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Alevín A"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Todos los partidos"
+- tapOn: ".*Cóndores.*"
+- extendedWaitUntil:
+    visible: "Ana, P1: X, titular"
+    timeout: 20000
+- assertVisible: "Ana, P1: X, titular"
+- tapOn: "Editar"
+- extendedWaitUntil:
+    visible: "Variante"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "Borrar partido"
+- tapOn: "Borrar partido"
+- assertVisible: "¿Borrar este partido?"
+- assertVisible: "Se borrarán el partido y su cuadrícula. No se puede deshacer."
+- assertVisible: "Cancelar"
+- tapOn:
+    point: 2%,50%
+- assertVisible: "¿Borrar este partido?"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- assertVisible: "¿Borrar este partido?"
+- tapOn: "Cancelar"
+- assertNotVisible: "¿Borrar este partido?"
+- assertVisible: "Borrar partido"
+- tapOn: "Borrar partido"
+- assertVisible: "¿Borrar este partido?"
+- tapOn: "Borrar partido"
+- assertNotVisible: "¿Borrar este partido?"
+- waitForAnimationToEnd
+- assertNotVisible: ".*Cóndores.*"
+- assertVisible: ".*Zorros.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Equipos"
+- tapOn: "Alevín A"
+- extendedWaitUntil:
+    visible: "Todavía no hay partidos."
+    timeout: 20000
+- assertVisible: "Todavía no hay partidos."
+- assertNotVisible: ".*Cóndores.*"
