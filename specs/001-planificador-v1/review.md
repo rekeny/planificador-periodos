@@ -1865,3 +1865,9 @@ Fixes of run 3: Codex raised no finding on F-D3-06 (RF-052, `39a2468`), F-D3-07 
 Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed; 113 selected domain/data/state tests passed. Full verification and device tests were not rerun; GitHub was unreachable from the review. No repository files were changed by Codex.
 
 Notes for the orchestrator: Codex states that the requested complete prerequisite reading was not completed (historical task and report content was inspected selectively). Codex's verdict on the important finding is not blocking; the orchestrator decides whether it is fixed or recorded as pending.
+
+### Fixes of 2026-11-25 (run 4)
+
+- **F-D3-08 IMPORTANT, fixed** in `0365a99` (RF-045): `MatchQuestions` only makes its dialog visible while its route is focused (`useIsFocused` of `expo-router`), so the stack `/ → /matches/1 → /matches → /matches/1` opens one dialog, from the focused grid. The session and the Undo history are untouched. Regression: `tests/app/match-screen.questions.stacks.test.tsx` (red before the fix with two Modals, green after; it also answers the question). The other Modal of the grid screen, the overtime confirmation of `useMatchActions`, is local state of the grid whose button was pressed, so it cannot open twice.
+- **MINOR, fixed** in the commit of `summary.md` of this list: the paragraphs on deleting a match and a team now describe `leaveDeletedMatch` and `leaveDeletedTeam` (`src/ui/leave-deleted.ts`).
+- **Verification:** `STRYKER_INCREMENTAL=1 npm run verify` green after `0365a99` ("All checks passed").
