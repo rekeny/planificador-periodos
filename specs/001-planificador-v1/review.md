@@ -1836,3 +1836,32 @@ Open items for the orchestrator: none recorded by Codex beyond the three finding
 - Verify: `STRYKER_INCREMENTAL=1 npm run verify` passed types, lint, format and focused-tests; the full Jest run (4,444 tests) failed 1 to 5 tests per attempt (4 attempts), always different suites of `tests/app`, with «Exceeded timeout of 30000 ms» on a loaded machine; every one of those suites passes when run alone (for example 44 of 44 and 18 of 18). The same load flake is described above (2026-11-24). Traceability, Expo Doctor, npm audit, osv-scanner, gitleaks and semgrep were run by hand and are green; mutation testing is skipped (no domain change). A clean full `verify.sh` run is pending (CI).
 
 - Clean verify (2026-11-25, machine idle, after the leftover Jest run of the earlier attempts ended): `STRYKER_INCREMENTAL=1 npm run verify` exit 0, 371 suites, 4,444 tests, traceability, Expo Doctor, osv-scanner, gitleaks and semgrep green. The earlier timeouts were load, not a defect.
+
+## Codex review run 4 (2026-11-25, whole D3)
+
+Source: `specs/001-planificador-v1/codex-review.md`, run with `scripts/review.sh specs/001-planificador-v1 866d988 < /dev/null` on commit 9c3675f (branch `001-planificador-v1-d3` against `866d988`, review dated 2026-11-25 20:00). Scope: the whole D3 (T062 to T078). Purpose: confirm the fixes F-D3-06 and F-D3-07 of run 3.
+
+Verdict: **no blocking finding**. Counts: 0 BLOCKING, 1 IMPORTANT, 1 MINOR. Status: open, pending fixes in phase 6 (the important finding must be fixed unless the developer accepts recording it as pending).
+
+Findings, copied from Codex:
+
+1. **IMPORTANT · Present questions only from the focused grid.** `src/ui/grid/match-questions.tsx:109`. The stack `/ → /matches/1 → /matches → /matches/1` keeps two grids for the same match mounted. Both observe the shared `pending` question and make their Modal visible. Android presents these as separate native dialog windows. A component regression confirmed two visible Modals instead of one. Suggested fix: gate question presentation by route focus while retaining the session and Undo history; add a regression using the existing repeated-match stack fixture.
+
+2. **MINOR · Update the deletion explanation to describe the final implementation.** `specs/001-planificador-v1/summary.md:859`. The main explanation still says match deletion uses `router.dismiss(2)`; the adjacent team-deletion explanation also describes superseded logic. Current code uses `leaveDeletedMatch` and `leaveDeletedTeam`. Suggested fix: rewrite these paragraphs around the helpers' current stack cleanup and fallback behavior.
+
+Category results (Codex):
+
+| Category                                       | Result                                                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| RF/E implementation, coverage and scope        | Finding 1; all RF/E IDs have test references. No unrelated additions found.                                        |
+| Constitution, layers, conventions and glossary | No findings.                                                                                                       |
+| Test integrity                                 | No deleted, skipped or weakened assertions found. Finding 1 needs regression coverage.                             |
+| Security                                       | No findings: parameterised queries, no new network calls, no player-data logging, no new dependency or permission. |
+| Explanations and reports                       | Finding 2.                                                                                                         |
+| Simplicity and efficiency                      | No findings.                                                                                                       |
+
+Fixes of run 3: Codex raised no finding on F-D3-06 (RF-052, `39a2468`), F-D3-07 (RF-076, `fb1aee4`) or the MINOR of run 3 (`56bbae6`). This is absence of a finding, not an explicit confirmation.
+
+Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed; 113 selected domain/data/state tests passed. Full verification and device tests were not rerun; GitHub was unreachable from the review. No repository files were changed by Codex.
+
+Notes for the orchestrator: Codex states that the requested complete prerequisite reading was not completed (historical task and report content was inspected selectively). Codex's verdict on the important finding is not blocking; the orchestrator decides whether it is fixed or recorded as pending.
