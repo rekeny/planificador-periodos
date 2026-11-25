@@ -9,6 +9,7 @@ import {
   Text,
   useWindowDimensions,
 } from "react-native";
+import { ALL_ORIENTATIONS } from "./modal-orientations";
 
 // The backdrop's padding on every side; the card's maximum height leaves room for it.
 const BACKDROP_PADDING = 24;
@@ -57,6 +58,7 @@ export function QuestionDialog(props: QuestionDialogProps): ReactElement {
       transparent
       animationType="fade"
       visible={visible}
+      supportedOrientations={ALL_ORIENTATIONS}
       onRequestClose={onCancel}
     >
       <Pressable accessible={false} style={styles.backdrop} onPress={onCancel}>
