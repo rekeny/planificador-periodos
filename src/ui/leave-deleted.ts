@@ -52,7 +52,7 @@ function resetTo(router: Router, href: "/" | "/matches", routes: Routes): void {
  * Leaves the screens of a deleted match: every route of it at the top of the stack (the grid and
  * any details above it) is popped, so the app ends on the screen below the grid. When the grid is
  * the root of the stack (a restored session or a deep link) nothing is left below it, so the app
- * ends on `/`. The grid's unmount closes the session.
+ * ends on `/matches`. When the match also sits earlier in the stack, the whole stack is reset. The grid's unmount closes the session.
  */
 export function leaveDeletedMatch(
   router: Router,
@@ -62,7 +62,14 @@ export function leaveDeletedMatch(
   const own = (route: StackRoute) =>
     isRouteOf(route, "matches/[matchId]", "matchId", matchId);
   const count = routes === undefined ? 0 : trailing(routes, own);
-  if (routes === undefined || count === 0 || count === routes.length) {
+  // An earlier route of the match, under other screens, would let Back reach it: reset instead.
+  const earlier = routes?.filter(own).length !== count;
+  if (
+    routes === undefined ||
+    count === 0 ||
+    count === routes.length ||
+    earlier
+  ) {
     resetTo(router, "/matches", routes);
   } else {
     router.dismiss(count);

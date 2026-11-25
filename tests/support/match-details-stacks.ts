@@ -5,8 +5,15 @@
 //   - the same with a second details screen of the same match pushed over the first;
 //   - the team screen, the grid and two details screens of the same match.
 // After a confirmed deletion no screen of the deleted match may stay in the stack, drawn or hidden.
-import { act, screen, testRouter, waitFor } from "expo-router/testing-library";
+import {
+  act,
+  renderRouter,
+  screen,
+  testRouter,
+  waitFor,
+} from "expo-router/testing-library";
 
+import { createSquadStore } from "@/state/squad-store";
 import * as notFoundModule from "@/ui/not-found";
 import { NOT_FOUND } from "./edit-team";
 import {
@@ -19,6 +26,10 @@ import {
 } from "./match-details-actions";
 import type { Seeded } from "./match-details";
 import { openDetailsFromGrid } from "./match-details";
+import { useMockSquadStore } from "./mock-app-stores";
+
+// Not a hook: the alias keeps the rules-of-hooks lint from reading it as one.
+const giveSquadStore = useMockSquadStore;
 
 const HIDDEN = { includeHiddenElements: true } as const;
 
@@ -86,4 +97,57 @@ export function expectNoTraceOfTheMatch(
   expect(way.seen).not.toContain("notFound");
   expect(way.notFound).not.toHaveBeenCalled();
   expect(screen.queryByText(NOT_FOUND, HIDDEN)).toBeNull();
+}
+
+// F-D3-03b: the match also sits EARLIER in the stack, under other screens, not only at the top.
+// Every stack ends with the grid of match 1 and its details on top, and the deletion is confirmed
+// from those details. A route of match 1 deeper in the stack must go too, or Back reaches it.
+export type EarlierStack = (seeded: Seeded) => Promise<void>;
+
+/** The list of teams, which reads the squad store, as the root of the stack. */
+async function openRoot(seeded: Seeded): Promise<void> {
+  giveSquadStore(createSquadStore(seeded.db));
+  await renderRouter("./src/app");
+  await screen.findByRole("button", { name: "Nuevo equipo" });
+}
+
+async function pushAll(paths: readonly string[], last: string): Promise<void> {
+  for (const path of paths) await testRouter.push(path);
+  await screen.findByLabelText("Local");
+  expect(screen).toHavePathname(last);
+}
+
+/** `/ → /matches/1 → /matches → /matches/1 → /matches/1/edit` (the stack of the Codex finding). */
+export const grid_list_grid_details: EarlierStack = async (seeded) => {
+  await openRoot(seeded);
+  const grid = `/matches/${seeded.matchId}`;
+  await pushAll([grid, "/matches", grid, `${grid}/edit`], `${grid}/edit`);
+};
+
+/** `/ → /matches/1 → /matches/1/edit → /matches → /matches/1 → /matches/1/edit`: the earlier occurrence has a details screen. */
+export const details_list_grid_details: EarlierStack = async (seeded) => {
+  await openRoot(seeded);
+  const grid = `/matches/${seeded.matchId}`;
+  const paths = [grid, `${grid}/edit`, "/matches", grid, `${grid}/edit`];
+  await pushAll(paths, `${grid}/edit`);
+};
+
+/** `/ → /matches/1 → /teams/1 → /matches/1 → /matches/1/edit`: the earlier occurrence is under a team screen. */
+export const grid_team_grid_details: EarlierStack = async (seeded) => {
+  await openRoot(seeded);
+  const grid = `/matches/${seeded.matchId}`;
+  const paths = [grid, `/teams/${seeded.teamId}`, grid, `${grid}/edit`];
+  await pushAll(paths, `${grid}/edit`);
+};
+
+/** Back until the stack is at its bottom: no step may reach a screen of the deleted match or «not found». */
+export async function backThroughTheStack(): Promise<void> {
+  for (let step = 0; step < 10 && testRouter.canGoBack(); step += 1) {
+    await testRouter.back();
+    expect(matchScreensMounted()).toBe(false);
+    expect(screen).not.toHavePathname(
+      expect.stringMatching(/^\/matches\/1(\/|$)/),
+    );
+    expect(screen.queryByText(NOT_FOUND, HIDDEN)).toBeNull();
+  }
 }
