@@ -19,7 +19,7 @@ import {
   readFlow,
   specIds,
   taskText,
-  withoutWildcards,
+  withoutRowPattern,
 } from "../support/e2e-flows";
 import { commands, link } from "../support/us3-flow";
 import { OPTION_PREFIX } from "../support/us5-flow";
@@ -106,7 +106,7 @@ describe("T066 Maestro US5 flows", () => {
             !isSpanishText(value) &&
             !isSystemText(value) &&
             !isTypedHere(
-              withoutWildcards(value.replace(OPTION_PREFIX, "")),
+              withoutRowPattern(value.replace(OPTION_PREFIX, "")),
               typed,
             ),
         ),

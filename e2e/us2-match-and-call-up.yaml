@@ -172,7 +172,7 @@ name: "RF-010 RF-030 RF-031 RF-033 RF-035 RF-036 RF-037 RF-068 RF-082 RF-083 RF-
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Luis"
+- assertVisible: "Luis|.*, Luis.*"
 
 # RF-082: the form half-filled and the app closed. No match is created: D2 has no match list, so
 # the deep link of the first match, which would be number 1, must show the not-found message.

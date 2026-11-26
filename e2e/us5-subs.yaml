@@ -143,7 +143,7 @@ name: "RF-045 RF-046 RF-047 RF-048 RF-050 RF-051 RF-052 RF-053 RF-054 RF-055 RF-
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Jon"
+- assertVisible: "Jon|.*, Jon.*"
 - tapOn: "Nuevo partido"
 - scrollUntilVisible:
     element:

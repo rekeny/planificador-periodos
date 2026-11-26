@@ -219,4 +219,17 @@ export function withoutWildcards(text: string): string {
   return text.replace(/^\.\*|\.\*$/g, "");
 }
 
+/** The pattern of a player's row on the team screen: the bare name (Android reads the texts of the row's children) or the label «6, Fran» that iOS merges the pressable row into. */
+const PLAYER_ROW = /^([^|,.*]+)\|\.\*, \1\.\*$/;
+
+/** The player a `Name|.*, Name.*` text names, or null when the text is not exactly that pattern. */
+export function playerRowName(text: string): string | null {
+  return PLAYER_ROW.exec(text)?.[1] ?? null;
+}
+
+/** The text to look up among the typed values: the player of a row pattern, or the text without wildcards. */
+export function withoutRowPattern(text: string): string {
+  return playerRowName(text) ?? withoutWildcards(text);
+}
+
 export const FLOW_ROOT = ROOT;

@@ -17,7 +17,7 @@ import {
   readFlow,
   specIds,
   taskText,
-  withoutWildcards,
+  withoutRowPattern,
 } from "../support/e2e-flows";
 
 const spec = readFileSync(
@@ -82,7 +82,7 @@ describe("T036 Maestro flows", () => {
         .filter(
           (value) =>
             !isSpanishText(value) &&
-            !isTypedHere(withoutWildcards(value), typed),
+            !isTypedHere(withoutRowPattern(value), typed),
         );
       expect({ file, unknown }).toEqual({ file, unknown: [] });
     }

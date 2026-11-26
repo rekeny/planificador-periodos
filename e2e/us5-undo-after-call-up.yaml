@@ -93,7 +93,7 @@ name: "RF-047 RF-057 RF-086 E-026: a starter replaces Eva in P2, Eva is removed 
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Fran"
+- assertVisible: "Fran|.*, Fran.*"
 - tapOn: "Nuevo partido"
 - scrollUntilVisible:
     element:

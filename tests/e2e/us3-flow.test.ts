@@ -14,7 +14,7 @@ import {
   literalsOf,
   readFlow,
   specIds,
-  withoutWildcards,
+  withoutRowPattern,
 } from "../support/e2e-flows";
 import {
   INTERRUPTION,
@@ -80,7 +80,7 @@ describe("T056 Maestro US3 flows", () => {
           (value) =>
             !isSpanishText(value) &&
             !isSystemText(value) &&
-            !isTypedHere(withoutWildcards(value), typed),
+            !isTypedHere(withoutRowPattern(value), typed),
         ),
       }).toEqual({ file, unknown: [] });
       const players = typed.filter((value) => value !== "Alevín A").join("|");
