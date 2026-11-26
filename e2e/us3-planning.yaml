@@ -93,7 +93,7 @@ name: "RF-034 RF-042 RF-055 RF-057 RF-058 RF-059 E-017: five starters, the sixth
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Fran"
+- assertVisible: "Fran|.*, Fran.*"
 - tapOn: "Nuevo partido"
 - scrollUntilVisible:
     element:

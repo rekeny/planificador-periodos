@@ -109,7 +109,7 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Eva"
+- assertVisible: "Eva|.*, Eva.*"
 
 # RF-016: three players added one after the other without leaving the team screen, shown 4, 7, 9.
 - tapOn: "Nuevo jugador"
@@ -124,7 +124,7 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Bea"
+- assertVisible: "Bea|.*, Bea.*"
 - tapOn: "Nuevo jugador"
 - tapOn:
     text: "Nombre"
@@ -137,13 +137,13 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Carla"
+- assertVisible: "Carla|.*, Carla.*"
 - assertVisible:
-    text: "Carla"
-    below: "Bea"
+    text: "Carla|.*, Carla.*"
+    below: "Bea|.*, Bea.*"
 - assertVisible:
-    text: "Eva"
-    below: "Carla"
+    text: "Eva|.*, Eva.*"
+    below: "Carla|.*, Carla.*"
 - assertNotVisible: "Hay jugadores con el mismo dorsal: 7."
 
 # RF-017 RF-069: a second number 7 is saved and the warning appears. Same number: sorted by name.
@@ -159,11 +159,11 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Luis"
+- assertVisible: "Luis|.*, Luis.*"
 - assertVisible: "Hay jugadores con el mismo dorsal: 7."
 - assertVisible:
-    text: "Luis"
-    below: "Carla"
+    text: "Luis|.*, Luis.*"
+    below: "Carla|.*, Carla.*"
 
 # Odd numbers: "0" is listed before "00", and both before 4.
 - tapOn: "Nuevo jugador"
@@ -178,7 +178,7 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Zoe"
+- assertVisible: "Zoe|.*, Zoe.*"
 - tapOn: "Nuevo jugador"
 - tapOn:
     text: "Nombre"
@@ -191,10 +191,10 @@ name: "RF-011 RF-013 RF-014 RF-016 RF-017 RF-069 RF-073 E-022: two teams and the
 - tapOn: "Dorsal"
 - runFlow: subflows/close-keyboard.yaml
 - tapOn: "Guardar"
-- assertVisible: "Ana"
+- assertVisible: "Ana|.*, Ana.*"
 - assertVisible:
-    text: "Ana"
-    below: "Zoe"
+    text: "Ana|.*, Ana.*"
+    below: "Zoe|.*, Zoe.*"
 - assertVisible:
-    text: "Bea"
-    below: "Ana"
+    text: "Bea|.*, Bea.*"
+    below: "Ana|.*, Ana.*"

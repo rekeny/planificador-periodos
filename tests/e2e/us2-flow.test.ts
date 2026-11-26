@@ -17,7 +17,7 @@ import {
   literalsOf,
   readFlow,
   specIds,
-  withoutWildcards,
+  withoutRowPattern,
 } from "../support/e2e-flows";
 import {
   US2_FILE,
@@ -69,7 +69,7 @@ describe("T048 Maestro US2 flow", () => {
         (value) =>
           !isSpanishText(value) &&
           !isSystemText(value) &&
-          !isTypedHere(withoutWildcards(value), typed) &&
+          !isTypedHere(withoutRowPattern(value), typed) &&
           value !== TODAY_VARIABLE &&
           !NATIVE_PICKER_TEXTS.includes(value) &&
           !PICKED_AND_SHOWN.includes(value),
