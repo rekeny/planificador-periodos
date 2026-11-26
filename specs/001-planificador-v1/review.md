@@ -1898,3 +1898,27 @@ Category results (Codex):
 Validation (Codex): TypeScript, ESLint, traceability and focused/skipped-test checks passed. A targeted Jest run produced 989 passing tests in 79 passing suites, and 59 suites failed with Reanimated mock-loading errors (`default.createAnimatedComponent`). Codex could not establish whether this comes from the versioned setup or the installed dependency environment, so it did not classify it as a branch defect. A green full verification was not reconfirmed by this review. No repository files were changed by Codex.
 
 Open items for the orchestrator: the 59 failing suites in the Codex targeted run need a reproduction in a clean, writable installation before closing verification (question: is this the same Reanimated environment issue as the earlier load runs, or a new one?). Finding 1 is a MINOR correction to `summary.md`.
+
+## Simulator and emulator pass of D3 (2026-11-26)
+
+No physical device is available (Fernando, 2026-11-26): the checklist `device-checklist-d3.md` is covered with simulators and emulators, and what they cannot show is recorded as not checked. Builds: Release of `001-planificador-v1-d3` at `12a205d` (same content as `main` at `ecc712a`). Maestro 2.12.1.
+
+| Flow                   | iPhone 17 (iOS 27.2) | iPad Pro 11 (iOS 27.2) | Android tablet emulator (API 37, 2560 x 1600) |
+| ---------------------- | -------------------- | ---------------------- | --------------------------------------------- |
+| us1-teams-and-players  | fail (row label)     | not run                | fail (keyboard); passes with `hideKeyboard`   |
+| us2-match-and-call-up  | fail (row label)     | not run                | fail (keyboard)                               |
+| us3-planning           | fail (row label)     | not run                | pass                                          |
+| us3-interruption       | pass                 | pass                   | pass                                          |
+| us4-warnings           | not run              | cut by the driver      | pass (357 steps): T060 flow part              |
+| us5-subs               | fail (row label)     | fail (row label)       | pass                                          |
+| us5-undo-after-call-up | fail (row label)     | not run                | pass                                          |
+| us6-matches            | pass                 | fail (swipes)          | fail (keyboard)                               |
+| us7-squad              | pass                 | pass                   | pass                                          |
+
+- **The app showed no defect in any run.** Every failure is the flows, not the app:
+  - **Row label (iOS):** since T074 the player rows are pressable and iOS reads «6, Fran» as one element, so `assertVisible: "Fran"` fails with the row on screen. Fixed by `F-E2E-01` (branch `fix/e2e-ios-merged-player-labels`, commit `90ed71b`, form approved 2026-11-26); the five flows then pass on the iPhone 17. The Android phone emulator and the iPad were not rerun with the new pattern.
+  - **Keyboard (Android tablet):** the soft keyboard stays open and covers «Guardar»; `close-keyboard.yaml` only closes the iPad keyboard of iOS. `hideKeyboard` fixes `us1` but sends «Back» in `us6`, where the keyboard was already closed, and leaves the form. Not fixed: the flows are for a phone.
+  - **Swipes (iPad):** `us6` swipes sideways for a phone and does not apply to the iPad grid. Not fixed.
+  - **Driver cut:** `us4-warnings` on the iPad stopped in the keyboard subflow with no failed check; not repeated.
+- **Two runs were void** because the disk was full (the database could not write: «No se ha podido guardar el cambio»); both were repeated with free disk.
+- **Not checked with a simulator or emulator** (Maestro reads text only and no screenshot review was done): the light red cells and players in red by eye (T057), rotation and the dialogs in landscape on an iPhone (F-D3-07 is covered by Jest only), the iOS time wheels on the daylight-saving day, the 100 ms measurement of the 5th-generation iPad (T060, needs a camera at 240 fps on the real iPad), real touch (long press versus scroll) and the device language dialogs of Android. T060, T057 and T092 stay open for that reason.
