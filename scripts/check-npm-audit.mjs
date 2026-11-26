@@ -11,15 +11,27 @@ function fail(message) {
   process.exit(1);
 }
 
-// Ids of the [[IgnoredVulns]] entries whose effectiveUntil is a date that has not passed yet.
-// An entry without effectiveUntil never ends, so it does not count.
+const DAY = 24 * 60 * 60 * 1000;
+// docs/security.md: an exception has an expiry of 90 days at most.
+const MAX_DAYS = 90;
+// A full TOML datetime with a zone, such as 2027-02-08T00:00:00Z. A bare year or a date alone has
+// no time of day, and a datetime without a zone depends on the machine's clock, so neither counts.
+const DATETIME =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+
+// Ids of the [[IgnoredVulns]] entries whose effectiveUntil is a full datetime that has not passed
+// and is at most 90 days away. An entry without it, or with another kind of value, never ends or
+// ends too late, so it does not count.
 export function approvedIds(toml, now = new Date()) {
   const ids = new Set();
   for (const block of toml.split("[[IgnoredVulns]]").slice(1)) {
     const id = /^\s*id\s*=\s*"([^"]+)"/m.exec(block)?.[1];
-    const until = /^\s*effectiveUntil\s*=\s*([0-9T:\-Z.+]+)/m.exec(block)?.[1];
-    const expiry = until === undefined ? NaN : Date.parse(until);
-    if (id !== undefined && expiry > now.getTime()) ids.add(id);
+    const until = /^\s*effectiveUntil\s*=\s*([^\s#]+)/m.exec(block)?.[1];
+    const expiry =
+      until !== undefined && DATETIME.test(until) ? Date.parse(until) : NaN;
+    const valid =
+      expiry > now.getTime() && expiry <= now.getTime() + MAX_DAYS * DAY;
+    if (id !== undefined && valid) ids.add(id);
   }
   return ids;
 }
