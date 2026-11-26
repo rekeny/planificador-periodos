@@ -925,8 +925,32 @@ By hand, with `npm run ios`:
   - Saving the edit-team form over the team screen may behave differently on a device than in Jest (a possible Jest-only difference).
   - Restored stacks (only the grid and the details) are handled by `leaveDeletedMatch` and covered by tests; what remains pending is to see it on a device.
   - The distance between «Editar» and «Convocatoria», and between the two buttons of the list of teams, is not testable in Jest (T079).
-- No landscape phone, no tablet and no real device have run the Maestro flows.
+- No landscape phone and no real device have run the Maestro flows; the iPad and Android tablet simulators ran some of them (see "D3 close" below).
 
 ### Codex review of PR 25 and its fixes (2026-11-25)
 
 Before the merge, Codex reviewed the branch and found two blocking defects and one important one, all about leaving a screen after something was deleted or deactivated, which Jest tests of single screens had not seen. Deleting a match with `router.dismiss(2)` assumed the usual stack (team or list, grid, details); with the grid as the root of the stack, or with two details screens, the deleted match's grid stayed mounted. Deleting a team used `dismissAll()`, which left `/teams/1` as a root «not found» screen when the team screen had been opened directly. And a player deactivated while a match session or a new-match form was open could still be added to the call-up or saved. The fixes (F-D3-03 to F-D3-05, in `review.md`) were done with the tests first: `src/ui/leave-deleted.ts` reads the real stack with `useRootNavigationState` and pops exactly the routes of what was deleted (a restored stack with the grid as root ends on the list of every match), `addToCallUp` and `create()` of the new-match draft revalidate who is still active, and the call-up screen and the new-match form refresh their candidates on focus without clearing Undo or what the coach typed. The lesson for the learner: a navigation call such as `dismiss(2)` is a guess about the stack the user came through, so a destructive action needs a test for every shape the stack can have. The Security note SEC-D3-1 was corrected: the double press was already guarded by `ConfirmDialog`; the real defect was this navigation.
+
+### D3 close (2026-11-26)
+
+**What was done.** D3 is closed: `spec.md` has the status «Closed» and T057, T060, T061, T079, T092 and T094 are ticked. Fernando decided on 2026-11-26 to close them **without checking on a physical device** (he has no Android phone and chose not to test the iPhone and iPad by hand); simulators and emulators were used instead. PR 25 (the rest of D3, with its fixes F-D3-03 to F-D3-08), PR 26 (the flows) and this close are the whole of it.
+
+**How it was checked.** Five Codex runs of the whole D3 (the last one with no blocking and no important finding), two Security audits (T062 to T066 and the diff of PR 25, both with no finding that blocks), `STRYKER_INCREMENTAL=1 STRYKER_FORCE=1 npm run verify` green (373 suites, 4,460 tests), and the Maestro flows on the iPhone 17 simulator, the iPad Pro 11-inch simulator, an Android phone emulator and an Android tablet emulator (`review.md`, «Simulator and emulator pass of D3»).
+
+**Decisions along the way.**
+
+- The iOS flows had gone stale since T074: the player rows are pressable, iOS reads «6, Fran» as one element and the bare name no longer matched. The flows were changed (F-E2E-01), not the app, so a screen reader keeps reading number and name together.
+- A full disk makes every save fail with «No se ha podido guardar el cambio», and two simulator runs were void for that reason and repeated. The app shows the right message; the lesson is to check `df` before a Maestro run.
+
+**What was NOT checked, and it is a risk of the release:**
+
+- The 100 ms repaint on the 5th-generation iPad (RF-087, T060): needs the real iPad and a 240 fps camera. It is unmeasured.
+- By eye: the light red cells and the players in red (T057), rotation, and the dialogs in landscape on an iPhone (F-D3-07 is covered by Jest only, and the Modal default on iPhone is portrait).
+- Real touch: a long press that neither scrolls nor marks (F-D3-06 is covered by Jest only), the strip under the iOS header, Back on Android with a dialog open.
+- The time picker on a daylight-saving day on a real device, and the device-language dialogs of Android.
+- A whole match in airplane mode, and the deep link to a path with no route (SEC-T061-4).
+- Flows that fail on the tablets only for reasons of the flows: the soft keyboard of the Android tablet (`us1`, `us2`, `us6`), the sideways swipes of `us6` on the iPad, and a driver cut of `us4-warnings` on the iPad.
+
+**To learn.** `Modal` in React Native shows portrait only on an iPhone unless `supportedOrientations` is set, and a `Pressable` fires `onPress` after a long hold when it has no `onLongPress`: neither shows in Jest. A test that drives the gesture but not the release misses the second one.
+
+**To check it later.** The list of what was not checked is the checklist `specs/001-planificador-v1/device-checklist-d3.md`: run it on a real iPhone and iPad before publishing to a store.

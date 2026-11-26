@@ -1922,3 +1922,7 @@ No physical device is available (Fernando, 2026-11-26): the checklist `device-ch
   - **Driver cut:** `us4-warnings` on the iPad stopped in the keyboard subflow with no failed check; not repeated.
 - **Two runs were void** because the disk was full (the database could not write: «No se ha podido guardar el cambio»); both were repeated with free disk.
 - **Not checked with a simulator or emulator** (Maestro reads text only and no screenshot review was done): the light red cells and players in red by eye (T057), rotation and the dialogs in landscape on an iPhone (F-D3-07 is covered by Jest only), the iOS time wheels on the daylight-saving day, the 100 ms measurement of the 5th-generation iPad (T060, needs a camera at 240 fps on the real iPad), real touch (long press versus scroll) and the device language dialogs of Android. T060, T057 and T092 stay open for that reason.
+
+## D3 close (2026-11-26)
+
+Fernando decided on 2026-11-26 to close D3 **without physical device checks** (T057, T060, T092, T094 and the device part of T061 and T079), using the simulator and emulator pass above. What stays unchecked is listed in `summary.md` («D3 close») and in `device-checklist-d3.md`, which is kept for a pass on real devices before any store publication. Status of `spec.md`: Closed. Verification at the close: `STRYKER_INCREMENTAL=1 STRYKER_FORCE=1 npm run verify` exit 0 on the branch of PR 26 (373 suites, 4,460 tests).
