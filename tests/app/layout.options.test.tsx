@@ -69,6 +69,13 @@ describe("root layout, the options of every route", () => {
     },
   );
 
+  it("RF-076: the not-found route, +not-found, is titled «Pantalla no encontrada» (notFound.title), is a normal screen and has an opaque header", async () => {
+    expect(await optionsOf("+not-found")).toEqual({
+      headerTransparent: false,
+      title: "Pantalla no encontrada",
+    });
+  });
+
   it("RF-074: the list of every match, matches/index, is titled «Todos los partidos», is a normal screen and has an opaque header", async () => {
     expect(await optionsOf("matches/index")).toEqual({
       headerTransparent: false,

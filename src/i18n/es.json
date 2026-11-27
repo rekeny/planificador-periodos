@@ -101,7 +101,10 @@
     "retry": "Reintentar"
   },
   "notFound": {
-    "message": "No se ha encontrado: puede que se haya borrado."
+    "message": "No se ha encontrado: puede que se haya borrado.",
+    "title": "Pantalla no encontrada",
+    "screenMessage": "Esta dirección no existe en la app.",
+    "back": "Volver a los equipos"
   },
   "format": {
     "option": "{{count}} periodos"
