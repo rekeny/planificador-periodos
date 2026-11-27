@@ -8,14 +8,14 @@ No findings identified in `git diff origin/main...HEAD` at `8a53a80`: two docume
 
 **BLOCKING: 0 · IMPORTANT: 0 · MINOR: 0**
 
-| Category | Result |
-|---|---|
-| RF/E coverage and scope | No findings introduced by this diff; no functional changes. |
-| Constitution, layers and conventions | No findings. |
-| Test integrity | No findings; no tests changed. |
-| Security | No findings; the checklist records the existing D3-7 control. |
-| Explanations and reports | No discrepancies found in the relevant sections. |
-| Simplicity and efficiency | No findings. |
+| Category                             | Result                                                        |
+| ------------------------------------ | ------------------------------------------------------------- |
+| RF/E coverage and scope              | No findings introduced by this diff; no functional changes.   |
+| Constitution, layers and conventions | No findings.                                                  |
+| Test integrity                       | No findings; no tests changed.                                |
+| Security                             | No findings; the checklist records the existing D3-7 control. |
+| Explanations and reports             | No discrepancies found in the relevant sections.              |
+| Simplicity and efficiency            | No findings.                                                  |
 
 Traceability, focused/skipped-test checks and `git diff --check` passed.
 
