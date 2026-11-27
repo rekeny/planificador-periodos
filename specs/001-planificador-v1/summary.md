@@ -954,3 +954,19 @@ Before the merge, Codex reviewed the branch and found two blocking defects and o
 **To learn.** `Modal` in React Native shows portrait only on an iPhone unless `supportedOrientations` is set, and a `Pressable` fires `onPress` after a long hold when it has no `onLongPress`: neither shows in Jest. A test that drives the gesture but not the release misses the second one.
 
 **To check it later.** The list of what was not checked is the checklist `specs/001-planificador-v1/device-checklist-d3.md`: run it on a real iPhone and iPad before publishing to a store.
+
+### F-SMALL-1: remove three unused Expo packages (2026-11-27)
+
+**What was done.** `expo-web-browser`, `expo-image` and `expo-device` were removed from `package.json` and `package-lock.json`, and the `expo-web-browser` plugin was removed from `app.json` (PR 32, approved by Fernando on 2026-11-27). `expo-glass-effect` stays because `expo-router` needs it. The lockfile also loses `ua-parser-js` 0.7.41, which only `expo-device` used.
+
+**What changes for the user.** Nothing visible: no screen, text or behaviour changes. The app ships less native code that nothing used, and `expo-image`, which can load images from URLs, is no longer in it.
+
+**Files.** `package.json`, `package-lock.json`, `app.json`, the form `small-change-form-remove-unused-expo-packages.md`, and these records in `review.md` and `summary.md`, with the Codex output in `codex-review.md`.
+
+**Why.** SEC-T061-3 found template packages that nothing uses, and they are autolinked native code (principle 6: nothing just in case). Only these three were removed, as Fernando asked.
+
+**To learn.** In Expo, a package in `dependencies` is linked into the native app even if no file imports it, so an unused one still adds surface. A package that another one needs (`expo-glass-effect` for `expo-router`) is installed anyway, so removing it from `package.json` would change nothing.
+
+**To check it.** `grep -r "expo-web-browser\|expo-image\|expo-device" src tests e2e scripts plugins app.json package.json` finds nothing, and `npx expo-doctor` gives 18/18. The Security audit found nothing and Codex found 0 blocking and 0 minor findings; its one important finding (these missing records) is fixed here (`review.md`, «F-SMALL-1 review»).
+
+**Pending.** A complete local `npm run verify` of the rebased tree was not rerun: before the rebase it passed (373 suites, 4,460 tests) and the CI of PR 32 is the full run. `npx prettier --check` was not run on these records. Not checked on a device.
