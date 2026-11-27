@@ -44,6 +44,7 @@ function optionsTable(t: Translate): Record<string, RouteOptions> {
       title: t("matches.new"),
       presentation: MODAL,
     },
+    "+not-found": { title: t("notFound.title") },
     "matches/index": { title: t("matches.allTitle") },
     "matches/[matchId]/index": { title: "" },
     "matches/[matchId]/call-up": { title: t("callUp.title") },
