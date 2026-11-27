@@ -59,3 +59,5 @@ If a vulnerability cannot be fixed, it is recorded in `osv-scanner.toml` with:
 Without those three, there is no exception.
 
 The same list also covers `npm audit` (high and critical advisories) through `scripts/check-npm-audit.mjs`.
+
+`scripts/check-npm-audit.mjs` also checks every `[[IgnoredVulns]]` entry of `osv-scanner.toml`, even one `npm audit` does not need, because `osv-scanner` in `scripts/verify.sh` honours any `effectiveUntil`. Each entry needs a single `effectiveUntil` that is a full datetime with a zone and at most 90 days away; an entry that has already expired is inert and passes. The 90 days are counted from the day the check runs, not from the approval, so any change to an exception must be reviewed in a PR: the script cannot see when it was approved. A multi-line string (`"""` or `'''`) or a repeated key in an entry fails the check.

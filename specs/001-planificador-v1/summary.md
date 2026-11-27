@@ -954,3 +954,26 @@ Before the merge, Codex reviewed the branch and found two blocking defects and o
 **To learn.** `Modal` in React Native shows portrait only on an iPhone unless `supportedOrientations` is set, and a `Pressable` fires `onPress` after a long hold when it has no `onLongPress`: neither shows in Jest. A test that drives the gesture but not the release misses the second one.
 
 **To check it later.** The list of what was not checked is the checklist `specs/001-planificador-v1/device-checklist-d3.md`: run it on a real iPhone and iPad before publishing to a store.
+
+### PR 30 (SMALL-3), review fixes (2026-11-27)
+
+**What was done.** `scripts/check-npm-audit.mjs` checks the expiry of the exceptions in `osv-scanner.toml` more strictly and more correctly. The first version (2026-11-26) only trusted `effectiveUntil` if it was a full datetime with a zone, at most 90 days away. The review of PR 30 (Codex and Security) found three holes, and Fernando approved fixing them on 2026-11-27.
+
+**What changes for the user.** Nothing in the app. For whoever edits `osv-scanner.toml`: (1) `2027-02-08 00:00:00Z` and `2027-02-08t00:00:00z` now count, like the `T` form, and a `# comment` after the value is allowed; (2) an exception can no longer borrow the `effectiveUntil` of the table below it; (3) `npm run verify` now fails if any `[[IgnoredVulns]]` entry is wrong (no `effectiveUntil`, no zone, more than 90 days away, a repeated key or a multi-line string), even when `npm audit` does not need it. The seven current entries still pass (73 and 75 days away today).
+
+**How.** The file is read line by line: an entry starts at `[[IgnoredVulns]]` and stops at the next line that starts with `[`. `exceptionProblems` validates every entry and runs first in `main`; `approvedIds` decides which advisories `npm audit` may ignore. An entry already expired passes the validation (osv-scanner no longer honours it) but approves nothing.
+
+**Decisions and why.**
+
+- The 90 days were only checked for `npm audit`, but `osv-scanner scan source` in `verify.sh` honours any date, so a 2099 entry for another advisory would have passed silently. Checking every entry closes that.
+- Splitting the text by the string `[[IgnoredVulns]]` made one entry read the keys of the next table. Cutting at the next `[` line fixes it with no TOML parser (no new dependency).
+- A multi-line string or a repeated key could hide or duplicate a key line; the entry is refused (two checks, tested).
+- Accepted risk: the script counts the 90 days from today, not from the approval, so an entry written with 120 days becomes accepted 30 days later with no file change. Exceptions must be reviewed in the PR (written in `docs/security.md`).
+
+**Files.** `scripts/check-npm-audit.mjs`, `tests/scripts/check-npm-audit.test.ts`, `tests/scripts/check-npm-audit-toml.test.ts` (new), `docs/security.md`, the small change form, `review.md`, `codex-review.md`.
+
+**To learn.** Splitting text on a marker is a guess about the structure: a parser has to know where a block ends. A regular expression with `^` and the `m` flag matches at every line of the whole text, which is why it read past the block. RFC 3339 allows a space and lowercase letters in a datetime, and a validator that is stricter than the format rejects good input.
+
+**To check it.** `npm test -- check-npm-audit` and `npm run verify`. By hand: in a copy of `osv-scanner.toml`, set one `effectiveUntil = 2099-01-01T00:00:00Z` and run `node scripts/check-npm-audit.mjs < /dev/null`-style input (an audit JSON): it fails naming the id.
+
+**Pending.** Nothing blocking. Accepted: the script cannot see the approval date (see `review.md`).

@@ -1,24 +1,28 @@
 # Codex review
 
-- Date: 2026-11-25 21:59
-- Branch: 001-planificador-v1-d3 against 866d988
-- Commit: b242b06
+- Date: 2026-11-27 15:37
+- Branch: review/pr30 against origin/main
+- Commit: d46c78d
 
-Reviewed `git diff 866d988...HEAD` through `b242b06`, after reading the required repository documents and specification files.
+**Verdict: two IMPORTANT findings. No BLOCKING or MINOR findings.**
 
-**No confirmed BLOCKING or IMPORTANT findings. One MINOR finding:**
+1. **IMPORTANT — Valid TOML datetimes are rejected.**  
+   `scripts/check-npm-audit.mjs:20,29` rejects `2027-02-08t00:00:00z` and `2027-02-08 00:00:00Z`. Both represent valid, zoned TOML datetimes. With the clock fixed at `2027-01-01`, the base script exits 0 and this branch exits 1 for either value, incorrectly rejecting the exception. [TOML specification](https://toml.io/en/v1.0.0#offset-date-time), [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6).
 
-- **MINOR — The summary describes an already addressed navigation risk as unresolved.** [summary.md:926](/Users/fernandorequeninacher/code/planificador-periodos/.claude/worktrees/planificador-periodos-cont-57813b/specs/001-planificador-v1/summary.md:926) says restored grid/details stacks are untested and their destination unspecified. The diff adds stack-aware deletion handling, a `/matches` fallback and regression tests for those stacks. The paragraph at line 932 also documents the fix. **Fix:** replace the stale bullet with the implemented behavior and retain only the outstanding device verification.
+   **Fix:** accept lowercase `t`/`z` and the space delimiter, capture the complete value before any trailing comment, preserve the expiry limits, and add regression tests.
 
-Results for the six requested categories:
+2. **IMPORTANT — Implementation and verification records are missing.**  
+   `specs/001-planificador-v1/small-change-form-check-npm-audit-dates.md:26` describes expected red/green cases, but the branch adds neither an implementation report to `summary.md` nor actual verification output to `review.md`. AGENTS.md rules 13 and 17 require both.
 
-1. **Requirements, examples and scope:** no additional findings from implementation and traceability inspection. The documented device acceptance checks remain pending.
-2. **Constitution, layers, conventions and glossary:** no findings.
-3. **Test integrity:** no deleted, skipped or weakened tests found. Existing assertions were preserved or strengthened. Runtime verification has the limitation below.
-4. **Security:** no findings. Added queries are parameterized; no new network calls, player-data logging, dependencies or permissions were introduced.
-5. **Explanations and reports:** the MINOR finding above.
-6. **Simplicity, clarity and efficiency:** no findings.
+   **Fix:** append the delivered-change explanation to `summary.md`; run `scripts/verify.sh` in a writable installation and record its result in `review.md`.
 
-Type checking, lint, traceability and focused/skipped-test checks passed. A targeted Jest run, with cache persistence suppressed in memory because the filesystem is read-only, produced **989 passing tests across 79 passing suites**; **59 suites failed**, with interface tests encountering Reanimated mock-loading errors involving `default.createAnimatedComponent`. I could not establish whether that failure originates in the versioned setup or the installed dependency environment, so I have not classified it as a branch defect.
+| Review category                                | Result                                                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Requirements, examples and scope               | Finding 1; app RF/E scope is unchanged.                                                                       |
+| Constitution, layers, conventions and glossary | Finding 2; no additional findings.                                                                            |
+| Tests                                          | No tests deleted, skipped or weakened. Missing regression cases described in finding 1.                       |
+| Security                                       | No additional findings; application networking, logging, queries, dependencies and permissions are unchanged. |
+| Explanations and reports                       | Finding 2.                                                                                                    |
+| Simplicity and efficiency                      | No findings.                                                                                                  |
 
-A green full verification was **not reconfirmed**. Reproduce the interface tests in a clean, writable installation before closing verification. No repository files were changed.
+Validation passed: traceability, focused/skipped-test checks, diff whitespace, JavaScript syntax, and 13 deterministic checks of the actual expiry function. All seven existing exceptions remain accepted. Jest, lint, typecheck and full verification were unavailable because dependencies are absent in this read-only checkout.
