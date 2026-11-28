@@ -1,4 +1,4 @@
-# Small change form · Expo SDK 58 patch updates (second round)
+# Small change form · Expo SDK 58 updates (second round)
 
 - **Date:** 2026-11-27
 - **Branch:** `fix/expo-sdk-58-patches`
@@ -6,7 +6,7 @@
 
 ## What
 
-The Expo packages move to the patch versions that Expo SDK 58 now expects (`npx expo install --fix`). The dependency list does not change: no package is added or removed, only versions move.
+The Expo packages move to the versions within SDK 58 that Expo now expects (`npx expo install --fix`). The dependency list does not change: no package is added or removed, only versions move. Most are patch releases, but some are minor releases within SDK 58 (see below).
 
 | Package              | Before   | After    |
 | -------------------- | -------- | -------- |
@@ -19,9 +19,18 @@ The Expo packages move to the patch versions that Expo SDK 58 now expects (`npx 
 | `expo-splash-screen` | ~58.0.14 | ~58.0.15 |
 | `jest-expo`          | ~58.0.15 | ~58.0.16 |
 
+### Minor releases among the updates
+
+Codex (2026-11-28) and the Security audit (2026-11-28) noted that not every bump is a patch release:
+
+- `expo` 58.0.26 to 58.1.0 (direct).
+- Transitive, in `package-lock.json`: `expo-dev-launcher` 58.0.21 to 58.1.0, `expo-modules-core` 58.1.0 to 58.2.0, `@expo/fingerprint` 0.21.10 to 0.22.0 and `@expo/ws-tunnel` 2.0.1 to 2.1.1.
+
+The wording of this form was corrected on 2026-11-28 (it first called every bump a "patch release"): they are updates within SDK 58. Compatibility is covered by `npx expo-doctor` (18/18) and the full `npm run verify`.
+
 ## Why
 
-Expo published new SDK 58 patch releases, so `npx expo-doctor` reports outdated packages and `scripts/verify.sh` fails on `main` with no change of ours. The SDK 58 reference page documents no breaking change for these patches; `expo` ~58.1.0 is the SDK's own patch line.
+Expo published new SDK 58 releases, so `npx expo-doctor` reports outdated packages and `scripts/verify.sh` fails on `main` with no change of ours. The SDK 58 reference page documents no breaking change for these updates; `expo` ~58.1.0 is the SDK's own line.
 
 ## How
 
@@ -29,7 +38,7 @@ Expo published new SDK 58 patch releases, so `npx expo-doctor` reports outdated 
 
 ## Why it is small
 
-It changes no behaviour of the app and does not touch `src/`. All bumps are patch releases within SDK 58, with no new dependency.
+It changes no behaviour of the app and does not touch `src/`. These are updates within SDK 58; some are minor releases (listed below), none is a major one, and there is no new dependency.
 
 ## Tests
 

@@ -782,7 +782,7 @@ Then open `reports/mutation/index.html`, and compare with the tables in `review.
 ### Pending
 
 - Device checks (T057, T092), the iPad 100 ms measurement and the `us4-warnings` run on a tablet (T060), the iOS `xattr` check on a physical device and the Android E-028 test.
-- Questions from Security: remove four unused template packages (SEC-T061-3), look at an unmatched deep link on a device (SEC-T061-4).
+- Questions from Security: remove four unused template packages (SEC-T061-3), look at an unmatched deep link on a device (SEC-T061-4; since 2026-11-28 the Spanish `+not-found` screen exists and is covered by Jest, the device check is still open).
 - The Planner reviews T062 to T079 before D3.
 
 ## osv-scanner exceptions use `effectiveUntil` · fix/osv-effective-until (2026-11-21)
@@ -948,7 +948,7 @@ Before the merge, Codex reviewed the branch and found two blocking defects and o
 - By eye: the light red cells and the players in red (T057), rotation, and the dialogs in landscape on an iPhone (F-D3-07 is covered by Jest only, and the Modal default on iPhone is portrait).
 - Real touch: a long press that neither scrolls nor marks (F-D3-06 is covered by Jest only), the strip under the iOS header, Back on Android with a dialog open.
 - The time picker on a daylight-saving day on a real device, and the device-language dialogs of Android.
-- A whole match in airplane mode, and the deep link to a path with no route (SEC-T061-4).
+- A whole match in airplane mode, and the deep link to a path with no route (SEC-T061-4; the screen now exists and has Jest coverage since 2026-11-28, the device check is still open).
 - Flows that fail on the tablets only for reasons of the flows: the soft keyboard of the Android tablet (`us1`, `us2`, `us6`), the sideways swipes of `us6` on the iPad, and a driver cut of `us4-warnings` on the iPad.
 
 **To learn.** `Modal` in React Native shows portrait only on an iPhone unless `supportedOrientations` is set, and a `Pressable` fires `onPress` after a long hold when it has no `onLongPress`: neither shows in Jest. A test that drives the gesture but not the release misses the second one.
@@ -1023,3 +1023,39 @@ Before the merge, Codex reviewed the branch and found two blocking defects and o
 **To check it.** Run `npx jest src/ui/date-time-field-android.test.tsx`. On an Android emulator: `adb shell settings put system time_12_24 12`, open a match, press «Añadir hora» and check the dialog shows 24 hours.
 
 **Pending.** Not checked on a device or emulator yet (Jest only proves the prop is passed).
+
+### F-SMALL-5: Expo SDK 58 updates, record of the review (2026-11-28)
+
+**Before.** PR 28 (merged 2026-11-27, approved by Fernando) moved eight Expo packages to the versions SDK 58 now expects, because `expo-doctor` and `scripts/verify.sh` failed on `main` with no change of ours. It was merged without the Security and Codex records.
+
+**After.** This entry and the sections «PR 28 (F-SMALL-5) Security and Codex review» in `review.md` and `codex-review.md` close that gap (Fernando approved it on 2026-11-28). The Security audit found nothing blocking (3 minor); Codex found one blocking finding, which was real and is already fixed by PR 33 (the 24-hour time dialog, `SMALL-6`).
+
+**What changes for the user.** Nothing new from this record. The app already got the 24-hour fix in PR 33.
+
+**Files.** `small-change-form-expo-sdk-58-patches.md` (the wording corrected: some bumps are minor releases, now listed), `review.md`, `summary.md`, `codex-review.md`.
+
+**Why.** Rules 13, 16 and 17 of `AGENTS.md` ask for the verification, the review and the report of every change, and a bump of versions is not exempt. The form had called every bump a «patch release», which was not true for `expo` (58.0.26 to 58.1.0) or for four transitive packages.
+
+**To learn.** A «patch» bump can hide a minor release and, with it, a changed default: `@expo/ui` 58.0.30 started following the phone's 12-hour or 24-hour setting, which the Jest doubles could not show. Reading the changelog of every moved package is part of a bump.
+
+**To check it.** Read `review.md`, section «PR 28 (F-SMALL-5) Security and Codex review (2026-11-28)». `npx expo-doctor` gives 18/18 and `npm run verify` is green.
+
+**Pending.** The Android emulator check at a 12-hour clock (from PR 33). For the first release, repeat the dev-client residue check of `docs/security.md` against the `expo-dev-launcher` 58.1.0 build (M-2).
+
+### SMALL-2: Spanish not-found screen, record of the review (2026-11-28)
+
+**Before.** PR 29 (merged, approved by Fernando) added `src/app/+not-found.tsx`: a link or address that matches no route now shows a Spanish screen, with its texts in `es.json`, and a button that goes to the home screen with `router.replace("/")`. It was merged without the Security and Codex records and SEC-T061-4 had no updated status.
+
+**After.** This entry and the sections «PR 29 (SMALL-2) Security and Codex review» in `review.md` and `codex-review.md` record them (approved by Fernando on 2026-11-28). The Security audit found nothing. Codex found 0 blocking, 1 important (these records) and 1 minor.
+
+**What changes for the user.** Nothing new from this record. The screen itself is the change of PR 29.
+
+**Files.** `review.md`, `summary.md`, `codex-review.md`.
+
+**Why.** Rules 13, 16 and 17 of `AGENTS.md`. The minor finding is not fixed here because it touches `src/` and `tests/`, which this documentation-only change must not.
+
+**To learn.** `router.replace("/")` swaps only the current screen: entries earlier in the stack can remain, so «nothing to go back to» is true only on a cold start. A test that starts on an unknown address proves the cold start, not a running app.
+
+**To check it.** `npx jest tests/app/not-found.test.tsx`; read `review.md`, section «PR 29 (SMALL-2) Security and Codex review (2026-11-28)».
+
+**Pending.** OPEN minor: the comment at `src/app/+not-found.tsx:6` overstates what `replace` guarantees and the test at `tests/app/not-found.test.tsx:72` checks only the cold start; it needs its own small change form (reword the comment, qualify the test title, add a running-app case only if an empty history is intended). SEC-T061-4 stays open: the screen is covered by Jest, but it was not seen on a device or simulator.
