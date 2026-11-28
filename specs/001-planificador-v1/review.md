@@ -1926,3 +1926,13 @@ No physical device is available (Fernando, 2026-11-26): the checklist `device-ch
 ## D3 close (2026-11-26)
 
 Fernando decided on 2026-11-26 to close D3 **without physical device checks** (T057, T060, T092, T094 and the device part of T061 and T079), using the simulator and emulator pass above. What stays unchecked is listed in `summary.md` («D3 close») and in `device-checklist-d3.md`, which is kept for a pass on real devices before any store publication. Status of `spec.md`: Closed. Verification at the close: `STRYKER_INCREMENTAL=1 STRYKER_FORCE=1 npm run verify` exit 0 on the branch of PR 26 (373 suites, 4,460 tests).
+
+## SMALL-4 review (2026-11-27)
+
+Small change `small-change-form-security-question-dialog.md` (PR 31, branch `docs/security-question-dialog`, one line in `docs/security.md`), approved by Fernando on 2026-11-26.
+
+**Security audit.** Not required: the change is documentation only and touches no dependency, data, navigation or configuration (AGENTS.md, rule 16).
+
+**Codex review** (`scripts/review.sh`, output in `codex-review.md`), at `8a53a80`: 2 documentation files and 27 added lines reviewed. **0 BLOCKING, 0 IMPORTANT, 0 MINOR.** Codex notes that it read the historical sections selectively and did not run the full verification (the review environment has no dependencies); the PR's GitHub Actions run `scripts/verify.sh`.
+
+**What was done.** Nothing to fix. This section is the missing phase 8 record (AGENTS.md, rules 13, 16 and 17). The complete verification is the CI of PR 31. `npx prettier --check` was not run on this record (no `node_modules` in the worktree); the Markdown follows the style of the sections above.

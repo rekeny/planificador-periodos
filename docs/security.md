@@ -35,6 +35,7 @@ The reference is the OWASP MASVS standard for mobile apps. Since the app works o
 - [ ] `better-sqlite3` is imported only from `tests/` (never from `src/`), and `drizzle-orm` only through its `better-sqlite3` subpaths there.
 - [ ] No route writes on open: every write is called from a button, a form submit or a cell tap, and routes carry only numeric ids parsed with `parseTeamId`, `parsePlayerId` or `parseMatchId`.
 - [ ] Every deletion (match, team, marks of a format change, deactivating a player) is called only from the confirm button of a `ChoiceDialog`, never from a route or an effect, and a second press in the same instant must not act twice (`ConfirmDialog` guards its confirm button) and the screen is left only when the result is `saved`, removing every route of what was deleted whatever the stack (SEC-D3-1, F-D3-03).
+- [ ] While a question is open nothing else acts, and a question is never a write.
 - [ ] Workflows with minimal permissions and pinned versions.
 - [ ] `npm audit` (fails only at high severity or above), OSV-Scanner, gitleaks and Semgrep green.
 
