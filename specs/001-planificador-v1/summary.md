@@ -970,3 +970,19 @@ Before the merge, Codex reviewed the branch and found two blocking defects and o
 **To check it.** `grep -r "expo-web-browser\|expo-image\|expo-device" src tests e2e scripts plugins app.json package.json` finds nothing, and `npx expo-doctor` gives 18/18. The Security audit found nothing and Codex found 0 blocking and 0 minor findings; its one important finding (these missing records) is fixed here (`review.md`, «F-SMALL-1 review»).
 
 **Pending.** A complete local `npm run verify` of the rebased tree was not rerun: before the rebase it passed (373 suites, 4,460 tests) and the CI of PR 32 is the full run. `npx prettier --check` was not run on these records. Not checked on a device.
+
+### SMALL-4: security audit item about open questions (2026-11-27)
+
+**What was done.** One line was added to the «Audit of each change» list of `docs/security.md`: «While a question is open nothing else acts, and a question is never a write.» Fernando approved it on 2026-11-26 (PR 31).
+
+**What changes for the user.** Nothing in the app. For the Security role, there is now a written check that the confirmation dialogs keep blocking every other action while they are open and never save anything by themselves.
+
+**Files.** `docs/security.md` and the form `small-change-form-security-question-dialog.md`; this record in `review.md` and `summary.md`, and the Codex output in `codex-review.md`.
+
+**Why.** Those two properties are what stop a dialog from being skipped or from writing by itself, and they were not in the list the audits follow.
+
+**To learn.** A security checklist is only as useful as it is complete: a property that is not written there is not checked in the next audit.
+
+**To check it.** Open `docs/security.md` and look for the new item after the one about deletions. Codex found 0 blocking, 0 important and 0 minor findings (`review.md`, «SMALL-4 review»). No Security audit was needed (documentation only).
+
+**Pending.** Nothing. The complete verification is the CI of PR 31; `npx prettier --check` was not run on these records.

@@ -1949,3 +1949,13 @@ Small change `small-change-form-remove-unused-expo-packages.md` (PR 32, branch `
 - After the rebase, `expo-doctor` gave 18/18.
 - A complete local `npm run verify` of the rebased tree was **not rerun**. The GitHub Actions CI of PR 32 is green and is the complete run.
 - `npx prettier --check` was not run on this record (no `node_modules` in the worktree); the Markdown follows the style of the sections above.
+
+## SMALL-4 review (2026-11-27)
+
+Small change `small-change-form-security-question-dialog.md` (PR 31, branch `docs/security-question-dialog`, one line in `docs/security.md`), approved by Fernando on 2026-11-26.
+
+**Security audit.** Not required: the change is documentation only and touches no dependency, data, navigation or configuration (AGENTS.md, rule 16).
+
+**Codex review** (`scripts/review.sh`, output in `codex-review.md`), at `8a53a80`: 2 documentation files and 27 added lines reviewed. **0 BLOCKING, 0 IMPORTANT, 0 MINOR.** Codex notes that it read the historical sections selectively and did not run the full verification (the review environment has no dependencies); the PR's GitHub Actions run `scripts/verify.sh`.
+
+**What was done.** Nothing to fix. This section is the missing phase 8 record (AGENTS.md, rules 13, 16 and 17). The complete verification is the CI of PR 31. `npx prettier --check` was not run on this record (no `node_modules` in the worktree); the Markdown follows the style of the sections above.
