@@ -1927,6 +1927,29 @@ No physical device is available (Fernando, 2026-11-26): the checklist `device-ch
 
 Fernando decided on 2026-11-26 to close D3 **without physical device checks** (T057, T060, T092, T094 and the device part of T061 and T079), using the simulator and emulator pass above. What stays unchecked is listed in `summary.md` («D3 close») and in `device-checklist-d3.md`, which is kept for a pass on real devices before any store publication. Status of `spec.md`: Closed. Verification at the close: `STRYKER_INCREMENTAL=1 STRYKER_FORCE=1 npm run verify` exit 0 on the branch of PR 26 (373 suites, 4,460 tests).
 
+## F-SMALL-1 review (2026-11-27)
+
+Small change `small-change-form-remove-unused-expo-packages.md` (PR 32, branch `fix/remove-unused-expo-packages`), approved by Fernando on 2026-11-27 («Quita solo los tres»). It closes SEC-T061-3 for three of the four unused template packages.
+
+**Security audit** (read-only, 2026-11-27): **no findings.**
+
+- A grep finds no use of `expo-web-browser`, `expo-image`, `expo-device` or `ua-parser-js` in `src/`, `tests/`, `e2e/`, `scripts/`, `plugins/` or `app.json`.
+- The lockfile loses only those three packages and `ua-parser-js` 0.7.41; `fbjs` keeps its own nested `ua-parser-js` 1.0.41.
+- `app.json` loses only the `expo-web-browser` plugin; the permissions and `allowBackup` are unchanged.
+- No new dependency. The exceptions of `osv-scanner.toml` (`glob`, `minimatch`, `qs`, `esbuild`) refer to none of the removed packages.
+- Limit: the audit did not run `npm audit` or OSV-Scanner (no `node_modules` in the worktree); the CI does.
+
+**Codex review** (`scripts/review.sh`, output in `codex-review.md`): **0 BLOCKING, 1 IMPORTANT, 0 MINOR.** Traceability, focused or skipped tests and lockfile consistency passed.
+
+- IMPORTANT: the completion and verification records were missing from `review.md` and `summary.md`. Fixed by this record and by the entry in `summary.md`.
+
+**Verification.**
+
+- During the F-SMALL-1 work, before the rebase onto `main` (`75ddf26`), `npm run verify` on this change gave: typecheck, lint and format green, 373 suites and 4,460 tests passed. `expo-doctor` failed only because `main` still lagged the Expo SDK 58 patches (fixed by PR 28, merged).
+- After the rebase, `expo-doctor` gave 18/18.
+- A complete local `npm run verify` of the rebased tree was **not rerun**. The GitHub Actions CI of PR 32 is green and is the complete run.
+- `npx prettier --check` was not run on this record (no `node_modules` in the worktree); the Markdown follows the style of the sections above.
+
 ## SMALL-4 review (2026-11-27)
 
 Small change `small-change-form-security-question-dialog.md` (PR 31, branch `docs/security-question-dialog`, one line in `docs/security.md`), approved by Fernando on 2026-11-26.
