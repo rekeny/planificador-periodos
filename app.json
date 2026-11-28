@@ -40,7 +40,6 @@
         }
       ],
       "expo-status-bar",
-      "expo-web-browser",
       "expo-sqlite",
       "./plugins/with-backup-exclusion.js"
     ],
