@@ -1996,3 +1996,11 @@ Small change `small-change-form-android-time-picker-24h.md` (branch `fix/android
 - Green: after the fix the same file passes; `PickerProps` of `tests/support/date-time-picker-double.ts` only gained the optional `is24Hour` field so the test can read it.
 
 **Not checked on a real device.** Jest uses a double of the native module, which cannot tell a 12-hour dialog from a 24-hour one: it only proves the prop is passed. The behaviour on a real Android with the system clock at 12-hour has NOT been checked yet. Pending: on the emulator run `adb shell settings put system time_12_24 12`, open «Añadir hora» and look at the dialog before and after the change.
+
+**Codex review of the fix** (`scripts/review.sh`, output in `codex-review.md`), at `7f8867e`: **0 BLOCKING, 1 IMPORTANT, 0 MINOR.** Codex found nothing on requirements and scope, architecture, test preservation, security, explanations or simplicity, and says the new assertion detects the prop being removed or set to false. The IMPORTANT finding is that the record had only the targeted Jest red and green and not the full `scripts/verify.sh` output (rule 13). Codex could not run Jest itself: its sandbox is read-only and rejected Jest's cache.
+
+**Full verification.** `npm run verify` on the branch before the review passed end to end: typecheck, lint, format, tests with coverage, mutation score 94.92 (break threshold 80), Expo Doctor, `npm audit`, OSV-Scanner, secrets and static analysis, with no jest timeouts. The suite and test counts were not captured in that run. The authoritative full run is the GitHub Actions `verify` of PR 33, which must be green before the merge; its result is the one to cite.
+
+**Security audit.** Not required: one prop on one UI component, with no change in dependencies, data, navigation or configuration.
+
+**Still pending (phase 9, device).** The native check on an Android emulator with the system clock at 12-hour, described above, remains open and is not a finding.

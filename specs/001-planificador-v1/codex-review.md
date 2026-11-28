@@ -1,28 +1,15 @@
 # Codex review
 
-- Date: 2026-11-27 15:37
-- Branch: review/pr30 against origin/main
-- Commit: d46c78d
+- Date: 2026-11-28 08:42
+- Branch: fix/android-time-picker-24h against origin/main
+- Commit: 7f8867e
 
-**Verdict: two IMPORTANT findings. No BLOCKING or MINOR findings.**
+Reviewed `git diff origin/main...HEAD` at `7f8867e`.
 
-1. **IMPORTANT — Valid TOML datetimes are rejected.**  
-   `scripts/check-npm-audit.mjs:20,29` rejects `2027-02-08t00:00:00z` and `2027-02-08 00:00:00Z`. Both represent valid, zoned TOML datetimes. With the clock fixed at `2027-01-01`, the base script exits 0 and this branch exits 1 for either value, incorrectly rejecting the exception. [TOML specification](https://toml.io/en/v1.0.0#offset-date-time), [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6).
+- **BLOCKING:** None.
+- **IMPORTANT — [review.md:1993](/private/tmp/claude-501/-Users-fernandorequeninacher-code-planificador-periodos--claude-worktrees-planificador-periodos-cont-57813b/5cae6c73-920e-4f58-a3cf-f0d25794cd6a/scratchpad/wt-fix/specs/001-planificador-v1/review.md:1993): Missing full verification evidence.** The new record contains only targeted Jest red/green results. `AGENTS.md` rule 13 requires the full `scripts/verify.sh` output. **Fix:** run verification for this commit in a writable environment or CI and attach the output or exact successful CI-run link.
+- **MINOR:** None.
 
-   **Fix:** accept lowercase `t`/`z` and the space delimiter, capture the complete value before any trailing comment, preserve the expiry limits, and add regression tests.
+No findings concerning requirements/scope, architecture/conventions/glossary, test preservation, security, explanation accuracy, or code simplicity. The prop restores RF-083; the new assertion detects its removal or a false value. Existing tests are preserved.
 
-2. **IMPORTANT — Implementation and verification records are missing.**  
-   `specs/001-planificador-v1/small-change-form-check-npm-audit-dates.md:26` describes expected red/green cases, but the branch adds neither an implementation report to `summary.md` nor actual verification output to `review.md`. AGENTS.md rules 13 and 17 require both.
-
-   **Fix:** append the delivered-change explanation to `summary.md`; run `scripts/verify.sh` in a writable installation and record its result in `review.md`.
-
-| Review category                                | Result                                                                                                        |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Requirements, examples and scope               | Finding 1; app RF/E scope is unchanged.                                                                       |
-| Constitution, layers, conventions and glossary | Finding 2; no additional findings.                                                                            |
-| Tests                                          | No tests deleted, skipped or weakened. Missing regression cases described in finding 1.                       |
-| Security                                       | No additional findings; application networking, logging, queries, dependencies and permissions are unchanged. |
-| Explanations and reports                       | Finding 2.                                                                                                    |
-| Simplicity and efficiency                      | No findings.                                                                                                  |
-
-Validation passed: traceability, focused/skipped-test checks, diff whitespace, JavaScript syntax, and 13 deterministic checks of the actual expiry function. All seven existing exceptions remain accepted. Jest, lint, typecheck and full verification were unavailable because dependencies are absent in this read-only checkout.
+Typecheck, lint, changed-file formatting, traceability, focused/skipped-test detection and diff whitespace checks passed. Jest could not start because the read-only sandbox rejected its temporary cache write. Native Android verification with the system clock set to 12-hour remains explicitly pending.
