@@ -1,11 +1,13 @@
 /// <reference types="node" />
 // Tests of scripts/check-npm-audit.mjs (tooling, no RF or E IDs): `npm audit` has no exceptions
 // file, so this script fails only on high or critical advisories that osv-scanner.toml does not
-// approve (docs/security.md, "Exceptions"). Dates in the fixtures are far from today (2020 and
-// 2099) so the tests do not depend on the clock.
+// approve (docs/security.md, "Exceptions"). An expiry counts only if it is a full datetime that
+// has not passed and is at most 90 days away. The past date is far back (2020); the others are
+// counted from today's midnight UTC with `inDays`, so the tests do not depend on the hour.
 import {
   auditJson,
   finding,
+  inDays,
   osvToml,
   removeFolders,
   runCheck,
@@ -62,6 +64,29 @@ describe("check-npm-audit script, what passes", () => {
   });
 });
 
+describe("check-npm-audit script, expiry dates that count", () => {
+  it.each([
+    ["a datetime 90 days away", inDays(90)],
+    ["a datetime tomorrow", inDays(1)],
+    ["a datetime with an offset", inDays(30).replace("Z", "+01:00")],
+    ["a datetime with fractions of a second", inDays(30).replace("Z", ".5Z")],
+    ["a datetime with a space instead of T", inDays(30).replace("T", " ")],
+    ["a datetime with a lowercase t and z", inDays(30).toLowerCase()],
+    ["a datetime followed by a comment", `${inDays(30)} # reviewed`],
+    [
+      "a datetime with a space and a comment",
+      `${inDays(30).replace("T", " ")}   # reviewed`,
+    ],
+  ])("passes when the expiry is %s", (_name, raw) => {
+    const result = runCheck(
+      auditJson(finding("picomatch", ID_A, "high")),
+      osvToml({ id: ID_A, raw }),
+    );
+
+    expect(result.status).toBe(0);
+  });
+});
+
 describe("check-npm-audit script, what fails", () => {
   it("fails and prints the id and the package of an unapproved high advisory", () => {
     const result = runCheck(
@@ -109,6 +134,26 @@ describe("check-npm-audit script, what fails", () => {
     const result = runCheck(
       auditJson(finding("picomatch", ID_A, "high")),
       osvToml({ id: ID_A, until: "legacyKey" }),
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.output).toContain(ID_A);
+  });
+
+  it.each([
+    ["a bare year", "2099"],
+    ["a date with no time", "2099-01-01"],
+    ["a date with no time, within 90 days", inDays(30).slice(0, 10)],
+    ["a datetime with no zone", inDays(30).replace("Z", "")],
+    ["a datetime more than 90 days away", inDays(91)],
+    ["a datetime far in the future", "2099-01-01T00:00:00Z"],
+    ["a datetime with no seconds", inDays(30).replace(":00Z", "Z")],
+    ["a datetime written as a string", `"${inDays(30)}"`],
+    ["a datetime with trailing text", `${inDays(30)} later`],
+  ])("fails when the expiry is %s", (_name, raw) => {
+    const result = runCheck(
+      auditJson(finding("picomatch", ID_A, "high")),
+      osvToml({ id: ID_A, raw }),
     );
 
     expect(result.status).toBe(1);

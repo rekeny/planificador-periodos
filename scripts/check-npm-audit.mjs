@@ -1,4 +1,5 @@
-// Fails on high or critical `npm audit` advisories that osv-scanner.toml does not approve.
+// Fails on high or critical `npm audit` advisories that osv-scanner.toml does not approve, and on
+// any exception of osv-scanner.toml that breaks the 90-day rule.
 // `npm audit` has no exceptions file, so the list of docs/security.md ("Exceptions") is reused.
 // Usage: npm audit --omit=dev --json | node scripts/check-npm-audit.mjs
 // The exceptions are read from osv-scanner.toml in the current folder.
@@ -11,15 +12,76 @@ function fail(message) {
   process.exit(1);
 }
 
-// Ids of the [[IgnoredVulns]] entries whose effectiveUntil is a date that has not passed yet.
-// An entry without effectiveUntil never ends, so it does not count.
+const DAY = 24 * 60 * 60 * 1000;
+// docs/security.md: an exception has an expiry of 90 days at most.
+const MAX_DAYS = 90;
+// A full TOML datetime with a zone, such as 2027-02-08T00:00:00Z. RFC 3339 also allows a lowercase
+// t or z and a space instead of the T. A bare year or a date alone has no time of day, and a
+// datetime without a zone depends on the machine's clock, so neither counts.
+const DATETIME =
+  /^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/;
+
+// The [[IgnoredVulns]] entries of the file. An entry runs from its header to the next table header
+// (a line that starts with `[`), so it never reads keys of another table. `suspect` marks an entry
+// that cannot be read safely: a multi-line string (it can hide a key line) or a repeated key.
+function entries(toml) {
+  const found = [];
+  let current;
+  for (const line of toml.split(/\r?\n/)) {
+    if (/^\s*\[/.test(line)) {
+      current = /^\s*\[\[IgnoredVulns\]\]\s*(#.*)?$/.test(line)
+        ? { ids: [], untils: [], suspect: false }
+        : undefined;
+      if (current !== undefined) found.push(current);
+      continue;
+    }
+    if (current === undefined) continue;
+    if (line.includes('"""') || line.includes("'''")) current.suspect = true;
+    const id = /^\s*id\s*=\s*"([^"]+)"/.exec(line)?.[1];
+    if (id !== undefined) current.ids.push(id);
+    // The value ends before a trailing comment; a datetime may hold a space.
+    const until = /^\s*effectiveUntil\s*=\s*(.*?)\s*(?:#.*)?$/.exec(line)?.[1];
+    if (until !== undefined) current.untils.push(until);
+  }
+  return found.map((entry) => ({
+    id: entry.ids[0],
+    suspect: entry.suspect || entry.ids.length > 1 || entry.untils.length > 1,
+    until: entry.untils[0],
+  }));
+}
+
+// Milliseconds of the expiry, or NaN if the entry has no readable full datetime.
+function expiryOf({ until, suspect }) {
+  if (suspect || until === undefined || !DATETIME.test(until)) return NaN;
+  return Date.parse(until.replace(/[Tt ]/, "T").replace(/z$/, "Z"));
+}
+
+// Problems of every [[IgnoredVulns]] entry, whether npm audit needs it or not: osv-scanner in
+// verify.sh honours any effectiveUntil. An entry that has already expired is fine: osv-scanner
+// no longer honours it. Any other entry needs a full datetime with a zone at most 90 days away.
+export function exceptionProblems(toml, now = new Date()) {
+  const problems = [];
+  for (const entry of entries(toml)) {
+    const ok = expiryOf(entry) <= now.getTime() + MAX_DAYS * DAY; // false for NaN
+    if (!ok) {
+      problems.push(
+        `  ${entry.id ?? "(entry without an id)"}: effectiveUntil must be a single full datetime with a zone, at most ${MAX_DAYS} days away`,
+      );
+    }
+  }
+  return problems;
+}
+
+// Ids of the [[IgnoredVulns]] entries whose effectiveUntil is a full datetime that has not passed
+// and is at most 90 days away. An entry without it, or with another kind of value, never ends or
+// ends too late, so it does not count.
 export function approvedIds(toml, now = new Date()) {
   const ids = new Set();
-  for (const block of toml.split("[[IgnoredVulns]]").slice(1)) {
-    const id = /^\s*id\s*=\s*"([^"]+)"/m.exec(block)?.[1];
-    const until = /^\s*effectiveUntil\s*=\s*([0-9T:\-Z.+]+)/m.exec(block)?.[1];
-    const expiry = until === undefined ? NaN : Date.parse(until);
-    if (id !== undefined && expiry > now.getTime()) ids.add(id);
+  for (const entry of entries(toml)) {
+    const expiry = expiryOf(entry);
+    const valid =
+      expiry > now.getTime() && expiry <= now.getTime() + MAX_DAYS * DAY;
+    if (entry.id !== undefined && valid) ids.add(entry.id);
   }
   return ids;
 }
@@ -59,13 +121,20 @@ function readToml() {
 }
 
 function main() {
+  const toml = readToml();
+  const problems = exceptionProblems(toml);
+  if (problems.length > 0) {
+    fail(
+      `check-npm-audit: invalid exceptions in osv-scanner.toml (docs/security.md, "Exceptions"):\n${problems.join("\n")}`,
+    );
+  }
   const audit = parseAudit(readFileSync(0, "utf8"));
   if (audit === undefined) {
     fail(
       "check-npm-audit: the npm audit output is not valid JSON of an audit.",
     );
   }
-  const approved = approvedIds(readToml());
+  const approved = approvedIds(toml);
   const unapproved = [...blockingAdvisories(audit)].filter(
     ([id]) => !approved.has(id),
   );

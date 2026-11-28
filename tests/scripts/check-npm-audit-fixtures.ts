@@ -8,8 +8,20 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const SCRIPT = resolve(__dirname, "../../scripts/check-npm-audit.mjs");
-const FUTURE = "2099-01-01T00:00:00Z";
 const PAST = "2020-01-01T00:00:00Z";
+
+const DAY = 24 * 60 * 60 * 1000;
+
+// A full datetime (`2027-02-08T00:00:00Z`) at midnight UTC, `days` days after today's midnight UTC.
+// Midnight keeps "90 days" exact: it is never later than now plus 90 days.
+export function inDays(days: number): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const midnight = Date.parse(`${today}T00:00:00Z`);
+  return new Date(midnight + days * DAY).toISOString().replace(".000Z", "Z");
+}
+
+// An approved expiry is at most 90 days away, so the usual "future" date is one month from today.
+const FUTURE = inDays(30);
 
 export type Severity = "low" | "moderate" | "high" | "critical";
 export type Advisory = { id: string; severity: Severity };
@@ -67,15 +79,17 @@ export function finding(name: string, id: string, severity: Severity): Finding {
   return { name, advisories: [{ id, severity }] };
 }
 
-// `legacyKey` writes the deprecated `ignoreUntil` key with a future date.
+// `legacyKey` writes the deprecated `ignoreUntil` key with a future date. `raw` writes that text
+// as the value of `effectiveUntil`, whatever it is (a bare year, a date, a datetime).
 type Exception = {
   id: string;
   until?: "future" | "past" | "none" | "legacyKey";
+  raw?: string;
 };
 
 export function osvToml(...exceptions: Exception[]): string {
   return exceptions
-    .map(({ id, until = "future" }) =>
+    .map(({ id, until = "future", raw }) =>
       [
         "[[IgnoredVulns]]",
         `id = "${id}"`,
@@ -83,7 +97,9 @@ export function osvToml(...exceptions: Exception[]): string {
           ? []
           : until === "legacyKey"
             ? [`ignoreUntil = ${FUTURE}`]
-            : [`effectiveUntil = ${until === "past" ? PAST : FUTURE}`]),
+            : [
+                `effectiveUntil = ${raw ?? (until === "past" ? PAST : FUTURE)}`,
+              ]),
         'reason = "A test reason."',
         "",
       ].join("\n"),
