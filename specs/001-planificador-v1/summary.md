@@ -1009,3 +1009,17 @@ Before the merge, Codex reviewed the branch and found two blocking defects and o
 **To check it.** Open `docs/security.md` and look for the new item after the one about deletions. Codex found 0 blocking, 0 important and 0 minor findings (`review.md`, «SMALL-4 review»). No Security audit was needed (documentation only).
 
 **Pending.** Nothing. The complete verification is the CI of PR 31; `npx prettier --check` was not run on these records.
+
+### SMALL-6: the Android time dialog keeps the 24-hour clock (2026-11-28)
+
+**Before.** Since the Expo SDK 58 patch bump (PR 28), the time dialog of the match form on Android followed the phone's clock setting. A phone set to 12-hour time showed a 12-hour dialog, against RF-083.
+
+**After.** The dialog is told explicitly to use the 24-hour clock (`is24Hour` on the `DateTimePicker` of `PickerDialog`), so it shows 24 hours whatever the phone setting is. Nothing else changes; iOS is untouched.
+
+**Files.** `src/ui/date-time-field-android.tsx` (one prop), `src/ui/date-time-field-android.test.tsx` (new case), `tests/support/date-time-picker-double.ts` (the double's props type knows `is24Hour`), and the records in `review.md` and `summary.md`.
+
+**To learn.** A library update can change a default. Setting a value explicitly keeps the behaviour you want even if the default moves.
+
+**To check it.** Run `npx jest src/ui/date-time-field-android.test.tsx`. On an Android emulator: `adb shell settings put system time_12_24 12`, open a match, press «Añadir hora» and check the dialog shows 24 hours.
+
+**Pending.** Not checked on a device or emulator yet (Jest only proves the prop is passed).
