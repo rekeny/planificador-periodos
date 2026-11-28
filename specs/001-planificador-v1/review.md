@@ -1362,7 +1362,7 @@ Prebuild output read in both temporary copies (`APP_VARIANT` unset and `producti
 - **Routes carry only numeric ids.** Every `router.push` and `router.replace` builds `/teams/${id}`, `/matches/${id}/...` or the typed `/matches/[matchId]` object from a parsed or database id. Names, categories and notes are in no path. The team name appears only as the native header title.
 - **Deep links (`planificadorperiodos://`) trigger nothing destructive.** No route writes on open. The effects in the app are: `loadTeams` (list, `select` only), `useOpenRouteTeam` (F-03: `openTeam`, `select` only), `useOwnSession` (`openMatch`, `select` only) and the new-match draft `reset` (reads the team's players into memory). Every write (`createTeam`, `updateTeam`, `addPlayer`, `createMatch`, `addToCallUp`, `removeFromCallUp`, `createPlayerInMatch`, `saveCellChanges`, `addOvertime`, `removeLastOvertime`, `undo`) is called from a button, a form submit or a cell tap. The F-03 change (opening from a focus effect) did not add a write. The call-up and new-player routes still show `NotFound` unless the open session belongs to the id in the link (`view.matchId !== id`), so a crafted link cannot act on another match. While the database is opening the layout renders `null`, and while it failed it renders only the message, so no route code runs.
 - **Typed routes:** `experiments.typedRoutes: true`; the one object-form navigation uses the typed pathname. `tsc` was not run here.
-- **No catch-all and no `+not-found`:** a link to a path that matches no route (for example `planificadorperiodos://foo`) falls to Expo Router's default unmatched screen. It performs no action, but its text is not from `es.json` and it was not seen on a device (SEC-T061-4).
+- **No catch-all and no `+not-found`:** a link to a path that matches no route (for example `planificadorperiodos://foo`) falls to Expo Router's default unmatched screen. It performs no action, but its text is not from `es.json` and it was not seen on a device (SEC-T061-4). Update 2026-11-28: the Spanish `+not-found` screen now exists (PR 29, SMALL-2) and is covered by Jest; the check on a device or simulator is still not done.
 - **Android and iOS entry points:** one exported activity with one `VIEW` intent filter for the app scheme (and the dev-client one); the `https` `<data>` entry at the top of the manifest is Expo's `<queries>` block, not an intent filter.
 
 ### Findings
@@ -2004,3 +2004,52 @@ Small change `small-change-form-android-time-picker-24h.md` (branch `fix/android
 **Security audit.** Not required: one prop on one UI component, with no change in dependencies, data, navigation or configuration.
 
 **Still pending (phase 9, device).** The native check on an Android emulator with the system clock at 12-hour, described above, remains open and is not a finding.
+
+## PR 28 (F-SMALL-5) Security and Codex review (2026-11-28)
+
+Small change `small-change-form-expo-sdk-58-patches.md` (PR 28, branch `fix/expo-sdk-58-patches`, merge commit `75ddf26`), approved by Fernando on 2026-11-27. It was merged without the phase 8 records; this section is the retroactive record (AGENTS.md, rules 13, 16 and 17). Fernando approved recording it on 2026-11-28 (chat). Codex output: `codex-review.md`, section «PR 28 (F-SMALL-5), retroactive run».
+
+**Security audit** (read-only, 2026-11-28): **no BLOCKING, no IMPORTANT, 3 MINOR.**
+
+- The diff touches only `package.json`, `package-lock.json` and the form. No package was added or removed, all resolved URLs are on `registry.npmjs.org`, no package gained an install script (still 5), and no integrity value or licence changed.
+- `npm audit` is identical before and after (36 moderate, 0 high, 0 critical) and osv-scanner 2.7.1 gives «No issues found» with the same 9 vulnerabilities filtered. `node-forge` moved 1.4.3 to 1.4.4.
+
+| Id  | Severity | Finding                                                                                                                                                                                                                                                                       | What was done                                                                                                                                        |
+| --- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M-1 | Minor    | The form called every bump a «patch release», but some are minor releases: `expo` 58.0.26 to 58.1.0 and, transitive, `expo-dev-launcher` 58.0.21 to 58.1.0, `expo-modules-core` 58.1.0 to 58.2.0, `@expo/fingerprint` 0.21.10 to 0.22.0 and `@expo/ws-tunnel` 2.0.1 to 2.1.1. | Fixed here: the form now says «updates within SDK 58; some are minor releases» and lists those jumps.                                                |
+| M-2 | Minor    | `expo-dev-launcher` moved to 58.1.0.                                                                                                                                                                                                                                          | Pending, not now: for the first release, repeat the dev-client residue check of `docs/security.md` («Before each release») against the 58.1.0 build. |
+| M-3 | Minor    | `masked-view` became an optional peer of `expo-router` and nothing in the repository imports it.                                                                                                                                                                              | Nothing to do: covered by the green verification.                                                                                                    |
+
+Limits of the audit: package contents were not inspected (registry metadata only), the auditor did not run `verify.sh`, and nothing was run on a device.
+
+**Codex review** (2026-11-28, `scripts/review.sh specs/001-planificador-v1 1c2b38a`, HEAD `75ddf26`): **1 BLOCKING, 1 IMPORTANT, 1 MINOR.** Codex could not run Jest (no `node_modules` in its worktree).
+
+| Severity  | Finding                                                                                                                                         | What was done                                                                                                                                                                              |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BLOCKING  | The Android time dialog no longer guaranteed the 24-hour format: `@expo/ui` 58.0.30 follows the device clock when `is24Hour` is unset (RF-083). | Confirmed and fixed by PR 33 (merge `4d19b51`, section «Android time dialog 24-hour fix (2026-11-28)», `SMALL-6`). The check on an Android emulator with a 12-hour clock is still pending. |
+| IMPORTANT | Completion evidence missing in `review.md`, `summary.md` and `plan.md`.                                                                         | Fixed by this record. Dependency justification: it is not a new dependency, versions only moved, as the form says, so no row in `plan.md` is needed.                                       |
+| MINOR     | The «patch releases» wording.                                                                                                                   | Fixed (M-1 above).                                                                                                                                                                         |
+
+**Verification of PR 28.** `npm run verify` was green end to end on 2026-11-27 (373 suites and 4,460 tests; 375 after later PRs), `expo-doctor` 18/18, and the GitHub Actions CI of PR 28 was green.
+
+## PR 29 (SMALL-2) Security and Codex review (2026-11-28)
+
+Small change `small-change-form-not-found-route.md` (PR 29, branch `fix/not-found-route`, merge commit `85e0357`): a Spanish `+not-found` route. It was merged without the phase 8 records; this section is the retroactive record (AGENTS.md, rules 13, 16 and 17), approved by Fernando on 2026-11-28 (chat). Codex output: `codex-review.md`, section «PR 29 (SMALL-2), retroactive run».
+
+**Security audit** (read-only, 2026-11-28): **no findings.**
+
+- The screen imports only `useRouter`, `useTranslation` and React Native primitives. It uses no `usePathname`, params or segments, so no URL data is reflected. It has no effects and no store access.
+- The button calls `router.replace("/")` with a fixed literal. No network, no logging.
+- Texts come from `es.json` (`notFound.title`, `notFound.screenMessage`, `notFound.back`). No new dependency or permission; the link scheme is unchanged.
+- Limit: not run on a device or simulator; the not-found screen is covered by Jest only.
+
+**Codex review** (2026-11-28, `scripts/review.sh specs/001-planificador-v1 75ddf26`, HEAD `85e0357`): **0 BLOCKING, 1 IMPORTANT, 1 MINOR.** Codex could not run Jest, TypeScript or ESLint (no dependencies in its worktree).
+
+| Severity  | Finding                                                                                                                                                                                                                                                                                            | What was done                                                                                                                                                                                                                                   |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IMPORTANT | Missing completion and verification records in `summary.md` and `review.md`, and SEC-T061-4 without an updated status.                                                                                                                                                                             | Fixed by this record (SEC-T061-4 below).                                                                                                                                                                                                        |
+| MINOR     | The comment in `src/app/+not-found.tsx:6` says nothing remains to go back to, but `router.replace("/")` replaces only the current screen, so earlier stack entries can remain; the test at `tests/app/not-found.test.tsx:72` checks only the cold start (an unknown address as the initial route). | **OPEN, not fixed here:** it is a change in `src/` and `tests/` and needs its own small change form. Proposed fix: reword the comment, qualify the test title as a cold start, and add a running-app case only if an empty history is intended. |
+
+**Verification of PR 29.** Its local `npm run verify` was green (2026-11-26/27) and the GitHub Actions CI of PR 29 was green.
+
+**SEC-T061-4 (deep link to a path with no route).** Status updated on 2026-11-28: the Spanish `+not-found` screen now exists and is covered by Jest. The check on a device or simulator (open `planificadorperiodos://foo` once) is **still not done**: the item stays open.
