@@ -37,6 +37,7 @@ function PickerDialog({
     <DateTimePicker
       mode={mode}
       presentation="dialog"
+      is24Hour
       positiveButton={{ label: t("common.accept") }}
       negativeButton={{ label: t("common.cancel") }}
       value={value}

@@ -29,6 +29,7 @@ interface PickerEvent {
 interface PickerProps {
   readonly value: Date;
   readonly mode?: PickerMode | "datetime";
+  readonly is24Hour?: boolean;
   readonly onValueChange?: (event: PickerEvent, date: Date) => void;
   readonly onChange?: (
     event: PickerEvent & { type: "set" | "dismissed" },

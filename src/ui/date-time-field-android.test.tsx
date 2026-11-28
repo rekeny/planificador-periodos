@@ -11,6 +11,7 @@ import { DateTimeFieldAndroid } from "@/ui/date-time-field-android";
 import {
   dismissPicker,
   localParts,
+  pickerProps,
   pickerValue,
 } from "../../tests/support/date-time-picker-double";
 import {
@@ -93,6 +94,11 @@ describe("DateTimeFieldAndroid, driven by its props", () => {
     expect(handlers.onTimeChange).not.toHaveBeenCalled();
     expect(handlers.onClearTime).not.toHaveBeenCalled();
     expect(handlers.onDateChange).not.toHaveBeenCalled();
+  });
+
+  it("RF-083 E-032: the time dialog is told to use the 24-hour clock, whatever the device's 12-hour or 24-hour setting is", async () => {
+    await render(field("18:30"));
+    expect((await pickerProps("time")).is24Hour).toBe(true);
   });
 
   it("RF-083 E-033: «Añadir hora» calls onTimeChange once with 12:00 and opens the dialog, «Cancelar» calls nothing more, and «Quitar hora» calls onClearTime once", async () => {

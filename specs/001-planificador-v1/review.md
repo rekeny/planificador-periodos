@@ -1981,3 +1981,26 @@ Small change `small-change-form-security-question-dialog.md` (PR 31, branch `doc
 **Codex review** (`scripts/review.sh`, output in `codex-review.md`), at `8a53a80`: 2 documentation files and 27 added lines reviewed. **0 BLOCKING, 0 IMPORTANT, 0 MINOR.** Codex notes that it read the historical sections selectively and did not run the full verification (the review environment has no dependencies); the PR's GitHub Actions run `scripts/verify.sh`.
 
 **What was done.** Nothing to fix. This section is the missing phase 8 record (AGENTS.md, rules 13, 16 and 17). The complete verification is the CI of PR 31. `npx prettier --check` was not run on this record (no `node_modules` in the worktree); the Markdown follows the style of the sections above.
+
+## Android time dialog 24-hour fix (2026-11-28)
+
+Small change `small-change-form-android-time-picker-24h.md` (branch `fix/android-time-picker-24h`), approved by Fernando on 2026-11-28.
+
+**Finding.** The Codex review of PR 28 (the Expo SDK 58 patch bump, merged on 2026-11-27) reported a BLOCKING finding: `PickerDialog` in `src/ui/date-time-field-android.tsx` did not set `is24Hour`. The `@expo/ui` 58.0.30 changelog confirms it: when `is24Hour` is not set, the community `DateTimePicker` follows the device's 12-hour or 24-hour setting, and `is24Hour` set to `true` keeps the 24-hour clock. So an Android device set to 12-hour time showed a 12-hour dialog, against RF-083.
+
+**Fix.** The `DateTimePicker` of `PickerDialog` now has the prop `is24Hour` (true). `node_modules/@expo/ui/build/community/datetime-picker/types.d.ts` declares `is24Hour?: boolean` («Use 24-hour format», Android), so the prop has that exact name. The iOS field is a different file and is not touched.
+
+**Tests.**
+
+- Red: the new case «RF-083 E-032: the time dialog is told to use the 24-hour clock...» failed with `Expected: true, Received: undefined`, for the right reason (no `is24Hour`).
+- Green: after the fix the same file passes; `PickerProps` of `tests/support/date-time-picker-double.ts` only gained the optional `is24Hour` field so the test can read it.
+
+**Not checked on a real device.** Jest uses a double of the native module, which cannot tell a 12-hour dialog from a 24-hour one: it only proves the prop is passed. The behaviour on a real Android with the system clock at 12-hour has NOT been checked yet. Pending: on the emulator run `adb shell settings put system time_12_24 12`, open «Añadir hora» and look at the dialog before and after the change.
+
+**Codex review of the fix** (`scripts/review.sh`, output in `codex-review.md`), at `7f8867e`: **0 BLOCKING, 1 IMPORTANT, 0 MINOR.** Codex found nothing on requirements and scope, architecture, test preservation, security, explanations or simplicity, and says the new assertion detects the prop being removed or set to false. The IMPORTANT finding is that the record had only the targeted Jest red and green and not the full `scripts/verify.sh` output (rule 13). Codex could not run Jest itself: its sandbox is read-only and rejected Jest's cache.
+
+**Full verification.** `npm run verify` on the branch before the review passed end to end: typecheck, lint, format, tests with coverage, mutation score 94.92 (break threshold 80), Expo Doctor, `npm audit`, OSV-Scanner, secrets and static analysis, with no jest timeouts. The suite and test counts were not captured in that run. The authoritative full run is the GitHub Actions `verify` of PR 33, which must be green before the merge; its result is the one to cite.
+
+**Security audit.** Not required: one prop on one UI component, with no change in dependencies, data, navigation or configuration.
+
+**Still pending (phase 9, device).** The native check on an Android emulator with the system clock at 12-hour, described above, remains open and is not a finding.
